@@ -1,0 +1,14 @@
+config:
+  target: "http://192.168.68.109:8000"
+  phases:
+    - duration: 6
+      arrivalRate: 100
+  defaults:
+    headers:
+      Content-Type: "application/json"
+scenarios:
+  - flow:
+      - get:
+          url: "/api/admin/users/list"
+          params:
+            company_id: "{{ $randomNumberInRange(1, 412) }}"
