@@ -8,18 +8,11 @@
   align-items: center;
 }
 
-.counter {
+/* .counter {
   font-size: 200px;
   color: #fff1;
   position: absolute;
   bottom: 0;
   left: 50px;
   z-index: 100;
-}
-
-.block {
-  flex: 1;
-  height: 100%;
-  width: 100%;
-  background-color: #fff1;
-}
+} */

@@ -51,6 +51,20 @@ const Home = () => {
   const container = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP()
 
+  useGSAP(() => {
+    const li = container.current?.querySelectorAll("li");
+    if (!li) return
+
+    const t1 = gsap.timeline({ defaults: { duration: 0.5 } });
+    t1.from(li, {
+      opacity: 0,
+      rotateX: 90,
+      stagger: 0.2,
+      ease: "sine.in",
+      delay: 1
+    });
+  });
+
   const handleMouseEnter = contextSafe((color: string) => {
     gsap.to(container.current, {
       backgroundColor: color,

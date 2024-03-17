@@ -1,15 +1,13 @@
+// import Preloader from "./components/router/Loader"
 import Router from "./components/router/Routes"
-// import Loader from "./components/router/Loader";
 
 const App = () => {
-
   return (
-    // <Loader>
-    <>
-      <Router />
-    </>
-    // </Loader>
+    // <Preloader>
+    <Router />
+    // </Preloader>
   )
+
 }
 
 export default App

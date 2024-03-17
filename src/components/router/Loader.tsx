@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import "./loader.css";
+import { useGSAP } from '@gsap/react';
 
 const Preloader = ({ children }: { children: React.ReactNode }) => {
   const counterRef = useRef<HTMLDivElement>(null);
-  const verticalBlocksRef = useRef<HTMLDivElement[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
+  useGSAP(() => {
+    if (!counterRef.current || isLoaded) return
     const tl = gsap.timeline({ defaults: { ease: 'power1.out' } });
 
     // Animation for counter
@@ -20,49 +21,32 @@ const Preloader = ({ children }: { children: React.ReactNode }) => {
     // Simulating loading process
     let counter = 0;
     const updateCounter = () => {
-      counter++;
-      counterRef.current!.textContent = `${counter}%`;
+      counter = Math.floor(Math.min(counter + Math.random() * 10, 100)) // Increment counter by random value
+      if (counterRef.current) { // Check if counterRef.current is not null
+        counterRef.current.textContent = `${counter}`;
 
-      if (counter < 100) {
-        setTimeout(updateCounter, 30); // Adjust timing for smoother animation
-      } else {
-        // Countdown ends, hide counter and animate blocks
-        tl.to(counterRef.current!, { opacity: 0, duration: 0.5 });
-        animateBlocks(0);
+        if (counter < 100) {
+          setTimeout(updateCounter, 200); // Adjust timing for smoother animation
+        } else {
+          // Countdown ends, hide counter and animate blocks
+          tl.to(counterRef.current, { opacity: 0, duration: 0.5 });
+          setIsLoaded(true);
+        }
       }
     };
 
-    const animateBlocks = (index: number) => {
-      if (index < verticalBlocksRef.current.length) {
-        const blockTween = gsap.to(verticalBlocksRef.current[index], {
-          y: '-100%',
-          duration: 0.5,
-          ease: 'power2.out',
-        });
-
-        blockTween.then(() => animateBlocks(index + 1))
-      } else {
-        setIsLoaded(true);
-      }
-    };
-
-    updateCounter();
-
-    () => {
-      setIsLoaded(true);
-    }
-  }, []);
+    setTimeout(updateCounter, 10); // Call updateCounter after initial mount
+  }, {
+    scope: counterRef,
+  });
 
   if (isLoaded) {
     return children;
   }
 
   return (
-    <div className="preloader">
-      <div ref={counterRef} className="counter">0%</div>
-      {[...Array(5)].map((_, index) => (
-        <div key={index} ref={el => verticalBlocksRef.current[index] = el!} className="block"></div>
-      ))}
+    <div className="bg-gray-800 text-orange-500 mono h-screen w-screen flex justify-center items-center">
+      <div ref={counterRef} className="absolute top-auto left-auto text-9xl">0</div>
     </div>
   );
 };
