@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .mono {
+    font-family: 'Roboto Mono', monospace;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+  }
+
+  .tilt {
+    font-family: 'Tilt Warp', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+    font-variation-settings:
+      "XROT" 0,
+      "YROT" 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (min-width: 1024px) {
+  html {
+    cursor: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .cursor {
+    display: none;
+  }
+}

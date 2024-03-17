@@ -1,0 +1,18 @@
+.preloader {
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+/* .counter {
+  font-size: 200px;
+  color: #fff1;
+  position: absolute;
+  bottom: 0;
+  left: 50px;
+  z-index: 100;
+} */
