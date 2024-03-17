@@ -18,35 +18,31 @@ const Cursor: FC<CursorProps> = ({ classes = "" }) => {
     const moveCursor = (e: MouseEvent) => {
       clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {
-        const rect = document.documentElement.getBoundingClientRect();
-        const x = e.clientX - rect.left - cursor.clientWidth / 2;
-        const y = e.clientY - rect.top - cursor.clientHeight / 2;
-        const clampedX = Math.max(0, Math.min(x, rect.width));
-        const clampedY = Math.max(0, Math.min(y, rect.height));
+        const x = e.clientX - cursor.clientWidth / 2;
+        const y = e.clientY - cursor.clientHeight / 2;
+        const clampedX = Math.max(0, Math.min(x));
+        const clampedY = Math.max(0, Math.min(y));
 
         gsap.to(cursor, {
           left: clampedX,
           top: clampedY,
           duration: 0.2,
-          ease: 'power3.out'
+          ease: 'power4',
         });
-      }, 10); // Adjust debounce delay as needed
+      }, 5); // Adjust debounce delay as needed
     };
 
     const handleLinkHover = () => {
       if (!cursor.classList.contains('hover')) {
-        gsap.to(cursor, { scale: 3, duration: 0.5 });
-        cursor.classList.add('hover');
-        cursor.style.mixBlendMode = 'difference'; // Change mix-blend-mode on hover
-        cursor.style.backgroundColor = 'white'; // Change background color on hover
+        gsap.to(cursor, { scale: 3, duration: 0.5, mixBlendMode: 'difference', backgroundColor: 'white' });
       }
     };
 
     const handleLinkLeave = () => {
-      gsap.to(cursor, { scale: 1, duration: 0.3 });
+      gsap.killTweensOf(cursor);
+
+      gsap.to(cursor, { scale: 1, duration: 0.3, mixBlendMode: 'exclusion', backgroundColor: '' });
       cursor.classList.remove('hover');
-      cursor.style.backgroundColor = ''; // Reset background color 
-      cursor.style.mixBlendMode = 'exclusion'; // Reset mix-blend-mode
     };
 
     document.addEventListener('mousemove', moveCursor);
@@ -66,7 +62,8 @@ const Cursor: FC<CursorProps> = ({ classes = "" }) => {
     };
   }, []);
 
-  return <div ref={cursorRef} className={`cursor w-6 h-6 rounded-full absolute pointer-events-none ${classes} mix-blend-exclusion z-40`}></div>;
+  return <div ref={cursorRef} className={`w-6 h-6 rounded-full fixed pointer-events-none ${classes} mix-blend-exclusion z-40`}>
+  </div>;
 };
 
 export default Cursor;

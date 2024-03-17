@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
   }, { scope: footerRef });
 
   return (
-    <footer ref={footerRef} className="fixed bottom-0 w-full p-4 flex justify-between items-center mono z-20 text-lg">
+    <footer ref={footerRef} className="fixed bottom-0 w-full p-4 flex justify-between items-center mono text-lg z-20">
       <div className='flex flex-col'>
         <a href="https://www.linkedin.com/in/nishant-chorge/" target="_blank" rel="noreferrer" >
           LinkedIn

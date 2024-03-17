@@ -5,7 +5,9 @@ const App = () => {
 
   return (
     // <Loader>
-    <Router />
+    <>
+      <Router />
+    </>
     // </Loader>
   )
 }
