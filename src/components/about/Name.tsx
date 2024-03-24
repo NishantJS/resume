@@ -7,7 +7,7 @@ export const Name: FC = () => {
 
   return (
     <div className="flex justify-center items-center w-full text-center">
-      <h1 className="text-7xl lm:text-9xl lg:text-9xl font-bold tilt link uppercase  mix-blend-exclusion" ref={ref}>
+      <h1 className="md:text-9xl text-6xl font-bold link uppercase mix-blend-exclusion" ref={ref}>
         Nishant Chorge
       </h1>
     </div>

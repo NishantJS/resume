@@ -1,27 +1,29 @@
 import { Routes, Route, useLocation } from "react-router-dom"
 import Home from "../home/Home"
-import Project from "../projects/Project"
+import Project from "../project/Project"
 import NotFound from "../error/NotFound"
 import ScrollIntoView from "./ScrollIntoView"
-import { AnimatePresence } from "framer-motion"
 import About from "../about/About"
+import Header from "../header/Header"
+import Footer from "../footer/Footer"
+import Cursor from "./Cursor"
 
 const Router = () => {
   const location = useLocation()
 
   return (
-    <AnimatePresence
-      initial={false}
-      mode="sync"
-    >
-      <ScrollIntoView key={1} />
+    <>
+      <ScrollIntoView key="scroll" />
+      <Header active={location.pathname} key="header" />
       <Routes location={location} key={location.pathname}>
         <Route index element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/project/:project" element={<Project />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </AnimatePresence>
+      <Footer active={location.pathname} key="footer" />
+      <Cursor key="cursor" pathname={location.pathname} />
+    </>
   )
 }
 

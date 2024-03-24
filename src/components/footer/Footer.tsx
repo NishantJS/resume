@@ -1,8 +1,14 @@
-import React, { useRef } from 'react';
+import { FC, useRef } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
 
-const Footer: React.FC = () => {
+const darkModeOn = "/about"
+
+type FooterProps = {
+  active: string;
+}
+
+const Footer: FC<FooterProps> = ({ active = "" }) => {
   const footerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -12,8 +18,15 @@ const Footer: React.FC = () => {
     gsap.fromTo(footer, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, delay: 0.5 });
   }, { scope: footerRef });
 
+  useGSAP(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+
+    gsap.to(footer, { color: darkModeOn === active ? "white" : "black", duration: 2 });
+  }, [active]);
+
   return (
-    <footer ref={footerRef} className="fixed bottom-0 w-full p-4 flex justify-between items-center mono text-lg z-20">
+    <footer ref={footerRef} className="fixed bottom-0 w-full flex justify-between items-center mono text-lg px-4 py-0">
       <div className='flex flex-col'>
         <a href="https://www.linkedin.com/in/nishant-chorge/" target="_blank" rel="noreferrer" >
           LinkedIn

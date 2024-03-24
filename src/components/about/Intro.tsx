@@ -5,7 +5,7 @@ import { ScrollButton } from "./ScrollButton";
 
 const Intro: FC = () => {
   return (
-    <div className="h-screen flex flex-col justify-evenly items-center ">
+    <div className="h-screen flex flex-col justify-evenly items-center">
       <Skills />
       <Name />
       <ScrollButton />

@@ -1,12 +1,12 @@
-import { FC, useRef } from 'react';
+import { CSSProperties, FC, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 type CursorProps = {
-  classes?: string;
+  pathname?: string;
 };
 
-const Cursor: FC<CursorProps> = ({ classes = "" }) => {
+const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -32,9 +32,18 @@ const Cursor: FC<CursorProps> = ({ classes = "" }) => {
       }, 5); // Adjust debounce delay as needed
     };
 
-    const handleLinkHover = () => {
+    const handleLinkHover = (e: Event) => {
       if (!cursor.classList.contains('hover')) {
-        gsap.to(cursor, { scale: 3, duration: 0.5, mixBlendMode: 'difference', backgroundColor: 'white' });
+        let styles: CSSProperties = {}
+        if (e.target instanceof HTMLElement && e.target.dataset.image) {
+          styles = {
+            backgroundImage: `url(${e.target.dataset.image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }
+        }
+
+        gsap.to(cursor, { scale: 3, duration: 0.5, mixBlendMode: 'difference', backgroundColor: 'white', ...styles });
       }
     };
 
@@ -42,6 +51,8 @@ const Cursor: FC<CursorProps> = ({ classes = "" }) => {
       gsap.killTweensOf(cursor);
 
       gsap.to(cursor, { scale: 1, duration: 0.3, mixBlendMode: 'exclusion', backgroundColor: '' });
+
+      cursor.style.backgroundImage = '';
       cursor.classList.remove('hover');
     };
 
@@ -60,9 +71,12 @@ const Cursor: FC<CursorProps> = ({ classes = "" }) => {
         link.removeEventListener('mouseleave', handleLinkLeave);
       });
     };
-  }, []);
+  }, {
+    dependencies: [pathname],
+    scope: cursorRef,
+  });
 
-  return <div ref={cursorRef} className={`w-6 h-6 rounded-full fixed pointer-events-none ${classes} mix-blend-exclusion z-40`}>
+  return <div ref={cursorRef} className="w-6 h-6 rounded-full fixed pointer-events-none z-40 bg-gray-700 mix-blend-exclusion cursor">
   </div>;
 };
 
