@@ -1,8 +1,7 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { projects } from "../home/Home";
 import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
 
 const PrevProject = ({ index = 0 }) => {
   const project = projects[index ? index - 1 : projects.length - 1];

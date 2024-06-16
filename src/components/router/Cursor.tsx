@@ -29,7 +29,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
           duration: 0.2,
           ease: 'power4',
         });
-      }, 1); // Adjust debounce delay as needed
+      }, 3); // Adjust debounce delay as needed
     };
 
     const handleLinkHover = (e: Event) => {
