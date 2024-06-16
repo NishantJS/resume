@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { projects } from "../home/Home";
 import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 const PrevProject = ({ index = 0 }) => {
   const project = projects[index ? index - 1 : projects.length - 1];
@@ -25,6 +26,11 @@ const Project = () => {
   useGSAP(() => {
     if (!ref.current) return;
 
+    const t1 = gsap.timeline({ defaults: { duration: 1, delay: 0.5, scaleY: 1, transformOrigin: "bottom" } });
+    t1.fromTo(".color-sheet", { backgroundColor: project.color }, { scaleY: 0 })
+    t1.fromTo(".black-sheet", { backgroundColor: "black" }, { scaleY: 0 }, "-=70%")
+
+    return () => t1.kill();
   }, {
     scope: ref
   });
@@ -32,11 +38,12 @@ const Project = () => {
   if (!project) return <div>Project not found</div>;
 
   return (
-    <main className="min-h-screen mono flex flex-col relative" ref={ref}>
+    <main className="min-h-screen mono flex flex-col relative" ref={ref} style={{ backgroundColor: project.color }}>
       <div className="absolute inset-0 black-sheet"></div>
+      <div className="absolute inset-0 color-sheet"></div>
 
       <div className="flex-grow flex items-center justify-center min-h-svh">
-        <h1 className="text-5xl md:text-7xl font-bold text-white">{project.title}</h1>
+        <h1 className="text-5xl md:text-7xl font-bold text-white">{"Work In Progress, Page  50%" || project.title}</h1>
       </div>
 
       <figure className="flex-grow flex items-center justify-center w-full flex-col">
