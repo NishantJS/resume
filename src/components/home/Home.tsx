@@ -9,6 +9,11 @@ interface ProjectData {
   color: string;
   contribution: string;
   path: string;
+  description?: string;
+  features?: {
+    title: string;
+    description: string;
+  }[];
 }
 
 export const projects: ProjectData[] = [
@@ -16,31 +21,36 @@ export const projects: ProjectData[] = [
     title: "Qollabb",
     color: "#eebcff",
     contribution: "Backend & Frontend",
-    path: "/project/qollabb/"
+    path: "/project/qollabb/",
+    description: "Qollabb is a versatile job and assignment portal featuring four key modules: Teacher, Mentor, Student, and Companies. Employers can post job opportunities and assignments, while teachers assign coursework and real-world tasks to students. Students access a range of opportunities and mentorship sessions, enhancing their academic and career paths. Mentors provide invaluable guidance in virtual meetings, fostering growth and collaboration. Qollabb: Where talent meets opportunity."
   },
   {
     title: "OneSociety",
     color: "#ffcab2",
-    contribution: "Monolithic to Microservices",
-    path: "/project/onesociety/"
+    contribution: "Monorepo & Microfrontend",
+    path: "/project/onesociety/",
+    description: "OneSociety revolutionizes cooperative housing society management, providing a comprehensive platform for both members and society offices. With a user-friendly interface and robust functionality, it simplifies the complexities of society administration. Onesociety: Your one-stop solution to manage your housing society and maintain a comfortable living environment",
   },
   {
     title: "Buddy",
     color: "#f2ee99",
     contribution: "Design & Development",
     path: "/project/buddy/",
+    description: "Buddy is an online ecommerce store catering to products for your pets. Whether you're looking for pet foods, toys, treats, or other pet-related items, Buddy has you covered. With two modules - one for customers to place orders and one for sellers to manage products, inventory, and shipping - Buddy offers a seamless experience for both buyers and sellers.",
   },
   {
     title: "ConsultmyAstro",
     color: "#EFE8D3",
     contribution: "Backend & DataBase",
     path: "/project/consultmyastro/",
+    description: "ConsultmyAstro is a platform connecting users with experienced astrologers for personalized chat or call sessions. Users are billed only for the time they actively spend in sessions, with automatic refunds for any inactive periods. It offers a secure and convenient way for users to seek astrological guidance at their convenience.",
   },
   {
     title: "OneDashboard",
     color: "#c2e9fb",
     contribution: "Backend & Frontend",
     path: "/project/onedashboard/",
+    description: "OneDashboard is a comprehensive dashboard for managing multiple chsone applications. It provides a unified interface for users to access and manage their accounts, subscriptions, and services. With a user-friendly design and intuitive navigation, OneDashboard simplifies the user experience, making it easy to manage multiple applications from a single location.",
   }
 ];
 

@@ -39,7 +39,7 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
         </a>
       </div>
       <div className='flex flex-col'>
-        <a href="mailto:itsnishantchorge@gmail.com" target="_blank" rel="noreferrer">
+        <a href="mailto:contact@nishant.codes" target="_blank" rel="noreferrer">
           Email
         </a>
         <a href="tel:+916283925737" target="_blank" rel="noreferrer">

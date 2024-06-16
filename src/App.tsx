@@ -9,7 +9,6 @@ const App = () => {
       <SpeedInsights />
       <Router />
     </>
-    // </Preloader>
   )
 
 }

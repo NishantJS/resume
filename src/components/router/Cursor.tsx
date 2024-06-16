@@ -29,7 +29,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
           duration: 0.2,
           ease: 'power4',
         });
-      }, 5); // Adjust debounce delay as needed
+      }, 1); // Adjust debounce delay as needed
     };
 
     const handleLinkHover = (e: Event) => {
@@ -62,6 +62,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
     links.forEach(link => {
       link.addEventListener('mouseenter', handleLinkHover);
       link.addEventListener('mouseleave', handleLinkLeave);
+      link.addEventListener('click', handleLinkLeave);
     });
 
     return () => {
@@ -69,6 +70,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
       links.forEach(link => {
         link.removeEventListener('mouseenter', handleLinkHover);
         link.removeEventListener('mouseleave', handleLinkLeave);
+        link.removeEventListener('click', handleLinkLeave);
       });
     };
   }, {

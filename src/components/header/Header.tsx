@@ -18,8 +18,6 @@ type HeaderProps = {
   active: string;
 }
 
-const darkModeOn = "/about"
-
 const Header: FC<HeaderProps> = ({ active = "/" }) => {
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -28,13 +26,13 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
     if (!header) return;
 
     gsap.fromTo(header, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 1, delay: 0.5 });
-  }, { scope: headerRef, revertOnUpdate: true });
+  }, { scope: headerRef, revertOnUpdate: false });
 
   useGSAP(() => {
     const header = headerRef.current;
     if (!header) return;
 
-    gsap.to(header, { color: darkModeOn === active ? "white" : "black", duration: 2 });
+    gsap.to(header, { color: "white", mixBlendMode: 'difference', duration: 2 });
   }, [active]);
 
   return (
