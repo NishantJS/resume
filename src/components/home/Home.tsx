@@ -3,8 +3,13 @@ import { useGSAP } from "@gsap/react"
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 
+export type ContentType = {
+  max: number;
+  key: string;
+}
+
 // Define interfaces for project data and modal state
-interface ProjectData {
+export interface ProjectData {
   title: string;
   color: string;
   contribution: string;
@@ -14,6 +19,7 @@ interface ProjectData {
     title: string;
     description: string;
   }[];
+  content?: ContentType[]
 }
 
 export const projects: ProjectData[] = [
@@ -22,7 +28,33 @@ export const projects: ProjectData[] = [
     color: "#eebcff",
     contribution: "Backend & Frontend",
     path: "/project/qollabb/",
-    description: "Qollabb is a versatile job and assignment portal featuring four key modules: Teacher, Mentor, Student, and Companies. Employers can post job opportunities and assignments, while teachers assign coursework and real-world tasks to students. Students access a range of opportunities and mentorship sessions, enhancing their academic and career paths. Mentors provide invaluable guidance in virtual meetings, fostering growth and collaboration. Qollabb: Where talent meets opportunity."
+    description: "Qollabb is a versatile job and assignment portal featuring four key modules: Teacher, Mentor, Student, and Companies. Employers can post job opportunities and assignments, while teachers assign coursework and real-world tasks to students. Students access a range of opportunities and mentorship sessions, enhancing their academic and career paths. Mentors provide invaluable guidance in virtual meetings, fostering growth and collaboration. Qollabb: Where talent meets opportunity.",
+    content: [
+      {
+        max: 3,
+        key: "login"
+      },
+      {
+        max: 4,
+        key: "post"
+      },
+      {
+        max: 2,
+        key: "auth"
+      },
+      {
+        max: 2,
+        key: "dashboard"
+      },
+      {
+        max: 2,
+        key: "listing"
+      },
+      {
+        max: 1,
+        key: "plan"
+      }
+    ]
   },
   {
     title: "OneSociety",

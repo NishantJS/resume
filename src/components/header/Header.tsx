@@ -18,8 +18,16 @@ type HeaderProps = {
   active: string;
 }
 
+const getActiveLink = (active = "") => {
+  if (active === "/about") {
+    return "/about";
+  }
+  return "/";
+};
+
 const Header: FC<HeaderProps> = ({ active = "/" }) => {
   const headerRef = useRef<HTMLDivElement>(null);
+  console.log(active)
 
   useGSAP(() => {
     const header = headerRef.current;
@@ -42,7 +50,7 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
       <nav>
         <ul className="flex space-x-4 text-2xl mono">
           {links.map((link, index) => (
-            <li key={index} className={`cursor-pointer link ${active === link.path ? "text-gray-500 border-b-2 border-purple-600" : ""}`}>
+            <li key={index} className={`cursor-pointer link border-b-2 ${getActiveLink(active) === link.path ? "text-gray-500 border-purple-600" : "border-transparent"}`}>
               <Link to={link.path}>{link.name}</Link>
             </li>
           ))}

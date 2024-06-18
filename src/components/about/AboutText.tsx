@@ -39,7 +39,7 @@ const Word: FC<WordProps> = ({ children, progress, range }) => {
   const opacity = useTransform(progress, range, [0, 1]);
 
   return (
-    <span className={`relative mr-3 mt-3 ${specialWords.includes(children) && "link underline"}`}>
+    <span className={`relative mr-3 mt-3 ${specialWords.includes(children) && "link"}`}>
       <span className='absolute opacity-10'>{children}</span>
       <motion.span style={{ opacity }}>{children}</motion.span>
     </span>
