@@ -44,8 +44,8 @@ const Project = () => {
 
   return (
     <main className="min-h-screen mono flex flex-col relative mix-blend-lighten" ref={ref} style={{ backgroundColor: project.color }}>
-      {/* <div className="absolute inset-0 black-sheet z-10"></div>
-      <div className="absolute inset-0 color-sheet z-10"></div> */}
+      <div className="absolute inset-0 black-sheet z-10"></div>
+      <div className="absolute inset-0 color-sheet z-10"></div>
 
 
       <AboutSection project={project} />
