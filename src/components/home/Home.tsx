@@ -3,11 +3,6 @@ import { useGSAP } from "@gsap/react"
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
 
-export type ContentType = {
-  max: number;
-  key: string;
-}
-
 // Define interfaces for project data and modal state
 export interface ProjectData {
   title: string;
@@ -19,7 +14,7 @@ export interface ProjectData {
     title: string;
     description: string;
   }[];
-  content?: ContentType[]
+  images?: number;
 }
 
 export const projects: ProjectData[] = [
@@ -29,32 +24,7 @@ export const projects: ProjectData[] = [
     contribution: "Backend & Frontend",
     path: "/project/qollabb/",
     description: "Qollabb is a versatile job and assignment portal featuring four key modules: Teacher, Mentor, Student, and Companies. Employers can post job opportunities and assignments, while teachers assign coursework and real-world tasks to students. Students access a range of opportunities and mentorship sessions, enhancing their academic and career paths. Mentors provide invaluable guidance in virtual meetings, fostering growth and collaboration. Qollabb: Where talent meets opportunity.",
-    content: [
-      {
-        max: 3,
-        key: "login"
-      },
-      {
-        max: 4,
-        key: "post"
-      },
-      {
-        max: 2,
-        key: "auth"
-      },
-      {
-        max: 2,
-        key: "dashboard"
-      },
-      {
-        max: 2,
-        key: "listing"
-      },
-      {
-        max: 1,
-        key: "plan"
-      }
-    ]
+    images: 16
   },
   {
     title: "OneSociety",
@@ -76,6 +46,7 @@ export const projects: ProjectData[] = [
     contribution: "Backend & DataBase",
     path: "/project/consultmyastro/",
     description: "ConsultmyAstro is a platform connecting users with experienced astrologers for personalized chat or call sessions. Users are billed only for the time they actively spend in sessions, with automatic refunds for any inactive periods. It offers a secure and convenient way for users to seek astrological guidance at their convenience.",
+    images: 11
   },
   {
     title: "OneDashboard",

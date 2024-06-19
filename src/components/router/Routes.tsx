@@ -23,9 +23,9 @@ const Router = () => {
           <Route path="/project/:project" element={<Project />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Cursor key="cursor" pathname={location.pathname} />
       </AnimatePresence>
       <Footer active={location.pathname} key="footer" />
-      <Cursor key="cursor" pathname={location.pathname} />
     </>
   )
 }

@@ -47,7 +47,6 @@ const Project = () => {
       <div className="absolute inset-0 black-sheet z-10"></div>
       <div className="absolute inset-0 color-sheet z-10"></div>
 
-
       <AboutSection project={project} />
       <Contents project={project} />
 
