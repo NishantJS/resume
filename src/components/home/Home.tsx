@@ -32,6 +32,7 @@ export const projects: ProjectData[] = [
     contribution: "Monorepo & Microfrontend",
     path: "/project/onesociety/",
     description: "OneSociety revolutionizes cooperative housing society management, providing a comprehensive platform for both members and society offices. With a user-friendly interface and robust functionality, it simplifies the complexities of society administration. Onesociety: Your one-stop solution to manage your housing society and maintain a comfortable living environment",
+    images: 7
   },
   {
     title: "Buddy",
@@ -39,6 +40,7 @@ export const projects: ProjectData[] = [
     contribution: "Design & Development",
     path: "/project/buddy/",
     description: "Buddy is an online ecommerce store catering to products for your pets. Whether you're looking for pet foods, toys, treats, or other pet-related items, Buddy has you covered. With two modules - one for customers to place orders and one for sellers to manage products, inventory, and shipping - Buddy offers a seamless experience for both buyers and sellers.",
+    images: 13
   },
   {
     title: "ConsultmyAstro",
