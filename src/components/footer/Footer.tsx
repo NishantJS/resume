@@ -34,7 +34,7 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
         <a href='https://www.github.com/NishantJS' target="_blank" rel="noreferrer">
           GitHub
         </a>
-        <a href='https://www.twitter.com/nishantchorge' target="_blank" rel="noreferrer" download={true}>
+        <a href='/Nishant Chorge Front end Developer.pdf' target="_blank" rel="noreferrer" download={true}>
           Resume
         </a>
       </div>
