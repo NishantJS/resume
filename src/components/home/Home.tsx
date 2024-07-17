@@ -21,7 +21,7 @@ export const projects: ProjectData[] = [
     color: "#eebcff",
     contribution: "Backend & Frontend",
     path: "/project/qollabb/",
-    description: "Qollabb is a versatile job and assignment portal featuring four key modules: Teacher, Mentor, Student, and Companies. Employers can post job opportunities and assignments, while teachers assign coursework and real-world tasks to students. Students access a range of opportunities and mentorship sessions, enhancing their academic and career paths. Mentors provide invaluable guidance in virtual meetings, fostering growth and collaboration. Qollabb: Where talent meets opportunity.",
+    description: "Qollabb is an online job portal where I was solely responsible for backend development, covering all sections for employers, educators, mentors, and students. I utilized Express.js and PostgreSQL with Sequelize for the backend and developed the frontend for the employer section using React. This project involved creating a comprehensive, user-friendly platform to connect job seekers and employers efficiently.",
     images: 16,
     href: "https://qollabb.com",
     skills: ["React.js", "Node.js", "PostgreSQL", "AWS", "Express.js", "TypeScript", "Sequelize", "Tailwind CSS", "Nginx"]
@@ -31,7 +31,7 @@ export const projects: ProjectData[] = [
     color: "#ffcab2",
     contribution: "Monorepo & Microfrontend",
     path: "/project/onesociety/",
-    description: "OneSociety revolutionizes cooperative housing society management, providing a comprehensive platform for both members and society offices. With a user-friendly interface and robust functionality, it simplifies the complexities of society administration. Onesociety: Your one-stop solution to manage your housing society and maintain a comfortable living environment",
+    description: "The OneSociety project is a society management application where I created a comprehensive library for form and table pages using React JSON Schema Form (RJSF) for forms and Material-UI DataGrid for tables, all integrated with Next.js. This development significantly reduced the time required to create form pages to mere minutes, featuring built-in validation and a user-friendly interface. The project enhanced application scalability and maintainability through a modular codebase design.",
     images: 7,
     href: "https://society.cubeone.in",
     skills: ["Next.JS", "React.js", "Node.js", "Docker", "Express.js", "TypeScript", "Material-UI (MUI)", "Redis"]
@@ -41,7 +41,7 @@ export const projects: ProjectData[] = [
     color: "#f2ee99",
     contribution: "Design & Development",
     path: "/project/buddy/",
-    description: "Buddy is an online ecommerce store catering to products for your pets. Whether you're looking for pet foods, toys, treats, or other pet-related items, Buddy has you covered. With two modules - one for customers to place orders and one for sellers to manage products, inventory, and shipping - Buddy offers a seamless experience for both buyers and sellers.",
+    description: "Buddy is a MERN stack e-commerce web application designed to streamline online shopping experiences. The backend, developed using Node.js, Express, and MongoDB, features secure Passport and JWT authentication. The frontend, created with React, ensures a responsive and user-friendly interface. The project leverages AWS EC2 for hosting and S3 for storage, providing a scalable and robust solution for modern e-commerce needs.",
     images: 13,
     href: "https://github.com/NishantJS/Buddy-Backend",
     skills: ["React.js", "Node.js", "MongoDB", "Express.js", "MongoDB", "Bcrypt", "JWT", "Multer", "Passport.js"]
@@ -51,7 +51,7 @@ export const projects: ProjectData[] = [
     color: "#EFE8D3",
     contribution: "Backend & DataBase",
     path: "/project/consultmyastro/",
-    description: "ConsultmyAstro is a platform connecting users with experienced astrologers for personalized chat or call sessions. Users are billed only for the time they actively spend in sessions, with automatic refunds for any inactive periods. It offers a secure and convenient way for users to seek astrological guidance at their convenience.",
+    description: "ConsultMyAstro is a chat and call application designed for astrologers. In this project, I handled the backend development, implementing key features like the chat module with Socket.io, a payment module, and a wallet system. Additionally, I contributed significantly to the frontend development, ensuring a seamless and engaging user experience for astrologers and their clients.",
     images: 11,
     href: "https://consultmyastro.com",
     skills: ["React.js", "Node.js", "PostgreSQL", "Express.js", "Sequelize", "JWT", "Bcrypt", "Socket.IO", "Live Chat and Call"]
@@ -61,7 +61,7 @@ export const projects: ProjectData[] = [
     color: "#c2e9fb",
     contribution: "Backend & Frontend",
     path: "/project/onedashboard/",
-    description: "OneDashboard is a comprehensive dashboard for managing multiple chsone applications. It provides a unified interface for users to access and manage their accounts, subscriptions, and services. With a user-friendly design and intuitive navigation, OneDashboard simplifies the user experience, making it easy to manage multiple applications from a single location.",
+    description: "The OneDashboard project involved developing a Single Sign-On (SSO) dashboard using Supabase and Next.js, providing unified access to multiple applications. I implemented Role-Based Access Control (RBAC) for efficient user permissions management across sibling projects. The project enhanced security and user management through robust authentication mechanisms, ensuring a seamless user experience across all interconnected applications.",
     href: "https://onedashboard.cubeone.in",
     skills: ["Next.js", "Supabase", "Kong Gateway", "TypeScript", "Material-UI (MUI)", "Redis"],
     images: 5
