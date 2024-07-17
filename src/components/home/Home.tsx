@@ -9,12 +9,10 @@ export interface ProjectData {
   color: string;
   contribution: string;
   path: string;
-  description?: string;
-  features?: {
-    title: string;
-    description: string;
-  }[];
-  images?: number;
+  description: string;
+  images: number;
+  href: string;
+  skills: string[];
 }
 
 export const projects: ProjectData[] = [
@@ -24,7 +22,9 @@ export const projects: ProjectData[] = [
     contribution: "Backend & Frontend",
     path: "/project/qollabb/",
     description: "Qollabb is a versatile job and assignment portal featuring four key modules: Teacher, Mentor, Student, and Companies. Employers can post job opportunities and assignments, while teachers assign coursework and real-world tasks to students. Students access a range of opportunities and mentorship sessions, enhancing their academic and career paths. Mentors provide invaluable guidance in virtual meetings, fostering growth and collaboration. Qollabb: Where talent meets opportunity.",
-    images: 16
+    images: 16,
+    href: "https://qollabb.com",
+    skills: ["React.js", "Node.js", "PostgreSQL", "AWS", "Express.js", "TypeScript", "Sequelize", "Tailwind CSS", "Nginx"]
   },
   {
     title: "OneSociety",
@@ -32,7 +32,9 @@ export const projects: ProjectData[] = [
     contribution: "Monorepo & Microfrontend",
     path: "/project/onesociety/",
     description: "OneSociety revolutionizes cooperative housing society management, providing a comprehensive platform for both members and society offices. With a user-friendly interface and robust functionality, it simplifies the complexities of society administration. Onesociety: Your one-stop solution to manage your housing society and maintain a comfortable living environment",
-    images: 7
+    images: 7,
+    href: "https://society.cubeone.in",
+    skills: ["Next.JS", "React.js", "Node.js", "Docker", "Express.js", "TypeScript", "Material-UI (MUI)", "Redis"]
   },
   {
     title: "Buddy",
@@ -40,7 +42,9 @@ export const projects: ProjectData[] = [
     contribution: "Design & Development",
     path: "/project/buddy/",
     description: "Buddy is an online ecommerce store catering to products for your pets. Whether you're looking for pet foods, toys, treats, or other pet-related items, Buddy has you covered. With two modules - one for customers to place orders and one for sellers to manage products, inventory, and shipping - Buddy offers a seamless experience for both buyers and sellers.",
-    images: 13
+    images: 13,
+    href: "https://github.com/NishantJS/Buddy-Backend",
+    skills: ["React.js", "Node.js", "MongoDB", "Express.js", "MongoDB", "Bcrypt", "JWT", "Multer", "Passport.js"]
   },
   {
     title: "ConsultmyAstro",
@@ -48,7 +52,9 @@ export const projects: ProjectData[] = [
     contribution: "Backend & DataBase",
     path: "/project/consultmyastro/",
     description: "ConsultmyAstro is a platform connecting users with experienced astrologers for personalized chat or call sessions. Users are billed only for the time they actively spend in sessions, with automatic refunds for any inactive periods. It offers a secure and convenient way for users to seek astrological guidance at their convenience.",
-    images: 11
+    images: 11,
+    href: "https://consultmyastro.com",
+    skills: ["React.js", "Node.js", "PostgreSQL", "Express.js", "Sequelize", "JWT", "Bcrypt", "Socket.IO", "Live Chat and Call"]
   },
   {
     title: "OneDashboard",
@@ -56,6 +62,9 @@ export const projects: ProjectData[] = [
     contribution: "Backend & Frontend",
     path: "/project/onedashboard/",
     description: "OneDashboard is a comprehensive dashboard for managing multiple chsone applications. It provides a unified interface for users to access and manage their accounts, subscriptions, and services. With a user-friendly design and intuitive navigation, OneDashboard simplifies the user experience, making it easy to manage multiple applications from a single location.",
+    href: "https://onedashboard.cubeone.in",
+    skills: ["Next.js", "Supabase", "Kong Gateway", "TypeScript", "Material-UI (MUI)", "Redis"],
+    images: 5
   }
 ];
 
