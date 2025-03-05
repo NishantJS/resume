@@ -5,7 +5,7 @@ interface ParagraphProps {
   paragraph: string;
 }
 
-const specialWords = ['Frontend', 'Developer', 'Designer', 'chat', 'project', 'opportunities'];
+const specialWords = ['frontend', 'developer', 'designer', 'micro-frontend', 'real-time', 'scalable,', 'reusable', 'opportunities', 'project'];
 
 const Paragraph: FC<ParagraphProps> = ({ paragraph }) => {
   const container = useRef<HTMLParagraphElement>(null);
@@ -39,7 +39,7 @@ const Word: FC<WordProps> = ({ children, progress, range }) => {
   const opacity = useTransform(progress, range, [0, 1]);
 
   return (
-    <span className={`relative mr-3 mt-3 ${specialWords.includes(children) && "link"}`}>
+    <span className={`relative mr-3 mt-3 ${specialWords.includes(children?.toLowerCase()) && "link"}`}>
       <span className='absolute opacity-10'>{children}</span>
       <motion.span style={{ opacity }}>{children}</motion.span>
     </span>

@@ -13,7 +13,8 @@ const About = () => {
 
       <div className="pb-20">
         <AboutText paragraph="Hello! I am a Frontend Developer and Designer based in Thane, MH, India." />
-        <AboutText paragraph="I am passionate about creating beautiful and functional websites and applications. I am currently looking for new opportunities and would love to chat with you about your project." />
+        <AboutText paragraph="I am passionate about creating beautiful, functional websites and applications that deliver seamless user experiences. With expertise in frontend development, micro-frontend architecture, and real-time systems, I enjoy turning ideas into scalable, reusable solutions." />
+        <AboutText paragraph="I am currently open to new opportunities and would love to chat with you about your project — let's build something great together!" />
       </div>
       <motion.div
         initial={{ scaleX: 1 }}

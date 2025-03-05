@@ -34,7 +34,7 @@ export const projects: ProjectData[] = [
     description: "The OneSociety project is a society management application where I created a comprehensive library for form and table pages using React JSON Schema Form (RJSF) for forms and Material-UI DataGrid for tables, all integrated with Next.js. This development significantly reduced the time required to create form pages to mere minutes, featuring built-in validation and a user-friendly interface. The project enhanced application scalability and maintainability through a modular codebase design.",
     images: 7,
     href: "https://society.cubeone.in",
-    skills: ["Next.JS", "React.js", "Node.js", "Docker", "Express.js", "TypeScript", "Material-UI (MUI)", "Redis", "RJSF & validator-ajv8"]
+    skills: ["Next.JS", "React.js", "Express.js", "TypeScript", "Material-UI (MUI)", "RJSF", "validator-ajv8", "Nx"]
   },
   {
     title: "Buddy",
@@ -63,7 +63,7 @@ export const projects: ProjectData[] = [
     path: "/project/onedashboard/",
     description: "The OneDashboard project involved developing a Single Sign-On (SSO) dashboard using Supabase and Next.js, providing unified access to multiple applications. I implemented Role-Based Access Control (RBAC) for efficient user permissions management across sibling projects. The project enhanced security and user management through robust authentication mechanisms, ensuring a seamless user experience across all interconnected applications.",
     href: "https://onedashboard.cubeone.in",
-    skills: ["Next.js", "Supabase", "Kong Gateway", "TypeScript", "Material-UI (MUI)", "Redis"],
+    skills: ["Next.js", "Supabase", "Kong Gateway", "TypeScript", "Material-UI (MUI)", "Redis", "Keycloak"],
     images: 5
   }
 ];

@@ -1,7 +1,7 @@
-const fontFamily = require("tailwindcss/defaultTheme").fontFamily;
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 /** @type {import('tailwindcss').Config} */
-export default {
+const config = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -11,8 +11,10 @@ export default {
       fontFamily: {
         "main-font": ["Rubik", ...fontFamily.sans],
         "sub-font": ['"Londrina Outline"', ...fontFamily.sans],
-      }
+      },
     },
   },
   plugins: [],
 };
+
+export default config;
