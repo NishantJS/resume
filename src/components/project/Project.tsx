@@ -3,58 +3,98 @@ import { Link, useLocation } from "react-router-dom";
 import { projects } from "../home/Home";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { motion } from "motion/react";
 import AboutSection from "./About";
 import Contents from "./Contents";
 
-const PrevProject = ({ index = 0 }) => {
-  const project = projects[index ? index - 1 : projects.length - 1];
+function isLight(hex: string): boolean {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55;
+}
 
-  return <Link to={project.path}>{project.title}</Link>;
+const NavProject = ({ index = 0, direction = "next" }: { index: number; direction: "prev" | "next" }) => {
+  const project = direction === "prev"
+    ? projects[index ? index - 1 : projects.length - 1]
+    : projects[index < projects.length - 1 ? index + 1 : 0];
+  const label = direction === "prev" ? "← Prev" : "Next →";
+  return (
+    <Link viewTransition to={project.path} className="link group flex flex-col gap-1">
+      <span className="mono text-xs uppercase tracking-widest opacity-40 group-hover:opacity-70 transition-opacity">
+        {label}
+      </span>
+      <span className="text-lg md:text-2xl xl:text-3xl font-semibold group-hover:opacity-60 transition-opacity">
+        {project.displayTitle ?? project.title}
+      </span>
+    </Link>
+  );
 };
 
-const NextProject = ({ index = 0 }) => {
-  const project = projects[index < projects.length - 1 ? index + 1 : 0];
-
-  return <Link to={project.path}>{project.title}</Link>;
+/** Infinite horizontal scrolling marquee of skill tags */
+const SkillsMarquee = ({ skills, ink, border }: { skills: string[]; ink: string; border: string }) => {
+  const repeated = [...skills, ...skills, ...skills];
+  return (
+    <div className="overflow-hidden border-y py-3 md:py-4" style={{ borderColor: border }} aria-hidden>
+      <div className="flex gap-8 md:gap-12 whitespace-nowrap skill-marquee" style={{ color: ink }}>
+        {repeated.map((s, i) => (
+          <span key={i} className="mono text-xs md:text-sm uppercase tracking-widest shrink-0 opacity-60">{s}</span>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const Project = () => {
   const { pathname } = useLocation();
-  const project = projects.find((project) => project.path === pathname) || projects[0];
-  const index = projects.indexOf(project);
+  const project = projects.find(p => p.path === pathname) ?? projects[0];
+  const index   = projects.indexOf(project);
+  const ref     = useRef<HTMLDivElement>(null);
 
-  const ref = useRef<HTMLDivElement>(null);
+  const light  = isLight(project.color);
+  const ink    = light ? "#111111" : "#ffffff";
+  const border = light ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)";
 
+  // Color-wipe entrance
   useGSAP(() => {
     if (!ref.current) return;
-
-    const t1 = gsap.timeline({ defaults: { duration: 1, delay: 0.5, scaleY: 1, transformOrigin: "bottom" } });
-    t1.fromTo(".color-sheet", { backgroundColor: project.color }, { scaleY: 0 })
-    t1.fromTo(".black-sheet", { backgroundColor: "black" }, { scaleY: 0 }, "-=70%")
-
-    t1.set(".color-sheet", { display: "none" });
-    t1.set(".black-sheet", { display: "none" });
-
-    return () => t1.kill();
-  }, {
-    scope: ref
-  });
-
-  if (!project) return <div>Project not found</div>;
+    const tl = gsap.timeline({ defaults: { duration: 1, delay: 0.3, transformOrigin: "bottom" } });
+    tl.fromTo(".color-sheet", { scaleY: 1, backgroundColor: project.color }, { scaleY: 0, ease: "power3.inOut" });
+    tl.fromTo(".black-sheet", { scaleY: 1, backgroundColor: "#000" },        { scaleY: 0, ease: "power3.inOut" }, "-=65%");
+    tl.set(".color-sheet", { display: "none" });
+    tl.set(".black-sheet", { display: "none" });
+    return () => tl.kill();
+  }, { scope: ref, dependencies: [project.path] });
 
   return (
-    <main className="min-h-screen mono flex flex-col relative mix-blend-lighten" ref={ref} style={{ backgroundColor: project.color }}>
-      <div className="absolute inset-0 black-sheet z-10"></div>
-      <div className="absolute inset-0 color-sheet z-10"></div>
+    <motion.main
+      ref={ref}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.25 } }}
+      exit={{ opacity: 0, transition: { duration: 0.25 } }}
+      className="min-h-screen flex flex-col relative"
+      style={{ backgroundColor: project.color, color: ink }}
+    >
+      {/* GSAP wipe sheets */}
+      <div className="absolute inset-0 black-sheet z-10 pointer-events-none" />
+      <div className="absolute inset-0 color-sheet z-10 pointer-events-none" />
 
-      <AboutSection project={project} />
+      <AboutSection project={project} index={index} total={projects.length} />
+
+      <SkillsMarquee skills={project.skills} ink={ink} border={border} />
+
       <Contents project={project} />
 
-      <div className="px-5 md:px-20 py-16 pb-32 flex justify-between md:text-4xl bg-slate-800 mix-blend-difference text-white text-xl">
-        <PrevProject index={index} />
-        <NextProject index={index} />
-      </div>
-    </main>
+      {/* Prev / Next navigation */}
+      <nav
+        className="px-6 md:px-14 xl:px-20 py-14 pb-28 flex justify-between items-start border-t"
+        style={{ borderColor: border }}
+        aria-label="Project navigation"
+      >
+        <NavProject index={index} direction="prev" />
+        <NavProject index={index} direction="next" />
+      </nav>
+    </motion.main>
   );
 };
 

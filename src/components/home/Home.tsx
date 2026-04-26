@@ -1,11 +1,12 @@
 import { useRef } from 'react';
-import { useGSAP } from "@gsap/react"
+import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 
-// Define interfaces for project data and modal state
 export interface ProjectData {
   title: string;
+  displayTitle?: string;
   color: string;
   contribution: string;
   path: string;
@@ -21,107 +22,173 @@ export const projects: ProjectData[] = [
     color: "#eebcff",
     contribution: "Backend & Frontend",
     path: "/project/qollabb/",
-    description: "Qollabb is an online job portal where I was solely responsible for backend development, covering all sections for employers, educators, mentors, and students. I utilized Express.js and PostgreSQL with Sequelize for the backend and developed the frontend for the employer section using React. This project involved creating a comprehensive, user-friendly platform to connect job seekers and employers efficiently.",
+    description:
+      "Multi-role job portal (employer, mentor, student, educator) with real-time WebSocket chat, a wallet + payment + refund system, and a full employer dashboard built in React.",
     images: 16,
     href: "https://qollabb.com",
-    skills: ["React.js", "Node.js", "PostgreSQL", "AWS", "Express.js", "TypeScript", "Sequelize", "Tailwind CSS", "Nginx"]
+    skills: ["React.js", "Node.js", "PostgreSQL", "Express.js", "Sequelize", "WebSockets", "JWT", "Passport.js", "AWS EC2 & S3", "Nginx", "TypeScript"],
   },
   {
     title: "OneSociety",
     color: "#ffcab2",
-    contribution: "Monorepo & Microfrontend",
+    contribution: "Monorepo & Micro-Frontend",
     path: "/project/onesociety/",
-    description: "The OneSociety project is a society management application where I created a comprehensive library for form and table pages using React JSON Schema Form (RJSF) for forms and Material-UI DataGrid for tables, all integrated with Next.js. This development significantly reduced the time required to create form pages to mere minutes, featuring built-in validation and a user-friendly interface. The project enhanced application scalability and maintainability through a modular codebase design.",
+    description:
+      "Society management platform on a Nx monorepo with micro-frontend architecture. Built a dynamic form & table library (RJSF + MUI DataGrid) and implemented RBAC across the platform.",
     images: 7,
     href: "https://society.cubeone.in",
-    skills: ["Next.JS", "React.js", "Express.js", "TypeScript", "Material-UI (MUI)", "RJSF", "validator-ajv8", "Nx"]
+    skills: ["Next.js", "React.js", "TypeScript", "Nx Monorepo", "Micro-Frontend", "RJSF", "MUI DataGrid", "RBAC", "Express.js"],
   },
   {
     title: "Buddy",
     color: "#f2ee99",
-    contribution: "Design & Development",
+    contribution: "Full-Stack",
     path: "/project/buddy/",
-    description: "Buddy is a MERN stack e-commerce web application designed to streamline online shopping experiences. The backend, developed using Node.js, Express, and MongoDB, features secure Passport and JWT authentication. The frontend, created with React, ensures a responsive and user-friendly interface. The project leverages AWS EC2 for hosting and S3 for storage, providing a scalable and robust solution for modern e-commerce needs.",
+    description:
+      "MERN e-commerce app with Passport + JWT auth, file uploads via Multer, and cloud hosting on AWS EC2 with S3 for storage.",
     images: 13,
     href: "https://github.com/NishantJS/Buddy-Backend",
-    skills: ["React.js", "Node.js", "MongoDB", "Express.js", "MongoDB", "Bcrypt", "JWT", "Multer", "Passport.js"]
+    skills: ["React.js", "Node.js", "MongoDB", "Express.js", "JWT", "Passport.js", "Multer", "AWS EC2 & S3", "Bcrypt"],
   },
   {
     title: "ConsultmyAstro",
     color: "#EFE8D3",
-    contribution: "Backend & DataBase",
+    contribution: "Backend & Frontend",
     path: "/project/consultmyastro/",
-    description: "ConsultMyAstro is a chat and call application designed for astrologers. In this project, I handled the backend development, implementing key features like the chat module with Socket.io, a payment module, and a wallet system. Additionally, I contributed significantly to the frontend development, ensuring a seamless and engaging user experience for astrologers and their clients.",
+    description:
+      "Real-time chat and call platform for astrologers. Built the Socket.io chat module, payment & wallet system with refund support, and contributed extensively to the frontend.",
     images: 11,
     href: "https://consultmyastro.com",
-    skills: ["React.js", "Node.js", "PostgreSQL", "Express.js", "Sequelize", "JWT", "Bcrypt", "Socket.IO", "Live Chat and Call"]
+    skills: ["Node.js", "Express.js", "Socket.io", "PostgreSQL", "Sequelize", "JWT", "Bcrypt", "React.js", "Payment & Wallet System"],
   },
   {
     title: "OneDashboard",
     color: "#c2e9fb",
     contribution: "Backend & Frontend",
     path: "/project/onedashboard/",
-    description: "The OneDashboard project involved developing a Single Sign-On (SSO) dashboard using Supabase and Next.js, providing unified access to multiple applications. I implemented Role-Based Access Control (RBAC) for efficient user permissions management across sibling projects. The project enhanced security and user management through robust authentication mechanisms, ensuring a seamless user experience across all interconnected applications.",
+    description:
+      "SSO dashboard unifying access to multiple apps via Next.js + Supabase + Keycloak with SAML auth, RBAC user permissions, and Kong Gateway for API routing.",
     href: "https://onedashboard.cubeone.in",
-    skills: ["Next.js", "Supabase", "Kong Gateway", "TypeScript", "Material-UI (MUI)", "Redis", "Keycloak"],
-    images: 5
-  }
+    skills: ["Next.js", "Supabase", "Keycloak", "Kong Gateway", "SAML", "RBAC", "Redis", "TypeScript", "Material-UI"],
+    images: 5,
+  },
+  {
+    title: "mStockReferEarn",
+    displayTitle: "mStock Refer & Earn",
+    color: "#fde68a",
+    contribution: "Backend & Frontend",
+    path: "/project/mstock-refer-earn/",
+    description:
+      "Migrated the legacy .NET Refer & Earn platform to Next.js + Fastify with SSE-based real-time feeds via Redis Streams, L1/L2/L3 caching, circuit breakers, and idempotent APIs.",
+    images: 8,
+    href: "https://www.mstock.com/",
+    skills: ["Next.js", "Fastify", "Node.js", "TypeScript", "Redis Streams", "SSE", "Opossum", "L1/L2/L3 Caching", "ETag + Cache-Control", "PostgreSQL"],
+  },
+  {
+    title: "AdvisoryBasket",
+    displayTitle: "Advisory Basket",
+    color: "#bbf7d0",
+    contribution: "Backend (Fastify + NestJS)",
+    path: "/project/advisory-basket/",
+    description:
+      "Smallcase-style stock advisory backend with event-driven Redis Streams cache invalidation, circuit breakers, L1/L2/L3 caching, and high-concurrency API patterns.",
+    images: 8,
+    href: "https://www.mstock.com/",
+    skills: ["Fastify", "NestJS", "Node.js", "TypeScript", "Redis Streams", "PostgreSQL", "Opossum", "Microservices", "Event-Driven Cache Invalidation"],
+  },
 ];
+
+const pageVariants = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
+  exit:    { opacity: 0, y: -8,  transition: { duration: 0.3,  ease: [0.55, 0, 1, 0.45] as [number, number, number, number] } },
+};
 
 const Home = () => {
   const container = useRef<HTMLDivElement>(null);
-  const { contextSafe } = useGSAP()
+  const { contextSafe } = useGSAP();
 
   useGSAP(() => {
     const li = container.current?.querySelectorAll("li");
-    if (!li) return
-
-    const t1 = gsap.timeline({ defaults: { duration: 0.5 } });
-    t1.from(li, {
-      opacity: 0,
-      rotateX: 90,
-      stagger: 0.1,
-      ease: "sine.in",
-      delay: 0.5
+    if (!li) return;
+    gsap.fromTo(li, { opacity: 0, y: 20 }, {
+      opacity: 1, y: 0, stagger: 0.07, duration: 0.55, ease: "power3.out", delay: 0.3,
     });
   });
 
   const handleMouseEnter = contextSafe((color: string) => {
-    gsap.to(container.current, {
-      backgroundColor: color,
-      duration: 0.5,
-      ease: "power4"
-    });
+    gsap.to(container.current, { backgroundColor: color, duration: 0.4, ease: "power3.out" });
   });
 
   const handleMouseLeave = contextSafe(() => {
-    gsap.to(container.current, {
-      backgroundColor: "white",
-      duration: 0.5,
-      ease: "power4"
-    });
+    gsap.to(container.current, { backgroundColor: "white", duration: 0.4, ease: "power3.out" });
   });
 
   return (
-    <main className="min-h-screen bg-white flex justify-center items-center" ref={container}>
-      <ul className="w-full max-w-screen-lg divide-y divide-white">
+    <motion.main
+      ref={container}
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="min-h-screen bg-white flex justify-center items-start pt-28 pb-32"
+    >
+      <ul className="w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12 divide-y divide-black/10">
         {projects.map((project, index) => (
           <li
             key={index}
             onMouseEnter={() => handleMouseEnter(project.color)}
             onMouseLeave={handleMouseLeave}
-            className="py-4 sm:py-6 md:py-8"
+            className="py-7 md:py-9 xl:py-10 group"
           >
-            <Link to={project.path} className="block link" state={{ bg: "bg-gray-100" }} data-image={`/project/${project.title}/logo.webp`}>
-              <div className="flex flex-col sm:flex-row items-center justify-between">
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold">{project.title}</h2>
-                <p className="text-sm sm:text-base text-gray-600">{project.contribution}</p>
+            <Link
+              viewTransition
+              to={project.path}
+              className="block link"
+              data-image={`/project/${project.title}/logo.webp`}
+              aria-label={`View ${project.displayTitle ?? project.title} project`}
+            >
+              {/* Row 1: number + title + contribution */}
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-4">
+                <div className="flex items-baseline gap-3 sm:gap-4">
+                  <span
+                    className="mono text-xs text-zinc-500 tabular-nums select-none shrink-0 transition-colors duration-300 group-hover:text-zinc-800"
+                    aria-hidden
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
+                    {project.displayTitle ?? project.title}
+                  </h2>
+                </div>
+                <span className="mono text-xs sm:text-sm text-zinc-500 shrink-0 ml-7 sm:ml-0 transition-colors duration-300 group-hover:text-zinc-700">
+                  {project.contribution}
+                </span>
+              </div>
+
+              {/* Row 2: description — always visible */}
+              <p className="mono text-sm xl:text-base text-zinc-500 mt-2 line-clamp-2 ml-7 sm:ml-8 md:ml-9 max-w-2xl xl:max-w-3xl transition-colors duration-300 group-hover:text-zinc-700">
+                {project.description}
+              </p>
+
+              {/* Row 3: skill tags — hidden until hover, slide in */}
+              <div className="ml-7 sm:ml-8 md:ml-9 overflow-hidden max-h-0 group-hover:max-h-12 transition-all duration-300 ease-out">
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {project.skills.slice(0, 6).map(skill => (
+                    <span
+                      key={skill}
+                      className="mono text-[0.65rem] uppercase tracking-wider px-2 py-0.5 rounded-full bg-black/8 text-zinc-700"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
             </Link>
           </li>
         ))}
       </ul>
-    </main>
+    </motion.main>
   );
 };
 

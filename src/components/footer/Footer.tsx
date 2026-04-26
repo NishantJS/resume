@@ -2,52 +2,72 @@ import { FC, useRef } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
 
-const darkModeOn = "/about"
-
-type FooterProps = {
-  active: string;
-}
+type FooterProps = { active: string };
 
 const Footer: FC<FooterProps> = ({ active = "" }) => {
-  const footerRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-    const footer = footerRef.current;
-    if (!footer) return;
-
-    gsap.fromTo(footer, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, delay: 0.5 });
+    const f = footerRef.current;
+    if (!f) return;
+    gsap.fromTo(f, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, delay: 0.5 });
   }, { scope: footerRef });
 
   useGSAP(() => {
-    const footer = footerRef.current;
-    if (!footer) return;
-
-    gsap.to(footer, { color: darkModeOn === active ? "white" : "black", duration: 2 });
+    const f = footerRef.current;
+    if (!f) return;
+    // "/" is the about/home page (dark bg) — everything else is light
+    gsap.to(f, { color: active === "/" ? "white" : "black", duration: 2 });
   }, [active]);
 
+  useGSAP(() => {
+    const f = footerRef.current;
+    if (!f) return;
+    let lastY = window.scrollY;
+    let hidden = false;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastY && y > 80 && !hidden) {
+        hidden = true;
+        gsap.to(f, { y: '110%', duration: 0.4, ease: 'power2.inOut' });
+      } else if (y <= lastY && hidden) {
+        hidden = false;
+        gsap.to(f, { y: '0%', duration: 0.4, ease: 'power2.out' });
+      }
+      lastY = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, { scope: footerRef });
+
   return (
-    <footer ref={footerRef} className="fixed bottom-0 w-full flex justify-between items-center mono text-lg px-4 py-0">
-      <div className='flex flex-col'>
-        <a href="https://www.linkedin.com/in/nishant-chorge/" target="_blank" rel="noreferrer" >
+    <footer
+      ref={footerRef}
+      role="contentinfo"
+      aria-label="Contact and social links"
+      className="fixed bottom-0 w-full flex justify-between items-end mono text-sm md:text-base px-6 py-4 md:px-20 xl:px-28 2xl:px-40"
+    >
+      <div className="flex flex-col gap-0.5">
+        <a href="https://www.linkedin.com/in/nishant-chorge/" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
           LinkedIn
         </a>
-        <a href='https://www.github.com/NishantJS' target="_blank" rel="noreferrer">
+        <a href="https://www.github.com/NishantJS" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
           GitHub
         </a>
-        <a href='/Nishant Chorge Software Developer.pdf' target="_blank" rel="noreferrer" download={true}>
+        <a href="/Nishant Chorge Software Developer.pdf" target="_blank" rel="noreferrer noopener" download className="py-2 hover:underline inline-block" aria-label="Resume — download PDF">
           Resume
         </a>
       </div>
-      <div className='flex flex-col'>
-        <a href="mailto:contact@nishant.codes?bcc=itsnishantchorge@gmail.com" target="_blank" rel="noreferrer">
+      <div className="flex flex-col gap-0.5 text-right">
+        <a href="mailto:itsnishantchorge@gmail.com" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
           Email
         </a>
-        <a href="tel:+916283925737" target="_blank" rel="noreferrer">
+        <a href="tel:+916283925737" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
           Phone
         </a>
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;

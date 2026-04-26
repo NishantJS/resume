@@ -1,47 +1,82 @@
-import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
-import { FC, useRef } from 'react';
+import { motion, useTransform, MotionValue } from 'motion/react';
+import { FC } from 'react';
 
-interface ParagraphProps {
+// Words rendered in a distinctive accent colour once revealed
+const ACCENT = new Set([
+  'software', 'developer', 'fintech', 'enterprise', 'real-time',
+  'micro-frontend', 'resilience', 'latency', 'opportunities', 'project',
+  'systems', 'production-grade', 'mumbai',
+]);
+
+export interface ParagraphProps {
   paragraph: string;
+  /** Shared MotionValue from the parent scroll container */
+  progress: MotionValue<number>;
+  /** [start, end] slice of the 0-1 range this paragraph owns */
+  range: [number, number];
 }
 
-const specialWords = ['frontend', 'developer', 'designer', 'micro-frontend', 'real-time', 'scalable,', 'reusable', 'opportunities', 'project'];
+const Paragraph: FC<ParagraphProps> = ({ paragraph, progress, range }) => {
+  const [rs, re] = range;
+  const words = paragraph.split(' ');
 
-const Paragraph: FC<ParagraphProps> = ({ paragraph }) => {
-  const container = useRef<HTMLParagraphElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: container,
-    offset: ["start 0.7", "end 0.9"]
-  });
+  // Count every character (incl. spaces) for uniform range-slicing
+  const total = paragraph.length;
+  let cursor = 0; // running char-index through the paragraph
 
-  const words: string[] = paragraph.split(" ");
   return (
-    <p
-      ref={container}
-      className="mono flex flex-wrap text-4xl p-10 max-w-7xl text-white"
-    >
-      {words.map((word: string, i: number) => {
-        const start: number = i / words.length;
-        const end: number = start + (1 / words.length);
-        return <Word key={i} progress={scrollYProgress} range={[start, end]}>{word}</Word>;
+    <p className="mono flex flex-wrap text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl
+                  px-6 md:px-12 xl:px-16 py-10 md:py-14
+                  max-w-5xl 2xl:max-w-screen-xl mx-auto text-white leading-relaxed">
+      {words.map((word, wi) => {
+        const wordStart = cursor;
+        cursor += word.length;
+        const isAccent = ACCENT.has(word.replace(/[^a-z-]/gi, '').toLowerCase());
+        // Advance cursor past the space after this word
+        if (wi < words.length - 1) cursor += 1;
+
+        return (
+          // whitespace-nowrap keeps chars of the same word on the same line
+          <span key={wi} className="inline-block whitespace-nowrap mr-3 mt-3">
+            {word.split('').map((ch, ci) => {
+              const i = wordStart + ci;
+              const cs = rs + (i / total) * (re - rs);
+              const ce = rs + ((i + 1) / total) * (re - rs);
+              return (
+                <Char key={ci} progress={progress} range={[cs, ce]} accent={isAccent}>
+                  {ch}
+                </Char>
+              );
+            })}
+          </span>
+        );
       })}
     </p>
   );
 };
 
-interface WordProps {
+interface CharProps {
   children: string;
-  progress: MotionValue<number>; // Change type to MotionValue<number>
+  progress: MotionValue<number>;
   range: [number, number];
+  accent: boolean;
 }
 
-const Word: FC<WordProps> = ({ children, progress, range }) => {
+const Char: FC<CharProps> = ({ children, progress, range, accent }) => {
   const opacity = useTransform(progress, range, [0, 1]);
-
+  const y       = useTransform(progress, range, [10, 0]);
   return (
-    <span className={`relative mr-3 mt-3 ${specialWords.includes(children?.toLowerCase()) && "link"}`}>
-      <span className='absolute opacity-10'>{children}</span>
-      <motion.span style={{ opacity }}>{children}</motion.span>
+    <span className="relative inline-block">
+      {/* Ghost keeps layout stable at 0 opacity */}
+      <span className="absolute inset-0 opacity-[0.06] select-none" aria-hidden>
+        {children}
+      </span>
+      <motion.span
+        style={{ opacity, y }}
+        className={accent ? 'text-purple-400' : undefined}
+      >
+        {children}
+      </motion.span>
     </span>
   );
 };

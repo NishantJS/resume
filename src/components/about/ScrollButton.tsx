@@ -18,10 +18,11 @@ export function ScrollButton() {
       {
         y: 0,
         opacity: 1,
-        duration: 1,
-        delay: 2,
+        duration: 0.8,
+        delay: 0.8,
         yoyo: true,
         repeat: -1,
+        ease: "power2.inOut",
       }
     );
 
@@ -29,8 +30,15 @@ export function ScrollButton() {
 
   return (
     <div className="flex justify-center items-center" ref={ref}>
-      <svg className="w-12 h-12 link" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      <svg
+        className="w-10 h-10 link"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-label="Scroll down to read more"
+        role="img"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
       </svg>
     </div>
   );

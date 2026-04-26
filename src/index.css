@@ -1,17 +1,34 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@theme {
+  --font-main-font: "Rubik", ui-sans-serif, system-ui, sans-serif;
+  --font-sub-font: "Londrina Outline", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ── Base typography ─────────────────────────────────────── */
 @layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: "Rubik", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.65;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
   .mono {
     font-family: "Geologica", sans-serif;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
-    font-variation-settings:
-      "slnt" 0,
-      "CRSV" 0,
-      "SHRP" 0;
+    font-variation-settings: "slnt" 0, "CRSV" 0, "SHRP" 0;
   }
 }
 
@@ -20,28 +37,81 @@ html {
 }
 
 @media (min-width: 1024px) {
-
-  html,
-  a {
-    cursor: none;
-  }
+  html, a { cursor: none; }
 }
 
-@media (max-width: 1024px) {
-  .cursor {
-    display: none;
-  }
+@media (max-width: 1023px) {
+  .cursor, .cursor-ring { display: none; }
 }
 
+/* ── Page-transition overlay (legacy class, kept for safety) */
 .transition-animation {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 2;
 }
 
-.transition-animation-white {
-  background-color: white;
+/* ── Background orb pulse ────────────────────────────────── */
+@keyframes orb-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.1); }
+}
+.orb-pulse { animation: orb-pulse 9s ease-in-out infinite; }
+
+/* ── Cursor ring glow ────────────────────────────────────── */
+@keyframes cursor-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+  50%       { box-shadow: 0 0 0 5px rgba(168, 85, 247, 0.12); }
+}
+.cursor-ring { animation: cursor-glow 2.5s ease-in-out infinite; }
+
+/* ── Name heading glow (base ambient) ───────────────────── */
+.name-glow {
+  text-shadow:
+    0 0 60px rgba(168, 85, 247, 0.12),
+    0 0 120px rgba(34, 211, 238, 0.06);
+}
+/* Characters can receive per-letter text-shadow from GSAP */
+.name-glow .char { will-change: color, text-shadow, transform; }
+
+/* ── Skills marquee ─────────────────────────────────────── */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333%); }
+}
+.skill-marquee {
+  animation: marquee-scroll 18s linear infinite;
+}
+.skill-marquee:hover { animation-play-state: paused; }
+
+/* ── Native View Transitions (progressive enhancement) ───── */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) {
+    animation: 300ms cubic-bezier(0.4, 0, 0.2, 1) both vt-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation: 300ms cubic-bezier(0.4, 0, 0.2, 1) both vt-fade-in;
+  }
+  @keyframes vt-fade-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  @keyframes vt-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+/* ── Prefers-reduced-motion: kill all motion ─────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
 }
