@@ -43,11 +43,11 @@ export function useSkewEffect(ref: React.RefObject<HTMLHeadingElement | null>) {
       if (revealed) return;
       revealed = true;
 
-      // Show random glyphs first, ghost-dim
+      // Show random glyphs first, ghost-dim — opacity: 1 so they're no longer hidden by CSS
       chars.forEach(c => {
         c.textContent = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)];
       });
-      gsap.set(chars, { y: '0%', color: 'rgba(255,255,255,0.1)', scale: 0.9 });
+      gsap.set(chars, { opacity: 1, y: '0%', color: 'rgba(255,255,255,0.1)', scale: 0.9 });
 
       // Rapid scramble interval per character
       const sids = chars.map(c =>
@@ -56,7 +56,7 @@ export function useSkewEffect(ref: React.RefObject<HTMLHeadingElement | null>) {
         }, 55)
       );
 
-      // Lock each char in left → right with 80 ms stagger
+      // Lock each char in left → right with 100 ms stagger (slower = more dramatic)
       const lids = chars.map((c, i) =>
         window.setTimeout(() => {
           window.clearInterval(sids[i]);
@@ -64,17 +64,17 @@ export function useSkewEffect(ref: React.RefObject<HTMLHeadingElement | null>) {
 
           const color = COLORS[i % COLORS.length];
           gsap.timeline()
-            .set(c, { scale: 1.2, y: '-6%', color })
+            .set(c, { scale: 1.25, y: '-8%', color })
             .to(c, {
               scale: 1, y: '0%', color: 'white',
-              duration: 0.6, ease: 'power3.out',
+              duration: 0.8, ease: 'power3.out',
             });
 
           // After the last lock-in, start idle flash cycle
           if (i === chars.length - 1) {
-            window.setTimeout(() => { idleTimer = window.setTimeout(doFlash, 1200); }, 400);
+            window.setTimeout(() => { idleTimer = window.setTimeout(doFlash, 1500); }, 600);
           }
-        }, 400 + i * 80)
+        }, 500 + i * 100)
       );
 
       // Cleanup fns returned so we can kill them on unmount

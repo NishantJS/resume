@@ -71,8 +71,11 @@ html {
     0 0 60px rgba(168, 85, 247, 0.12),
     0 0 120px rgba(34, 211, 238, 0.06);
 }
-/* Characters can receive per-letter text-shadow from GSAP */
-.name-glow .char { will-change: color, text-shadow, transform; }
+/* Characters start invisible — revealed by the scramble entrance */
+.name-glow .char {
+  will-change: color, text-shadow, transform;
+  opacity: 0;
+}
 
 /* ── Skills marquee ─────────────────────────────────────── */
 @keyframes marquee-scroll {

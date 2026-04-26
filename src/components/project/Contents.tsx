@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { motion } from "motion/react";
+import { FC, useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import { ProjectData } from "../home/Home";
 
 type Props = { project: ProjectData };
@@ -13,6 +13,19 @@ function isLight(hex: string): boolean {
 
 const ease = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
+/* Each image pair gets a subtle parallax drift */
+const ParallaxPair: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const rawY = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const y = useSpring(rawY, { stiffness: 50, damping: 16, restDelta: 0.001 });
+  return (
+    <motion.div ref={ref} style={{ y }}>
+      {children}
+    </motion.div>
+  );
+};
+
 const Contents: FC<Props> = ({ project }) => {
   const total = project.images || 0;
   if (!total) return null;
@@ -25,7 +38,6 @@ const Contents: FC<Props> = ({ project }) => {
   const src = (n: number) => `/project/${project.title}/img (${n}).png`;
   const alt = (n: number) => `${title} screenshot ${n}`;
 
-  // Pair images: [1,2], [3,4], [5,6], … last row may have 1 image
   const pairs: number[][] = [];
   for (let i = 1; i <= total; i += 2) {
     pairs.push(i + 1 <= total ? [i, i + 1] : [i]);
@@ -47,29 +59,30 @@ const Contents: FC<Props> = ({ project }) => {
         </span>
       </div>
 
-      {/* Gallery: 2 per row on md+, 1 per row on mobile */}
+      {/* Gallery: 2 per row on md+, 1 per row on mobile, each pair parallaxes */}
       <div className="px-5 md:px-12 xl:px-20 space-y-3 md:space-y-5 pb-10">
         {pairs.map((pair, rowIdx) => (
-          <motion.div
-            key={rowIdx}
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.08 }}
-            transition={{ duration: 0.75, ease }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5"
-          >
-            {pair.map((n) => (
-              <div key={n} className="overflow-hidden rounded-xl">
-                <img
-                  src={src(n)}
-                  alt={alt(n)}
-                  loading={n <= 2 ? "eager" : "lazy"}
-                  decoding="async"
-                  className="w-full h-auto block"
-                />
-              </div>
-            ))}
-          </motion.div>
+          <ParallaxPair key={rowIdx}>
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.08 }}
+              transition={{ duration: 0.85, ease }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5"
+            >
+              {pair.map((n) => (
+                <div key={n} className="overflow-hidden rounded-xl">
+                  <img
+                    src={src(n)}
+                    alt={alt(n)}
+                    loading={n <= 2 ? "eager" : "lazy"}
+                    decoding="async"
+                    className="w-full h-auto block"
+                  />
+                </div>
+              ))}
+            </motion.div>
+          </ParallaxPair>
         ))}
       </div>
     </div>

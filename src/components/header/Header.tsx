@@ -4,9 +4,8 @@ import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
-// "/" is now the About/home page; "/work" is the projects list
 const links = [
-  { name: "Work", path: "/work" },
+  { name: "My Work", path: "/work" },
 ];
 
 type HeaderProps = { active: string };
@@ -19,15 +18,15 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
   useGSAP(() => {
     const h = headerRef.current;
     if (!h) return;
-    gsap.fromTo(h, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 1, delay: 0.5 });
+    gsap.fromTo(h, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 1.2, delay: 0.6 });
   }, { scope: headerRef, revertOnUpdate: false });
 
   useGSAP(() => {
     const h = headerRef.current;
     if (!h) return;
-    // "/" (about/home, black bg) and project pages → white blend; "/work" → dark
-    const isDark = active === '/' || active.startsWith('/project');
-    gsap.to(h, { color: isDark ? 'white' : 'black', mixBlendMode: isDark ? 'difference' : 'normal', duration: 2 });
+    // All pages use difference blend — white text inverts on light bg = readable black,
+    // inverts on dark/colored bg = white. Works everywhere without special-casing.
+    gsap.set(h, { color: 'white', mixBlendMode: 'difference' });
   }, [active]);
 
   // Hide on scroll-down, reveal on scroll-up
@@ -71,24 +70,24 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
     };
   }, [reduced]);
 
-  const isWork = active === '/work' || active.startsWith('/project');
+  const isWork = active === '/work' || active.startsWith('/work/');
 
   return (
     <header
       ref={headerRef}
-      className="fixed w-full p-8 flex justify-between items-center md:px-20 xl:px-28 2xl:px-40 z-20"
+      className="fixed w-full p-8 flex justify-between items-center md:px-20 xl:px-28 2xl:px-40 z-20 pointer-events-none"
       role="banner"
     >
       <Link
         ref={ncRef}
         to="/"
         aria-label="NC — go to home"
-        className="font-bold text-4xl -rotate-90 inline-block"
+        className="font-bold text-4xl -rotate-90 inline-block pointer-events-auto"
       >
         NC
       </Link>
 
-      <nav aria-label="Main navigation">
+      <nav aria-label="Main navigation" className="pointer-events-auto">
         <ul className="flex space-x-4 text-2xl mono" role="list">
           {links.map(link => (
             <li key={link.path}>

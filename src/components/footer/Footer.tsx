@@ -10,13 +10,13 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
   useGSAP(() => {
     const f = footerRef.current;
     if (!f) return;
-    gsap.fromTo(f, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, delay: 0.5 });
+    gsap.fromTo(f, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.2, delay: 0.8 });
   }, { scope: footerRef });
 
   useGSAP(() => {
     const f = footerRef.current;
     if (!f) return;
-    // "/" is the about/home page (dark bg) — everything else is light
+    // Only the about/home page has a dark bg — everything else is light
     gsap.to(f, { color: active === "/" ? "white" : "black", duration: 2 });
   }, [active]);
 
@@ -41,13 +41,16 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
   }, { scope: footerRef });
 
   return (
+    /* pointer-events-none on the container so the transparent middle area
+       doesn't block clicks on underlying page content.
+       pointer-events-auto restored on the actual link columns. */
     <footer
       ref={footerRef}
       role="contentinfo"
       aria-label="Contact and social links"
-      className="fixed bottom-0 w-full flex justify-between items-end mono text-sm md:text-base px-6 py-4 md:px-20 xl:px-28 2xl:px-40"
+      className="fixed bottom-0 w-full flex justify-between items-end mono text-sm md:text-base px-6 py-4 md:px-20 xl:px-28 2xl:px-40 pointer-events-none"
     >
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-0.5 pointer-events-auto">
         <a href="https://www.linkedin.com/in/nishant-chorge/" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
           LinkedIn
         </a>
@@ -58,7 +61,7 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
           Resume
         </a>
       </div>
-      <div className="flex flex-col gap-0.5 text-right">
+      <div className="flex flex-col gap-0.5 text-right pointer-events-auto">
         <a href="mailto:itsnishantchorge@gmail.com" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
           Email
         </a>

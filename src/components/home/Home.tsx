@@ -1,8 +1,8 @@
-import { useRef } from 'react';
+import { useRef, FC } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 
 export interface ProjectData {
   title: string;
@@ -21,7 +21,7 @@ export const projects: ProjectData[] = [
     title: "Qollabb",
     color: "#eebcff",
     contribution: "Backend & Frontend",
-    path: "/project/qollabb/",
+    path: "/work/qollabb/",
     description:
       "Multi-role job portal (employer, mentor, student, educator) with real-time WebSocket chat, a wallet + payment + refund system, and a full employer dashboard built in React.",
     images: 16,
@@ -32,7 +32,7 @@ export const projects: ProjectData[] = [
     title: "OneSociety",
     color: "#ffcab2",
     contribution: "Monorepo & Micro-Frontend",
-    path: "/project/onesociety/",
+    path: "/work/onesociety/",
     description:
       "Society management platform on a Nx monorepo with micro-frontend architecture. Built a dynamic form & table library (RJSF + MUI DataGrid) and implemented RBAC across the platform.",
     images: 7,
@@ -43,7 +43,7 @@ export const projects: ProjectData[] = [
     title: "Buddy",
     color: "#f2ee99",
     contribution: "Full-Stack",
-    path: "/project/buddy/",
+    path: "/work/buddy/",
     description:
       "MERN e-commerce app with Passport + JWT auth, file uploads via Multer, and cloud hosting on AWS EC2 with S3 for storage.",
     images: 13,
@@ -54,7 +54,7 @@ export const projects: ProjectData[] = [
     title: "ConsultmyAstro",
     color: "#EFE8D3",
     contribution: "Backend & Frontend",
-    path: "/project/consultmyastro/",
+    path: "/work/consultmyastro/",
     description:
       "Real-time chat and call platform for astrologers. Built the Socket.io chat module, payment & wallet system with refund support, and contributed extensively to the frontend.",
     images: 11,
@@ -65,7 +65,7 @@ export const projects: ProjectData[] = [
     title: "OneDashboard",
     color: "#c2e9fb",
     contribution: "Backend & Frontend",
-    path: "/project/onedashboard/",
+    path: "/work/onedashboard/",
     description:
       "SSO dashboard unifying access to multiple apps via Next.js + Supabase + Keycloak with SAML auth, RBAC user permissions, and Kong Gateway for API routing.",
     href: "https://onedashboard.cubeone.in",
@@ -77,7 +77,7 @@ export const projects: ProjectData[] = [
     displayTitle: "mStock Refer & Earn",
     color: "#fde68a",
     contribution: "Backend & Frontend",
-    path: "/project/mstock-refer-earn/",
+    path: "/work/mstock-refer-earn/",
     description:
       "Migrated the legacy .NET Refer & Earn platform to Next.js + Fastify with SSE-based real-time feeds via Redis Streams, L1/L2/L3 caching, circuit breakers, and idempotent APIs.",
     images: 8,
@@ -89,7 +89,7 @@ export const projects: ProjectData[] = [
     displayTitle: "Advisory Basket",
     color: "#bbf7d0",
     contribution: "Backend (Fastify + NestJS)",
-    path: "/project/advisory-basket/",
+    path: "/work/advisory-basket/",
     description:
       "Smallcase-style stock advisory backend with event-driven Redis Streams cache invalidation, circuit breakers, L1/L2/L3 caching, and high-concurrency API patterns.",
     images: 8,
@@ -104,17 +104,32 @@ const pageVariants = {
   exit:    { opacity: 0, y: -8,  transition: { duration: 0.3,  ease: [0.55, 0, 1, 0.45] as [number, number, number, number] } },
 };
 
+/* Parallax drift per row — uses a plain li so no motion variant conflicts */
+const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const ref = useRef<HTMLLIElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const rawY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const y = useSpring(rawY, { stiffness: 60, damping: 18 });
+  return (
+    <motion.li ref={ref} style={{ y }}>
+      {children}
+    </motion.li>
+  );
+};
+
 const Home = () => {
   const container = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP();
 
+  // GSAP entrance on the inner divs (not the motion.li wrappers)
   useGSAP(() => {
-    const li = container.current?.querySelectorAll("li");
-    if (!li) return;
-    gsap.fromTo(li, { opacity: 0, y: 20 }, {
-      opacity: 1, y: 0, stagger: 0.07, duration: 0.55, ease: "power3.out", delay: 0.3,
-    });
-  });
+    const rows = container.current?.querySelectorAll<HTMLElement>('.project-row');
+    if (!rows) return;
+    gsap.fromTo(rows,
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: "power3.out", delay: 0.3 }
+    );
+  }, { scope: container });
 
   const handleMouseEnter = contextSafe((color: string) => {
     gsap.to(container.current, { backgroundColor: color, duration: 0.4, ease: "power3.out" });
@@ -135,57 +150,60 @@ const Home = () => {
     >
       <ul className="w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12 divide-y divide-black/10">
         {projects.map((project, index) => (
-          <li
-            key={index}
-            onMouseEnter={() => handleMouseEnter(project.color)}
-            onMouseLeave={handleMouseLeave}
-            className="py-7 md:py-9 xl:py-10 group"
-          >
-            <Link
-              viewTransition
-              to={project.path}
-              className="block link"
-              data-image={`/project/${project.title}/logo.webp`}
-              aria-label={`View ${project.displayTitle ?? project.title} project`}
+          /* ParallaxRow is a plain motion.li with only the y spring — no opacity/animate */
+          <ParallaxRow key={index}>
+            {/* .project-row is the GSAP entrance target */}
+            <div
+              className="project-row py-7 md:py-9 xl:py-10 group"
+              onMouseEnter={() => handleMouseEnter(project.color)}
+              onMouseLeave={handleMouseLeave}
             >
-              {/* Row 1: number + title + contribution */}
-              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-4">
-                <div className="flex items-baseline gap-3 sm:gap-4">
-                  <span
-                    className="mono text-xs text-zinc-500 tabular-nums select-none shrink-0 transition-colors duration-300 group-hover:text-zinc-800"
-                    aria-hidden
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
-                    {project.displayTitle ?? project.title}
-                  </h2>
-                </div>
-                <span className="mono text-xs sm:text-sm text-zinc-500 shrink-0 ml-7 sm:ml-0 transition-colors duration-300 group-hover:text-zinc-700">
-                  {project.contribution}
-                </span>
-              </div>
-
-              {/* Row 2: description — always visible */}
-              <p className="mono text-sm xl:text-base text-zinc-500 mt-2 line-clamp-2 ml-7 sm:ml-8 md:ml-9 max-w-2xl xl:max-w-3xl transition-colors duration-300 group-hover:text-zinc-700">
-                {project.description}
-              </p>
-
-              {/* Row 3: skill tags — hidden until hover, slide in */}
-              <div className="ml-7 sm:ml-8 md:ml-9 overflow-hidden max-h-0 group-hover:max-h-12 transition-all duration-300 ease-out">
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {project.skills.slice(0, 6).map(skill => (
+              <Link
+                viewTransition
+                to={project.path}
+                className="block link"
+                data-image={`/project/${project.title}/logo.webp`}
+                aria-label={`View ${project.displayTitle ?? project.title} project`}
+              >
+                {/* Row 1: number + title + contribution */}
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-4">
+                  <div className="flex items-baseline gap-3 sm:gap-4">
                     <span
-                      key={skill}
-                      className="mono text-[0.65rem] uppercase tracking-wider px-2 py-0.5 rounded-full bg-black/8 text-zinc-700"
+                      className="mono text-xs text-zinc-500 tabular-nums select-none shrink-0 transition-colors duration-300 group-hover:text-zinc-800"
+                      aria-hidden
                     >
-                      {skill}
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                  ))}
+                    <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
+                      {project.displayTitle ?? project.title}
+                    </h2>
+                  </div>
+                  <span className="mono text-xs sm:text-sm text-zinc-500 shrink-0 ml-7 sm:ml-0 transition-colors duration-300 group-hover:text-zinc-700">
+                    {project.contribution}
+                  </span>
                 </div>
-              </div>
-            </Link>
-          </li>
+
+                {/* Description — always visible */}
+                <p className="mono text-sm xl:text-base text-zinc-500 mt-2 line-clamp-2 ml-7 sm:ml-8 md:ml-9 max-w-2xl xl:max-w-3xl transition-colors duration-300 group-hover:text-zinc-700">
+                  {project.description}
+                </p>
+
+                {/* Skill tags — reveal on hover */}
+                <div className="ml-7 sm:ml-8 md:ml-9 overflow-hidden max-h-0 group-hover:max-h-12 transition-all duration-300 ease-out">
+                  <div className="flex flex-wrap gap-1.5 mt-3">
+                    {project.skills.slice(0, 6).map(skill => (
+                      <span
+                        key={skill}
+                        className="mono text-[0.65rem] uppercase tracking-wider px-2 py-0.5 rounded-full bg-black/8 text-zinc-700"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </ParallaxRow>
         ))}
       </ul>
     </motion.main>

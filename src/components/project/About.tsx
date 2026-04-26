@@ -53,7 +53,7 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
         <span className="meta-line mono text-xs tracking-[0.18em] uppercase opacity-0" style={{ color: inkLow }}>
           {String(index + 1).padStart(2, "0")}&nbsp;/&nbsp;{String(total).padStart(2, "0")}
         </span>
-        <span className="meta-line mono text-xs tracking-[0.18em] uppercase opacity-0" style={{ color: inkLow }}>
+        <span className="meta-line mono text-xs tracking-[0.18em] uppercase opacity-0 text-end" style={{ color: inkLow }}>
           {project.contribution}
         </span>
       </div>
