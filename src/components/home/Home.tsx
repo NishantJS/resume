@@ -12,18 +12,43 @@ export interface ProjectData {
   path: string;
   description: string;
   images: number;
-  href: string;
+  href?: string;
   skills: string[];
 }
 
 export const projects: ProjectData[] = [
+
+  {
+    title: "mStockReferEarn",
+    displayTitle: "m.Stock Refer & Earn",
+    color: "#fde68a",
+    contribution: "Backend & Frontend",
+    path: "/work/mstock-refer-earn/",
+    description:
+      "Migrated the legacy .NET Refer & Earn platform to Next.js + Fastify with SSE-based real-time feeds via Redis Streams, L1/L2/L3 caching, circuit breakers, and idempotent APIs.",
+    images: 0,
+    href: "https://refer.mstock.com/",
+    skills: ["Next.js", "Fastify", "Node.js", "TypeScript", "Redis Streams", "SSE", "Opossum", "L1/L2/L3 Caching", "ETag + Cache-Control", "MySQL"],
+  },
+  {
+    title: "AdvisoryBasket",
+    displayTitle: "Advisory Basket",
+    color: "#bbf7d0",
+    contribution: "Backend (Fastify + NestJS)",
+    path: "/work/advisory-basket/",
+    description:
+      "Smallcase-style stock advisory backend with event-driven Redis Streams cache invalidation, circuit breakers, L1/L2/L3 caching, and high-concurrency API patterns.",
+    images: 0,
+    href: "https://www.mstock.com/advisory/",
+    skills: ["Fastify", "NestJS", "Node.js", "TypeScript", "Redis Streams", "MySQL", "Opossum", "Microservices", "Event-Driven Cache Invalidation"],
+  },
   {
     title: "Qollabb",
     color: "#eebcff",
     contribution: "Backend & Frontend",
     path: "/work/qollabb/",
     description:
-      "Multi-role job portal (employer, mentor, student, educator) with real-time WebSocket chat, a wallet + payment + refund system, and a full employer dashboard built in React.",
+      "Multi-role job portal (employer, mentor, student, educator) with real-time WebSocket chat, and a full employer dashboard built in React.",
     images: 16,
     href: "https://qollabb.com",
     skills: ["React.js", "Node.js", "PostgreSQL", "Express.js", "Sequelize", "WebSockets", "JWT", "Passport.js", "AWS EC2 & S3", "Nginx", "TypeScript"],
@@ -38,17 +63,6 @@ export const projects: ProjectData[] = [
     images: 7,
     href: "https://society.cubeone.in",
     skills: ["Next.js", "React.js", "TypeScript", "Nx Monorepo", "Micro-Frontend", "RJSF", "MUI DataGrid", "RBAC", "Express.js"],
-  },
-  {
-    title: "Buddy",
-    color: "#f2ee99",
-    contribution: "Full-Stack",
-    path: "/work/buddy/",
-    description:
-      "MERN e-commerce app with Passport + JWT auth, file uploads via Multer, and cloud hosting on AWS EC2 with S3 for storage.",
-    images: 13,
-    href: "https://github.com/NishantJS/Buddy-Backend",
-    skills: ["React.js", "Node.js", "MongoDB", "Express.js", "JWT", "Passport.js", "Multer", "AWS EC2 & S3", "Bcrypt"],
   },
   {
     title: "ConsultmyAstro",
@@ -68,34 +82,20 @@ export const projects: ProjectData[] = [
     path: "/work/onedashboard/",
     description:
       "SSO dashboard unifying access to multiple apps via Next.js + Supabase + Keycloak with SAML auth, RBAC user permissions, and Kong Gateway for API routing.",
-    href: "https://onedashboard.cubeone.in",
     skills: ["Next.js", "Supabase", "Keycloak", "Kong Gateway", "SAML", "RBAC", "Redis", "TypeScript", "Material-UI"],
     images: 5,
   },
   {
-    title: "mStockReferEarn",
-    displayTitle: "mStock Refer & Earn",
-    color: "#fde68a",
-    contribution: "Backend & Frontend",
-    path: "/work/mstock-refer-earn/",
+    title: "Buddy",
+    color: "#f2ee99",
+    contribution: "Full-Stack",
+    path: "/work/buddy/",
     description:
-      "Migrated the legacy .NET Refer & Earn platform to Next.js + Fastify with SSE-based real-time feeds via Redis Streams, L1/L2/L3 caching, circuit breakers, and idempotent APIs.",
-    images: 8,
-    href: "https://www.mstock.com/",
-    skills: ["Next.js", "Fastify", "Node.js", "TypeScript", "Redis Streams", "SSE", "Opossum", "L1/L2/L3 Caching", "ETag + Cache-Control", "PostgreSQL"],
-  },
-  {
-    title: "AdvisoryBasket",
-    displayTitle: "Advisory Basket",
-    color: "#bbf7d0",
-    contribution: "Backend (Fastify + NestJS)",
-    path: "/work/advisory-basket/",
-    description:
-      "Smallcase-style stock advisory backend with event-driven Redis Streams cache invalidation, circuit breakers, L1/L2/L3 caching, and high-concurrency API patterns.",
-    images: 8,
-    href: "https://www.mstock.com/",
-    skills: ["Fastify", "NestJS", "Node.js", "TypeScript", "Redis Streams", "PostgreSQL", "Opossum", "Microservices", "Event-Driven Cache Invalidation"],
-  },
+      "MERN e-commerce app with Passport + JWT auth, file uploads via Multer, and cloud hosting on AWS EC2 with S3 for storage.",
+    images: 13,
+    href: "https://github.com/NishantJS/Buddy-Backend",
+    skills: ["React.js", "Node.js", "MongoDB", "Express.js", "JWT", "Passport.js", "Multer", "AWS EC2 & S3", "Bcrypt"],
+  }
 ];
 
 const pageVariants = {

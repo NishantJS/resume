@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#0a0015" />
+      <stop offset="100%" stop-color="#12002a" />
+    </linearGradient>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+    <radialGradient id="glow-bg" cx="30%" cy="50%" r="55%">
+      <stop offset="0%"  stop-color="#7c3aed" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="dot-hi" cx="35%" cy="30%" r="60%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <filter id="drop">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#7c3aed" flood-opacity="0.5" />
+    </filter>
+    <filter id="text-glow">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#a855f7" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect width="1200" height="630" fill="url(#glow-bg)" />
+
+  <!-- Subtle grid lines -->
+  <g stroke="#ffffff" stroke-opacity="0.03" stroke-width="1">
+    <line x1="0" y1="105" x2="1200" y2="105" />
+    <line x1="0" y1="210" x2="1200" y2="210" />
+    <line x1="0" y1="315" x2="1200" y2="315" />
+    <line x1="0" y1="420" x2="1200" y2="420" />
+    <line x1="0" y1="525" x2="1200" y2="525" />
+    <line x1="150" y1="0" x2="150" y2="630" />
+    <line x1="300" y1="0" x2="300" y2="630" />
+    <line x1="450" y1="0" x2="450" y2="630" />
+    <line x1="600" y1="0" x2="600" y2="630" />
+    <line x1="750" y1="0" x2="750" y2="630" />
+    <line x1="900" y1="0" x2="900" y2="630" />
+    <line x1="1050" y1="0" x2="1050" y2="630" />
+  </g>
+
+  <!--
+    Logo: scale=1.4, path centre=(100,98). Rendered h=236.
+    Target centre: x=155, y=315.
+    tx = 155 - 100*1.4 = 15
+    ty = 315 - 98*1.4 = 178
+  -->
+  <g filter="url(#drop)" transform="translate(15, 178) scale(1.4)">
+    <path
+      d="
+        M 22 182
+        L 22 93
+        Q 22 14 100 14
+        Q 178 14 178 93
+        L 178 182
+        L 146 182
+        L 146 100
+        Q 146 46 100 46
+        Q 54 46 54 100
+        L 54 182
+        Z
+      "
+      fill="url(#g1)"
+    />
+    <circle cx="100" cy="152" r="17" fill="url(#g1)" />
+    <circle cx="100" cy="152" r="17" fill="url(#dot-hi)" />
+  </g>
+
+  <!-- Divider line -->
+  <line x1="310" y1="140" x2="310" y2="490" stroke="url(#g1)" stroke-width="1.5" stroke-opacity="0.5" />
+
+  <!-- Name -->
+  <text
+    x="348" y="272"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="100"
+    font-weight="700"
+    letter-spacing="-2"
+    fill="#ffffff"
+    filter="url(#text-glow)"
+  >Nishant Chorge</text>
+
+  <!-- Role -->
+  <text
+    x="352" y="360"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="42"
+    font-weight="400"
+    letter-spacing="4"
+    fill="url(#g1)"
+  >SOFTWARE DEVELOPER</text>
+
+  <!-- Stack -->
+  <text
+    x="352" y="430"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="26"
+    fill="#ffffff"
+    fill-opacity="0.45"
+    letter-spacing="0.5"
+  >Node.js · React · Next.js · TypeScript · Fintech · Mumbai</text>
+
+  <!-- Bottom domain -->
+  <text
+    x="600" y="588"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="26"
+    font-weight="400"
+    fill="#ffffff"
+    fill-opacity="0.3"
+    text-anchor="middle"
+    letter-spacing="4"
+  >nishant.click</text>
+</svg>

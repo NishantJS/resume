@@ -13,9 +13,9 @@ function isLight(hex: string): boolean {
 type Props = { project: ProjectData; index: number; total: number };
 
 const AboutSection: FC<Props> = ({ project, index, total }) => {
-  const ref    = useRef<HTMLElement>(null);
-  const light  = isLight(project.color);
-  const ink    = light ? "#111111" : "#ffffff";
+  const ref = useRef<HTMLElement>(null);
+  const light = isLight(project.color);
+  const ink = light ? "#111111" : "#ffffff";
   const inkLow = light ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.55)";
   const border = light ? "rgba(0,0,0,0.14)" : "rgba(255,255,255,0.18)";
 
@@ -82,18 +82,24 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
           <p className="text-sm xl:text-base leading-relaxed max-w-lg xl:max-w-xl" style={{ color: inkLow }}>
             {project.description}
           </p>
-          <a
-            href={project.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link inline-flex items-center gap-2 mono text-xs font-semibold tracking-widest uppercase border-b pb-1 self-start shrink-0 transition-opacity hover:opacity-50"
-            style={{ borderColor: border }}
-          >
-            Visit Project
-            <svg width="10" height="10" viewBox="0 0 11 11" fill="none" aria-hidden>
-              <path d="M1 10L10 1M10 1H4M10 1V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
+          {project.href ? (
+            <a
+              href={project.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link inline-flex items-center gap-2 mono text-xs font-semibold tracking-widest uppercase border-b pb-1 self-start shrink-0 transition-opacity hover:opacity-50"
+              style={{ borderColor: border }}
+            >
+              Visit Project
+              <svg width="10" height="10" viewBox="0 0 11 11" fill="none" aria-hidden>
+                <path d="M1 10L10 1M10 1H4M10 1V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          ) : !project.images ? (
+            <span className="mono text-xs tracking-widest uppercase self-start shrink-0" style={{ color: inkLow }}>
+              Confidential — screenshots not available
+            </span>
+          ) : null}
         </div>
 
       </div>
