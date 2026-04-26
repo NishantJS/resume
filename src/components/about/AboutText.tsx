@@ -1,4 +1,4 @@
-import { motion, useTransform, MotionValue } from 'motion/react';
+import { motion, useTransform, useReducedMotion, MotionValue } from 'motion/react';
 import { FC } from 'react';
 
 // Words rendered in a distinctive accent colour once revealed
@@ -63,8 +63,9 @@ interface CharProps {
 }
 
 const Char: FC<CharProps> = ({ children, progress, range, accent }) => {
-  const opacity = useTransform(progress, range, [0, 1]);
-  const y       = useTransform(progress, range, [10, 0]);
+  const reduced = useReducedMotion();
+  const opacity = useTransform(progress, range, reduced ? [1, 1] : [0, 1]);
+  const y       = useTransform(progress, range, reduced ? [0, 0] : [10, 0]);
   return (
     <span className="relative inline-block">
       {/* Ghost keeps layout stable at 0 opacity */}

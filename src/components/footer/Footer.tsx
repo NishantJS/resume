@@ -1,17 +1,20 @@
 import { FC, useRef } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 type FooterProps = { active: string };
 
 const Footer: FC<FooterProps> = ({ active = "" }) => {
   const footerRef = useRef<HTMLElement>(null);
+  const reduced   = useReducedMotion();
 
   useGSAP(() => {
     const f = footerRef.current;
     if (!f) return;
+    if (reduced) { gsap.set(f, { opacity: 1, y: 0 }); return; }
     gsap.fromTo(f, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.2, delay: 0.8 });
-  }, { scope: footerRef });
+  }, { scope: footerRef, dependencies: [reduced] });
 
   useGSAP(() => {
     const f = footerRef.current;

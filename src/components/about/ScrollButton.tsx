@@ -1,32 +1,23 @@
 import { useRef } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 export function ScrollButton() {
   const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
   useGSAP(() => {
     const button = ref.current;
     if (!button) return;
+    if (reduced) { gsap.set(button, { opacity: 1, y: 0 }); return; }
 
     gsap.fromTo(
       button,
-      {
-        y: 10,
-        opacity: 0,
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        delay: 0.8,
-        yoyo: true,
-        repeat: -1,
-        ease: "power2.inOut",
-      }
+      { y: 10, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, delay: 0.8, yoyo: true, repeat: -1, ease: "power2.inOut" }
     );
-
-  }, []);
+  }, [reduced]);
 
   return (
     <div className="flex justify-center items-center" ref={ref}>

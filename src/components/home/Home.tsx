@@ -2,7 +2,7 @@ import { useRef, FC } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, useSpring } from 'motion/react';
+import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'motion/react';
 
 export interface ProjectData {
   title: string;
@@ -66,6 +66,7 @@ export const projects: ProjectData[] = [
   },
   {
     title: "ConsultmyAstro",
+    displayTitle: "Consult my Astro",
     color: "#EFE8D3",
     contribution: "Backend & Frontend",
     path: "/work/consultmyastro/",
@@ -77,6 +78,7 @@ export const projects: ProjectData[] = [
   },
   {
     title: "OneDashboard",
+    displayTitle: "One Dashboard",
     color: "#c2e9fb",
     contribution: "Backend & Frontend",
     path: "/work/onedashboard/",
@@ -104,11 +106,12 @@ const pageVariants = {
   exit:    { opacity: 0, y: -8,  transition: { duration: 0.3,  ease: [0.55, 0, 1, 0.45] as [number, number, number, number] } },
 };
 
-/* Parallax drift per row — uses a plain li so no motion variant conflicts */
+/* Parallax drift per row — skipped when reduced motion is preferred */
 const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
   const ref = useRef<HTMLLIElement>(null);
+  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const rawY = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const rawY = useTransform(scrollYProgress, [0, 1], reduced ? [0, 0] : [40, -40]);
   const y = useSpring(rawY, { stiffness: 60, damping: 18 });
   return (
     <motion.li ref={ref} style={{ y }}>
@@ -120,16 +123,18 @@ const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
 const Home = () => {
   const container = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP();
+  const reduced = useReducedMotion();
 
   // GSAP entrance on the inner divs (not the motion.li wrappers)
   useGSAP(() => {
     const rows = container.current?.querySelectorAll<HTMLElement>('.project-row');
     if (!rows) return;
+    if (reduced) { gsap.set(rows, { opacity: 1, y: 0 }); return; }
     gsap.fromTo(rows,
       { opacity: 0, y: 28 },
       { opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: "power3.out", delay: 0.3 }
     );
-  }, { scope: container });
+  }, { scope: container, dependencies: [reduced] });
 
   const handleMouseEnter = contextSafe((color: string) => {
     gsap.to(container.current, { backgroundColor: color, duration: 0.4, ease: "power3.out" });
@@ -142,10 +147,10 @@ const Home = () => {
   return (
     <motion.main
       ref={container}
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+      variants={reduced ? undefined : pageVariants}
+      initial={reduced ? false : "initial"}
+      animate={reduced ? undefined : "animate"}
+      exit={reduced ? undefined : "exit"}
       className="min-h-screen bg-white flex justify-center items-start pt-28 pb-32"
     >
       <ul className="w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12 divide-y divide-black/10">

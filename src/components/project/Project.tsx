@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { projects } from "../home/Home";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import AboutSection from "./About";
 import Contents from "./Contents";
 
@@ -50,6 +50,7 @@ const Project = () => {
   const project = projects.find(p => p.path === pathname) ?? projects[0];
   const index   = projects.indexOf(project);
   const ref     = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
   const light  = isLight(project.color);
   const ink    = light ? "#111111" : "#ffffff";
@@ -58,6 +59,11 @@ const Project = () => {
   // Color-wipe entrance
   useGSAP(() => {
     if (!ref.current) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      gsap.set([".color-sheet", ".black-sheet"], { display: "none" });
+      return;
+    }
     const tl = gsap.timeline({ defaults: { duration: 1, delay: 0.3, transformOrigin: "bottom" } });
     tl.fromTo(".color-sheet", { scaleY: 1, backgroundColor: project.color }, { scaleY: 0, ease: "power3.inOut" });
     tl.fromTo(".black-sheet", { scaleY: 1, backgroundColor: "#000" },        { scaleY: 0, ease: "power3.inOut" }, "-=65%");
@@ -69,9 +75,9 @@ const Project = () => {
   return (
     <motion.main
       ref={ref}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1, transition: { duration: 0.25 } }}
-      exit={{ opacity: 0, transition: { duration: 0.25 } }}
+      initial={reduced ? false : { opacity: 0 }}
+      animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
+      exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
       className="min-h-screen flex flex-col relative"
       style={{ backgroundColor: project.color, color: ink }}
     >

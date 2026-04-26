@@ -2,7 +2,7 @@ import { useEffect, useRef, FC } from "react";
 import Intro from "./Intro";
 import Paragraph from "./AboutText";
 import { Skills } from "./Skills";
-import { motion, useScroll } from "motion/react";
+import { motion, useScroll, useReducedMotion } from "motion/react";
 import gsap from "gsap";
 
 const pageVariants = {
@@ -74,6 +74,7 @@ const ExpCard: FC<{
   location: string;
 }> = ({ color, period, title, company, sub, location }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const el = cardRef.current;
@@ -83,7 +84,11 @@ const ExpCard: FC<{
     const dot     = el.querySelector<HTMLElement>(".acc-dot");
     const content = el.querySelectorAll<HTMLElement>(".acc-text");
 
-    // Start hidden
+    if (reduced) {
+      gsap.set([el, line, dot, content], { clearProps: "all" });
+      return;
+    }
+
     gsap.set(el,      { opacity: 0, x: -24 });
     gsap.set(line,    { scaleY: 0, transformOrigin: "top" });
     gsap.set(dot,     { scale: 0 });
@@ -105,7 +110,7 @@ const ExpCard: FC<{
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [reduced]);
 
   return (
     <div ref={cardRef} className="flex gap-5 md:gap-8">
@@ -142,6 +147,7 @@ const EduCard: FC<{
   score: string;
 }> = ({ color, period, degree, institution, score }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const el = cardRef.current;
@@ -150,6 +156,11 @@ const EduCard: FC<{
     const line    = el.querySelector<HTMLElement>(".acc-line");
     const dot     = el.querySelector<HTMLElement>(".acc-dot");
     const content = el.querySelectorAll<HTMLElement>(".acc-text");
+
+    if (reduced) {
+      gsap.set([el, line, dot, content], { clearProps: "all" });
+      return;
+    }
 
     gsap.set(el,      { opacity: 0, x: -24 });
     gsap.set(line,    { scaleY: 0, transformOrigin: "top" });
@@ -172,7 +183,7 @@ const EduCard: FC<{
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [reduced]);
 
   return (
     <div ref={cardRef} className="flex gap-5 md:gap-8">
@@ -191,6 +202,8 @@ const EduCard: FC<{
 };
 
 const About = () => {
+  const reduced = useReducedMotion();
+
   useEffect(() => {
     const html = document.documentElement;
     html.style.scrollSnapType = "y proximity";
@@ -202,7 +215,10 @@ const About = () => {
 
   return (
     <motion.main
-      variants={pageVariants} initial="initial" animate="animate" exit="exit"
+      variants={reduced ? undefined : pageVariants}
+      initial={reduced ? false : "initial"}
+      animate={reduced ? undefined : "animate"}
+      exit={reduced ? undefined : "exit"}
       className="bg-black text-white relative overflow-x-hidden"
       id="about"
     >

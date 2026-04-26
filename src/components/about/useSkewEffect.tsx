@@ -29,7 +29,7 @@ export function useSkewEffect(ref: React.RefObject<HTMLHeadingElement | null>) {
     const originals = chars.map(c => c.dataset.char ?? '');
 
     if (reduced) {
-      gsap.set(chars, { y: '0%' });
+      gsap.set(chars, { opacity: 1, y: '0%', color: 'white' });
       return;
     }
 

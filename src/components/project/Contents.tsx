@@ -1,5 +1,5 @@
 import { FC, useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "motion/react";
+import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "motion/react";
 import { ProjectData } from "../home/Home";
 
 type Props = { project: ProjectData };
@@ -13,11 +13,12 @@ function isLight(hex: string): boolean {
 
 const ease = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
-/* Each image pair gets a subtle parallax drift */
+/* Each image pair gets a subtle parallax drift — skipped when reduced motion is preferred */
 const ParallaxPair: FC<{ children: React.ReactNode }> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const rawY = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const rawY = useTransform(scrollYProgress, [0, 1], reduced ? [0, 0] : [50, -50]);
   const y = useSpring(rawY, { stiffness: 50, damping: 16, restDelta: 0.001 });
   return (
     <motion.div ref={ref} style={{ y }}>
@@ -28,6 +29,7 @@ const ParallaxPair: FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const Contents: FC<Props> = ({ project }) => {
   const total = project.images || 0;
+  const reduced = useReducedMotion();
   if (!total) return null;
 
   const title  = project.displayTitle ?? project.title;
@@ -64,8 +66,8 @@ const Contents: FC<Props> = ({ project }) => {
         {pairs.map((pair, rowIdx) => (
           <ParallaxPair key={rowIdx}>
             <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={reduced ? false : { opacity: 0, y: 28 }}
+              whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.08 }}
               transition={{ duration: 0.85, ease }}
               className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5"

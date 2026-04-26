@@ -25,6 +25,12 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
     const el = ref.current;
     if (!el) return;
 
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      el.querySelectorAll<HTMLElement>(".tw, .meta-line, .desc-col").forEach(e => { e.style.opacity = "1"; });
+      return;
+    }
+
     gsap.fromTo(
       el.querySelectorAll<HTMLElement>(".tw"),
       { y: "110%", opacity: 0 },

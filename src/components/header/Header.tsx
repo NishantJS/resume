@@ -18,8 +18,9 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
   useGSAP(() => {
     const h = headerRef.current;
     if (!h) return;
+    if (reduced) { gsap.set(h, { opacity: 1, y: 0 }); return; }
     gsap.fromTo(h, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 1.2, delay: 0.6 });
-  }, { scope: headerRef, revertOnUpdate: false });
+  }, { scope: headerRef, revertOnUpdate: false, dependencies: [reduced] });
 
   useGSAP(() => {
     const h = headerRef.current;

@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 const skillGroups: { label: string; color: string; items: string[] }[] = [
   {
@@ -27,10 +28,13 @@ const skillGroups: { label: string; color: string; items: string[] }[] = [
 /* Each skill row animates independently when fully in view */
 const SkillRow = ({ group }: { group: typeof skillGroups[0] }) => {
   const rowRef = useRef<HTMLLIElement>(null);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const el = rowRef.current;
     if (!el) return;
+
+    if (reduced) { gsap.set(el, { opacity: 1, x: 0 }); return; }
 
     gsap.set(el, { opacity: 0, x: -28 });
 
@@ -41,12 +45,12 @@ const SkillRow = ({ group }: { group: typeof skillGroups[0] }) => {
           gsap.to(el, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" });
         }
       },
-      { threshold: 0.9 }   // fires only when row is 90% visible
+      { threshold: 0.9 }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [reduced]);
 
   return (
     <li
