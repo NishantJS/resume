@@ -1,8 +1,5 @@
-import { useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { projects } from "../home/Home";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 import { motion, useReducedMotion } from "motion/react";
 import AboutSection from "./About";
 import Contents from "./Contents";
@@ -49,42 +46,20 @@ const Project = () => {
   const { pathname } = useLocation();
   const project = projects.find(p => p.path === pathname) ?? projects[0];
   const index   = projects.indexOf(project);
-  const ref     = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
   const light  = isLight(project.color);
   const ink    = light ? "#111111" : "#ffffff";
   const border = light ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)";
 
-  // Color-wipe entrance
-  useGSAP(() => {
-    if (!ref.current) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      gsap.set([".color-sheet", ".black-sheet"], { display: "none" });
-      return;
-    }
-    const tl = gsap.timeline({ defaults: { duration: 1, delay: 0.3, transformOrigin: "bottom" } });
-    tl.fromTo(".color-sheet", { scaleY: 1, backgroundColor: project.color }, { scaleY: 0, ease: "power3.inOut" });
-    tl.fromTo(".black-sheet", { scaleY: 1, backgroundColor: "#000" },        { scaleY: 0, ease: "power3.inOut" }, "-=65%");
-    tl.set(".color-sheet", { display: "none" });
-    tl.set(".black-sheet", { display: "none" });
-    return () => tl.kill();
-  }, { scope: ref, dependencies: [project.path] });
-
   return (
     <motion.main
-      ref={ref}
       initial={reduced ? false : { opacity: 0 }}
       animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
       exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
       className="min-h-screen flex flex-col relative"
       style={{ backgroundColor: project.color, color: ink }}
     >
-      {/* GSAP wipe sheets */}
-      <div className="absolute inset-0 black-sheet z-10 pointer-events-none" />
-      <div className="absolute inset-0 color-sheet z-10 pointer-events-none" />
-
       <AboutSection project={project} index={index} total={projects.length} />
 
       <SkillsMarquee skills={project.skills} ink={ink} border={border} />

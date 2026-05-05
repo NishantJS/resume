@@ -126,13 +126,20 @@ const Home = () => {
   const reduced = useReducedMotion();
 
   // GSAP entrance on the inner divs (not the motion.li wrappers)
+  // data-entering="true" is set on the list while rows animate in so the
+  // cursor skips the data-image logo effect until entrance is fully done.
   useGSAP(() => {
-    const rows = container.current?.querySelectorAll<HTMLElement>('.project-row');
+    const el   = container.current;
+    const rows = el?.querySelectorAll<HTMLElement>('.project-row');
     if (!rows) return;
     if (reduced) { gsap.set(rows, { opacity: 1, y: 0 }); return; }
+    el?.setAttribute('data-entering', 'true');
     gsap.fromTo(rows,
       { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: "power3.out", delay: 0.3 }
+      {
+        opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: "power3.out", delay: 0.3,
+        onComplete: () => el?.removeAttribute('data-entering'),
+      }
     );
   }, { scope: container, dependencies: [reduced] });
 

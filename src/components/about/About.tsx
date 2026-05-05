@@ -21,27 +21,46 @@ const RANGES: [number, number][] = [[0, 0.33], [0.34, 0.67], [0.68, 1]];
 const EXPERIENCE = [
   {
     period: "Sep 2025 – Present",
-    role: "Software Developer",
-    company: "Finquest Consulting",
-    sub: "Client: Mirae Asset Capital Markets",
-    location: "Mumbai, MH",
+    role: "Software Engineer",
+    company: "FinQuest Consulting Services",
+    sub: "Client: Mirae Asset Capital Markets · Full-time · On-site",
+    location: "Mumbai, Maharashtra, India",
     color: "#a855f7",
+    bullets: [
+      "Revamped the mStock Refer & Earn platform from legacy .NET to a modern stack (Next.js + Fastify), improving speed and scalability",
+      "Built a real-time referral feed using SSE + Redis Streams, reducing delays from ~5s polling to ~1s updates",
+      "Designed multi-layer caching (memory + Redis + DB) and event-driven invalidation to handle high traffic efficiently",
+      "Implemented idempotent APIs and circuit breakers for safer, resilient systems",
+      "Contributed to a stock advisory platform (similar to smallcase), building scalable backend services for portfolio and basket management",
+    ],
   },
   {
-    period: "Mar 2023 – Aug 2025",
+    period: "Apr 2023 – Aug 2025",
     role: "Software Developer",
-    company: "Futurescape Technologies",
-    sub: null,
-    location: "Navi Mumbai, MH",
+    company: "Futurescape Technology Private Limited",
+    sub: "Full-time · On-site",
+    location: "Navi Mumbai, Maharashtra, India",
     color: "#22d3ee",
+    bullets: [
+      "Built a dynamic form & table system (Nx + Next.js) powering complex, configurable workflows",
+      "Designed micro-frontend architecture for modular and scalable feature delivery",
+      "Led frontend for an SSO platform using Supabase + Keycloak with RBAC",
+      "Maintained strong code quality with unit, integration, and E2E testing",
+    ],
   },
   {
     period: "Aug 2022 – Mar 2023",
     role: "Software Developer",
-    company: "Pinsout Innovations",
-    sub: null,
-    location: "Noida, UP",
+    company: "Pinsout Innovation",
+    sub: "Full-time · On-site",
+    location: "Noida, Uttar Pradesh, India",
     color: "#f43f5e",
+    bullets: [
+      "Developed backend APIs for a job portal covering multiple user roles",
+      "Built real-time chat using WebSockets",
+      "Implemented wallet and payment systems with secure transactions",
+      "Led frontend for employer workflows with focus on performance",
+    ],
   },
 ];
 
@@ -72,7 +91,8 @@ const ExpCard: FC<{
   company: string;
   sub?: string | null;
   location: string;
-}> = ({ color, period, title, company, sub, location }) => {
+  bullets?: string[];
+}> = ({ color, period, title, company, sub, location, bullets }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
@@ -105,7 +125,7 @@ const ExpCard: FC<{
           .to(dot,     { scale: 1,               duration: 0.3 }, "-=0.2")
           .to(content, { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, "-=0.2");
       },
-      { threshold: 0.75 }
+      { threshold: 0.15 }
     );
 
     observer.observe(el);
@@ -133,6 +153,16 @@ const ExpCard: FC<{
         <p className="acc-text mono text-base md:text-lg mt-1 font-medium" style={{ color }}>{company}</p>
         {sub  && <p className="acc-text mono text-sm text-gray-400 mt-0.5">{sub}</p>}
         <p className="acc-text mono text-sm text-gray-500 mt-0.5">{location}</p>
+        {bullets && bullets.length > 0 && (
+          <ul className="acc-text mt-3 space-y-1.5 pl-0">
+            {bullets.map((b, i) => (
+              <li key={i} className="flex gap-2 text-sm text-gray-400 leading-relaxed">
+                <span className="shrink-0 mt-1.5 w-1 h-1 rounded-full" style={{ backgroundColor: color, opacity: 0.7 }} />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -258,6 +288,7 @@ const About = () => {
             company={exp.company}
             sub={exp.sub}
             location={exp.location}
+            bullets={exp.bullets}
           />
         ))}
       </section>

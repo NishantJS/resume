@@ -1,4 +1,4 @@
-import { CSSProperties, FC, useRef } from 'react';
+import { CSSProperties, FC, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
@@ -9,6 +9,18 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const ringRef   = useRef<HTMLDivElement>(null);
   const reduced   = useReducedMotion();
+
+  // Reset cursor appearance on every route change — prevents logo sticking
+  // after programmatic navigation (no mouseleave fires during page transitions)
+  useEffect(() => {
+    const cursor = cursorRef.current;
+    const ring   = ringRef.current;
+    if (!cursor) return;
+    gsap.killTweensOf(cursor);
+    gsap.to(cursor, { scale: 1, mixBlendMode: 'exclusion', backgroundColor: '', duration: 0.2 });
+    cursor.style.backgroundImage = '';
+    if (ring) gsap.to(ring, { scale: 1, duration: 0.2 });
+  }, [pathname]);
 
   useGSAP(() => {
     const cursor = cursorRef.current;
@@ -40,15 +52,23 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
 
     // ── Link hover handlers ──────────────────────────────────────────
     const handleEnter = (e: Event) => {
-      let styles: CSSProperties = {};
       const t = e.currentTarget as HTMLElement;
+
+      // Skip data-image while the work list is still animating in.
+      // Home.tsx sets data-entering="true" on the container during the
+      // staggered entrance and removes it when the last row finishes.
+      let styles: CSSProperties = {};
       if (t.dataset.image) {
-        styles = {
-          backgroundImage:    `url(${t.dataset.image})`,
-          backgroundSize:     'cover',
-          backgroundPosition: 'center',
-        };
+        const entering = !!document.querySelector('[data-entering]');
+        if (!entering) {
+          styles = {
+            backgroundImage:    `url(${t.dataset.image})`,
+            backgroundSize:     'cover',
+            backgroundPosition: 'center',
+          };
+        }
       }
+
       gsap.to(cursor, {
         scale: 3, duration: 0.4, ease: 'power3.out',
         mixBlendMode: 'difference', backgroundColor: 'white',

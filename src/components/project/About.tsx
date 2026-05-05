@@ -34,17 +34,17 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
     gsap.fromTo(
       el.querySelectorAll<HTMLElement>(".tw"),
       { y: "110%", opacity: 0 },
-      { y: "0%", opacity: 1, duration: 0.9, ease: "power4.out", stagger: 0.1, delay: 1.3 }
+      { y: "0%", opacity: 1, duration: 0.7, ease: "power4.out", stagger: 0.08, delay: 0.1 }
     );
     gsap.fromTo(
       el.querySelectorAll(".meta-line"),
       { opacity: 0, y: 8 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", stagger: 0.06, delay: 1.5 }
+      { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", stagger: 0.05, delay: 0.2 }
     );
     gsap.fromTo(
       el.querySelectorAll(".desc-col"),
-      { opacity: 0, y: 24 },
-      { opacity: 1, y: 0, duration: 0.75, ease: "power3.out", delay: 1.75 }
+      { opacity: 0, y: 16 },
+      { opacity: 1, y: 0, duration: 0.55, ease: "power3.out", delay: 0.3 }
     );
   }, { scope: ref, dependencies: [project.path] });
 
