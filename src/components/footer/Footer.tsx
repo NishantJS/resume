@@ -9,11 +9,17 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
   const footerRef = useRef<HTMLElement>(null);
   const reduced   = useReducedMotion();
 
+  // The game detail pages own the full viewport — the fixed footer would
+  // overlap the level rail, so it's hidden there.
+  const onGamePage = active.startsWith("/games/");
+
   useGSAP(() => {
     const f = footerRef.current;
     if (!f) return;
     if (reduced) { gsap.set(f, { opacity: 1, y: 0 }); return; }
-    gsap.fromTo(f, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.2, delay: 0.8 });
+    // Opacity-only entrance so it never competes with the scroll-driven `y`
+    // transform below (which hides/reveals the footer in step with the navbar).
+    gsap.fromTo(f, { opacity: 0 }, { opacity: 1, duration: 1.2, delay: 0.8 });
   }, { scope: footerRef, dependencies: [reduced] });
 
   useGSAP(() => {
@@ -32,16 +38,18 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
       const y = window.scrollY;
       if (y > lastY && y > 80 && !hidden) {
         hidden = true;
-        gsap.to(f, { y: '110%', duration: 0.4, ease: 'power2.inOut' });
+        gsap.to(f, { y: '110%', duration: 0.4, ease: 'power2.inOut', overwrite: 'auto' });
       } else if (y <= lastY && hidden) {
         hidden = false;
-        gsap.to(f, { y: '0%', duration: 0.4, ease: 'power2.out' });
+        gsap.to(f, { y: '0%', duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
       }
       lastY = y;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, { scope: footerRef });
+
+  if (onGamePage) return null;
 
   return (
     /* pointer-events-none on the container so the transparent middle area

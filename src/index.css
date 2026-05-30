@@ -47,6 +47,62 @@ html {
   .cursor, .cursor-ring { display: none; }
 }
 
+/* ── Warm "parking-lot" gradient backdrop ────────────────────
+   A subtle version of the Parking Escape page wash, reused behind the
+   games / projects lists. Corner glows over a near-white cream base. */
+.warm-gradient {
+  background:
+    radial-gradient(ellipse at 85% -12%, rgba(249, 210, 122, 0.40) 0%, transparent 56%),
+    radial-gradient(ellipse at -12% 104%, rgba(255, 181, 154, 0.34) 0%, transparent 56%),
+    linear-gradient(180deg, #fffdf8 0%, #faf3e6 100%);
+}
+
+/* Tints the project hero with its own colour instead of a flat fill. */
+.project-gradient {
+  background:
+    radial-gradient(ellipse at 82% -10%, color-mix(in srgb, var(--proj) 70%, white) 0%, transparent 58%),
+    radial-gradient(ellipse at -10% 102%, color-mix(in srgb, var(--proj) 55%, white) 0%, transparent 58%),
+    linear-gradient(165deg, color-mix(in srgb, var(--proj) 35%, white) 0%, var(--proj) 100%);
+}
+
+/* ── Project screenshot cards (with loading skeleton) ─────────
+   The image element is transparent until it paints, so a shimmering
+   skeleton shows behind it instead of a collapsed thin line. */
+.proj-shot {
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(100deg, #e9e4d8 30%, #f6f1e6 50%, #e9e4d8 70%);
+  background-size: 200% 100%;
+  animation: proj-shimmer 1.3s ease-in-out infinite;
+}
+.proj-shot img { display: block; opacity: 0; transition: opacity 0.4s ease; }
+.proj-shot img.is-loaded { opacity: 1; }
+/* Once loaded the shimmer is no longer needed under the opaque image. */
+.proj-shot:has(img.is-loaded) { animation: none; background: none; }
+
+/* Horizontal rail variant: fixed height, width follows the image's real
+   aspect (no crop / no zoom). A placeholder aspect reserves space while
+   loading so it's never a thin line, then clears on load. */
+.proj-shot--rail img { height: clamp(260px, 46vh, 500px); width: auto; max-width: none; aspect-ratio: 3 / 2; }
+.proj-shot--rail img.is-loaded { aspect-ratio: auto; }
+
+/* Stacked (mobile) variant: full width, height follows the image. */
+.proj-shot--stacked { width: 100%; }
+.proj-shot--stacked img { width: 100%; height: auto; aspect-ratio: 16 / 10; }
+.proj-shot--stacked img.is-loaded { aspect-ratio: auto; }
+
+@keyframes proj-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .proj-shot { animation: none; }
+  .proj-shot img { transition: none; }
+}
+
 /* ── Page-transition overlay (legacy class, kept for safety) */
 .transition-animation {
   position: fixed;

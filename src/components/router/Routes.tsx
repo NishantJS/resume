@@ -11,6 +11,8 @@ import gsap from "gsap"
 const About    = lazy(() => import("../about/About"))
 const Home     = lazy(() => import("../home/Home"))
 const Project  = lazy(() => import("../project/Project"))
+const Games    = lazy(() => import("../games/Games"))
+const GamePage = lazy(() => import("../games/GamePage"))
 const NotFound = lazy(() => import("../error/NotFound"))
 
 /* ── Subtle scroll-skew on fast scrolls ───────────────────── */
@@ -58,6 +60,8 @@ const Router = () => {
               <Route index                 element={<About />} />
               <Route path="/work"          element={<Home />} />
               <Route path="/work/:project" element={<Project />} />
+              <Route path="/games"         element={<Games />} />
+              <Route path="/games/:game"   element={<GamePage />} />
               <Route path="*"              element={<NotFound />} />
             </Routes>
           </Suspense>

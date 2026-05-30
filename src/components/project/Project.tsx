@@ -57,8 +57,8 @@ const Project = () => {
       initial={reduced ? false : { opacity: 0 }}
       animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
       exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
-      className="min-h-screen flex flex-col relative"
-      style={{ backgroundColor: project.color, color: ink }}
+      className="project-gradient min-h-screen flex flex-col relative"
+      style={{ ["--proj" as string]: project.color, color: ink } as React.CSSProperties}
     >
       <AboutSection project={project} index={index} total={projects.length} />
 

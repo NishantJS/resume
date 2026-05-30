@@ -5,7 +5,8 @@ import gsap from 'gsap';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const links = [
-  { name: "My Work", path: "/work" },
+  { name: "My Work", path: "/work", match: (p: string) => p === "/work" || p.startsWith("/work/"), color: "border-purple-500" },
+  { name: "Games",   path: "/games", match: (p: string) => p === "/games" || p.startsWith("/games/"), color: "border-amber-500"  },
 ];
 
 type HeaderProps = { active: string };
@@ -71,37 +72,38 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
     };
   }, [reduced]);
 
-  const isWork = active === '/work' || active.startsWith('/work/');
-
   return (
     <header
       ref={headerRef}
-      className="fixed w-full p-8 flex justify-between items-center md:px-20 xl:px-28 2xl:px-40 z-20 pointer-events-none"
+      className="fixed w-full px-5 py-5 sm:p-8 flex justify-between items-center gap-3 md:px-20 xl:px-28 2xl:px-40 z-20 pointer-events-none"
       role="banner"
     >
       <Link
         ref={ncRef}
         to="/"
         aria-label="NC — go to home"
-        className="font-bold text-4xl -rotate-90 inline-block pointer-events-auto"
+        className="font-bold text-3xl sm:text-4xl -rotate-90 inline-block pointer-events-auto shrink-0"
       >
         NC
       </Link>
 
       <nav aria-label="Main navigation" className="pointer-events-auto">
-        <ul className="flex space-x-4 text-2xl mono" role="list">
-          {links.map(link => (
-            <li key={link.path}>
-              <Link
-                to={link.path}
-                viewTransition
-                className={`link border-b-2 py-2 px-1 ${isWork ? 'border-purple-500' : 'border-transparent'}`}
-                aria-current={isWork ? 'page' : undefined}
-              >
-                {link.name}
-              </Link>
-            </li>
-          ))}
+        <ul className="flex space-x-3 sm:space-x-4 text-base sm:text-2xl mono" role="list">
+          {links.map(link => {
+            const isActive = link.match(active);
+            return (
+              <li key={link.path}>
+                <Link
+                  to={link.path}
+                  viewTransition
+                  className={`link border-b-2 py-1.5 px-0.5 sm:py-2 sm:px-1 whitespace-nowrap ${isActive ? link.color : 'border-transparent'}`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </header>
