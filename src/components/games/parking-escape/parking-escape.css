@@ -189,7 +189,16 @@
 .pe-btn.hint { background: linear-gradient(180deg, #fcd34d, #f59e0b); color: #1a1413; }
 
 /* ── Level rail ──────────────────────────────────────────── */
-.pe-rail { display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.25rem; scrollbar-width: none; }
+/* flex-shrink:0 ensures the rail is never squashed out of view in
+   fullscreen where pe-play is flex-column with flex:1 on stage-wrap. */
+.pe-rail {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
 .pe-rail::-webkit-scrollbar { display: none; }
 
 .pe-level-chip {
@@ -270,13 +279,27 @@
   .pe-hinted .pe-svg { animation: none; filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.95)); }
 }
 
-/* The board is measured from the stage, so give the play area a definite
-   height on mobile (the shell stage now shrinks to content). */
+/* Mobile: the board auto-sizes into whatever height the stage gives it.
+   Do NOT force a min-height here — the shell stage is already sized to the
+   board content; a large min-height just adds dead space. */
 @media (max-width: 860px) {
-  .pe-play { height: auto; min-height: 72vh; }
+  .pe-play { height: auto; }
+  /* Give the board area a sensible viewport-relative height so the board
+     is usable without scrolling, while still leaving room for the rail. */
+  .pe-stage-wrap { min-height: 60vw; }
+}
+
+/* In fullscreen (any device) the play area must fill all available height. */
+.game-shell:fullscreen .pe-play,
+.game-shell.is-fs .pe-play {
+  height: 100%;
+  flex: 1 1 auto;
 }
 
 /* ── Short viewports: tighten the gaps so the board keeps room ── */
 @media (max-height: 720px) {
-  .pe-play { gap: 0.4rem; }
+  .pe-play { gap: 0.3rem; }
+}
+@media (max-height: 480px) {
+  .pe-play { gap: 0.2rem; }
 }

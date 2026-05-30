@@ -23,15 +23,15 @@ function useCellSize(containerRef: React.RefObject<HTMLDivElement | null>, rows:
     const el = containerRef.current;
     if (!el) return;
     const measure = () => {
-      // Hard-cap the width by the viewport so the board can never end up wider
-      // than the screen (which the clipped stage would otherwise crop on the
-      // 6×6 / 7×7 levels). Only cap the maximum cell, never force a minimum.
-      const vw = window.innerWidth || el.clientWidth;
-      const w = Math.min(el.clientWidth, vw - 16);
+      // Use the container's own clientWidth — it already accounts for all
+      // parent padding and flex sizing, so the board never exceeds the stage.
+      const w = el.clientWidth;
       const h = el.clientHeight;
       if (w <= 0 || h <= 0) return;
-      const c = Math.floor(Math.min(w / cols, h / rows));
-      const sized = c > 0 ? Math.min(96, c) : 30;
+      // Floor to an integer, cap at 96 px. No minimum: a tiny cell is better
+      // than a board that overflows the stage on large level grids.
+      const c = Math.min(96, Math.floor(Math.min(w / cols, h / rows)));
+      const sized = c > 0 ? c : 1;
       setCell(prev => (prev === sized ? prev : sized));
     };
     measure();
