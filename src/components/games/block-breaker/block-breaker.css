@@ -1,0 +1,111 @@
+/* ── Block Breaker — lives inside the shared .game-stage ──────── */
+.bb-play {
+  --bb-ink: #2a2018;
+  color: var(--bb-ink);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  touch-action: none;
+}
+
+/* Lives chip (rendered via the shared .game-stat in the top bar). */
+.bb-lives b { letter-spacing: 0.12em; color: #ef4444; }
+
+.bb-btn {
+  border: 0;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: #1a1413;
+  color: #fdf6e3;
+  font-family: "Geologica", sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 160ms ease;
+}
+.bb-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.1); }
+.bb-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.bb-btn.primary { background: linear-gradient(180deg, #fde68a, #f59e0b); color: #1a1413; padding: 0.6rem 1.4rem; font-size: 0.9rem; }
+
+/* ── Stage / playfield ────────────────────────────────────────── */
+.bb-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bb-frame {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  aspect-ratio: 2 / 3;
+  margin: 0 auto;
+  border-radius: 1.1rem;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.bb-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 50% 0%, #1b2050 0%, transparent 60%),
+    linear-gradient(180deg, #11142e 0%, #0a0c1d 100%);
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* ── Toast (power-up feedback) ────────────────────────────────── */
+.bb-toast {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(8, 10, 24, 0.85);
+  color: #fdf6e3;
+  font-family: "Geologica", sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  animation: bb-toast 1.3s ease forwards;
+}
+@keyframes bb-toast {
+  0% { opacity: 0; transform: translate(-50%, 6px); }
+  15% { opacity: 1; transform: translate(-50%, 0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── Overlay screens ──────────────────────────────────────────── */
+.bb-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  padding: 1rem;
+  background: radial-gradient(ellipse at center, rgba(8, 10, 24, 0.55), rgba(8, 10, 24, 0.82));
+  color: #fdf6e3;
+  backdrop-filter: blur(2px);
+}
+.bb-overlay-title { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em; }
+.bb-overlay-sub { font-size: 0.82rem; opacity: 0.75; max-width: 18rem; }
+
+@media (max-width: 860px) {
+  .bb-play { height: auto; }
+  /* Give the 2:3 playfield a definite viewport-based size on mobile. */
+  .bb-frame { height: min(70vh, 138vw); width: auto; max-width: 100%; aspect-ratio: 2 / 3; }
+}
+@media (max-width: 540px) {
+  .bb-overlay-title { font-size: 1.35rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bb-toast { animation: none; }
+}
