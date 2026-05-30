@@ -38,7 +38,22 @@
 }
 .sld-tile:hover { filter: brightness(1.03); }
 .sld-tile.won { background: linear-gradient(180deg, #a7f3d0, #34d399); }
-.sld-tile.hint { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.95), 0 0 16px 3px rgba(245, 158, 11, 0.6); }
+/* data-hint attribute drives the highlight — no className race with Motion. */
+.sld-tile[data-hint="true"] {
+  background: linear-gradient(180deg, #fef3c7, #fde68a);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.9),
+              0 0 20px 4px rgba(245, 158, 11, 0.55),
+              0 6px 12px -6px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+  animation: sld-hint-pulse 0.9s ease-in-out infinite;
+}
+@keyframes sld-hint-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.9), 0 0 20px 4px rgba(245, 158, 11, 0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(245, 158, 11, 1),   0 0 30px 8px rgba(245, 158, 11, 0.7); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sld-tile[data-hint="true"] { animation: none; }
+}
 
 .sld-win {
   position: absolute;

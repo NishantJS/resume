@@ -69,7 +69,6 @@ const Sliding: FC = () => {
   const [best, setBest] = useState(0);
   const [hintValue, setHintValue] = useState<number | null>(null);
   const savedRef = useRef(false);
-  const hintTimer = useRef(0);
 
   const won = isSolved(board);
   const boardRef = useRef(board);
@@ -77,7 +76,6 @@ const Sliding: FC = () => {
 
   useEffect(() => {
     idbGet<{ best: number }>(SAVE_KEY).then(d => { if (d?.best) setBest(d.best); });
-    return () => window.clearTimeout(hintTimer.current);
   }, []);
 
   useEffect(() => {
@@ -94,7 +92,9 @@ const Sliding: FC = () => {
   const newGame = useCallback(() => {
     savedRef.current = false;
     setHintValue(null);
-    setBoard(scramble());
+    const next = scramble();
+    boardRef.current = next;
+    setBoard(next);
     setMoves(0);
   }, []);
 
@@ -116,22 +116,21 @@ const Sliding: FC = () => {
     const empty = b.indexOf(0);
     const candidates = neighbors(empty);
 
-    // First preference: a neighbor tile that is already AT its goal position
-    // after the swap (moving it is unambiguously good).
+    // First preference: a neighbor tile that will land exactly on its goal
+    // after the swap — moving it is unambiguously correct.
     for (const src of candidates) {
       const val = b[src];
-      if (val === 0) continue;
-      const goalPos = val - 1; // 0-indexed goal for value 1..15
-      if (empty === goalPos) {
+      if (!val) continue;
+      if (empty === val - 1) { // goal position for tile `val` is index `val-1`
         sfx.pop();
         setHintValue(val);
-        window.clearTimeout(hintTimer.current);
-        hintTimer.current = window.setTimeout(() => setHintValue(null), 1600);
         return;
       }
     }
 
     // Second preference: the swap that most reduces total Manhattan distance.
+    // We always pick SOMETHING — even if all moves worsen the position, the
+    // least-bad move is still a valid hint (avoids hints silently doing nothing).
     let bestSrc = -1, bestDelta = -Infinity;
     for (const src of candidates) {
       const after = [...b];
@@ -139,11 +138,9 @@ const Sliding: FC = () => {
       const delta = manhattan(b) - manhattan(after);
       if (delta > bestDelta) { bestDelta = delta; bestSrc = src; }
     }
-    if (bestSrc >= 0 && bestDelta >= 0) {
+    if (bestSrc >= 0) {
       sfx.pop();
       setHintValue(b[bestSrc]);
-      window.clearTimeout(hintTimer.current);
-      hintTimer.current = window.setTimeout(() => setHintValue(null), 1600);
     }
   }, [won]);
 
@@ -225,16 +222,21 @@ const Sliding: FC = () => {
             {Array.from({ length: SIZE - 1 }, (_, k) => k + 1).map(value => {
               const pos = board.indexOf(value);
               const r = Math.floor(pos / N), c = pos % N;
+              const isHint = hintValue === value;
               return (
                 <motion.button
                   key={value}
                   type="button"
-                  className={`sld-tile ${won ? "won" : ""} ${hintValue === value ? "hint" : ""}`}
+                  className={`sld-tile ${won ? "won" : ""}`.trim()}
+                  /* data-hint drives the highlight via CSS attr selector — this
+                     sidesteps a Motion layout/className race where the class
+                     was applied before the tile animated to its new position. */
+                  data-hint={isHint ? "true" : undefined}
                   style={{ gridColumnStart: c + 1, gridRowStart: r + 1 }}
                   layout={!reduced}
                   transition={{ type: "spring", stiffness: 560, damping: 38 }}
                   onClick={() => slideAt(pos)}
-                  aria-label={`Tile ${value}`}
+                  aria-label={`Tile ${value}${isHint ? " — hint" : ""}`}
                 >
                   {value}
                 </motion.button>
