@@ -1,0 +1,78 @@
+/* ── Sliding Puzzle — lives inside the shared .game-stage ─────── */
+.sld-play {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  color: #2a2018;
+  touch-action: none;
+}
+.sld-wrap { flex: 1 1 auto; min-height: 0; container-type: size; display: grid; place-items: center; }
+
+.sld-board {
+  position: relative;
+  width: min(100cqw, 100cqh, 30rem);
+  height: min(100cqw, 100cqh, 30rem);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: clamp(0.3rem, 1.5cqw, 0.6rem);
+  padding: clamp(0.4rem, 2cqw, 0.8rem);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  touch-action: none;
+}
+.sld-tile {
+  border: 0;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-family: "Geologica", sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 6cqw, 2.2rem);
+  color: #06302b;
+  background: linear-gradient(180deg, #d1fae5, #6ee7b7);
+  box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}
+.sld-tile:hover { filter: brightness(1.03); }
+.sld-tile.won { background: linear-gradient(180deg, #a7f3d0, #34d399); }
+.sld-tile.hint { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.95), 0 0 16px 3px rgba(245, 158, 11, 0.6); }
+
+.sld-win {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  border-radius: 1.1rem;
+  background: rgba(252, 247, 238, 0.85);
+  backdrop-filter: blur(2px);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.sld-btn {
+  border: 0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  background: #1a1413;
+  color: #fdf6e3;
+  font-family: "Geologica", sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 160ms ease;
+}
+.sld-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.1); }
+.sld-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.sld-btn.ghost { background: rgba(0, 0, 0, 0.08); color: #06302b; }
+.sld-btn.primary { background: linear-gradient(180deg, #6ee7b7, #10b981); color: #06302b; }
+
+@media (max-width: 860px) {
+  .sld-play { height: auto; }
+  .sld-wrap { container-type: normal; }
+  .sld-board { width: min(90vw, 60vh); height: min(90vw, 60vh); }
+}
