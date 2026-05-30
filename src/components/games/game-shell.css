@@ -1,26 +1,9 @@
-/* ── Shared game shell: chrome + theme + rules panel + fullscreen ── */
-.game-shell {
-  --game: #fde68a;
-  --game-ink: #2a2018;
-  color: var(--game-ink);
-  height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: 5.5rem clamp(0.9rem, 3vw, 2.5rem) 1rem;
-  background:
-    radial-gradient(ellipse at 85% -12%, color-mix(in srgb, var(--game) 60%, white) 0%, transparent 55%),
-    radial-gradient(ellipse at -12% 105%, color-mix(in srgb, var(--game) 45%, white) 0%, transparent 55%),
-    linear-gradient(180deg, #fffdf8 0%, color-mix(in srgb, var(--game) 22%, white) 100%);
-  overscroll-behavior: contain;
-}
-.game-shell:fullscreen { padding-top: 1.1rem; }
+/* ── Shared game shell ────────────────────────────────────────── */
 
-/* The site shows a custom cursor on desktop (html { cursor: none }). Game
-   elements set their own cursor: pointer, which would draw the native arrow
-   on top of the custom dot — so suppress it and let the custom cursor lead.
-   In fullscreen the custom-cursor element lives OUTSIDE the fullscreen element
-   and can't render, so there we restore the real cursor. */
+/* ─── Custom cursor ────────────────────────────────────────────
+   The site hides the native cursor on desktop (html { cursor:none }).
+   In fullscreen the custom-cursor element is outside the fullscreen
+   root and can't render, so we restore the native cursor there.     */
 @media (min-width: 1024px) {
   .game-shell:not(.is-fs), .game-shell:not(.is-fs) * { cursor: none !important; }
   .game-shell.is-fs { cursor: auto; }
@@ -32,67 +15,175 @@
   .game-shell.is-fs .g2048-board { cursor: pointer; }
 }
 
-/* ── Top bar ──────────────────────────────────────────────────── */
+/* ─── Root shell ───────────────────────────────────────────────
+   Desktop + tablet (> 860 px): fixed viewport, no scroll.
+   Mobile (≤ 860 px): height auto, page scrolls for the aside.
+   Fullscreen (any): always viewport-height, no scroll.             */
+.game-shell {
+  --game: #fde68a;
+  --game-ink: #2a2018;
+  color: var(--game-ink);
+
+  /* Desktop: fill the viewport exactly. */
+  height: 100dvh;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  /* Horizontal padding scales with the viewport; vertical is fixed. */
+  padding:
+    5.5rem          /* top  — clears the fixed site header   */
+    clamp(0.75rem, 3vw, 2.5rem)   /* sides */
+    clamp(0.5rem, 1.5vh, 1rem);   /* bottom */
+
+  background:
+    radial-gradient(ellipse at 85% -12%, color-mix(in srgb, var(--game) 60%, white) 0%, transparent 55%),
+    radial-gradient(ellipse at -12% 105%, color-mix(in srgb, var(--game) 45%, white) 0%, transparent 55%),
+    linear-gradient(180deg, #fffdf8 0%, color-mix(in srgb, var(--game) 22%, white) 100%);
+  overscroll-behavior: contain;
+}
+
+/* Fullscreen on any device: compact top, full height, no scroll. */
+.game-shell:fullscreen,
+.game-shell.is-fs {
+  height: 100dvh;
+  overflow: hidden;
+  padding-top: 0.9rem;
+}
+
+/* ─── Top bar ──────────────────────────────────────────────────
+   Left: title block.  Right: stats + action buttons + icons.
+   Both sides wrap independently so neither ever clips off-screen. */
 .game-topbar {
   flex: 0 0 auto;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem 1rem;
+  gap: 0.5rem 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 0.8rem;
+  /* Limit vertical growth so the top bar never steals board space. */
+  margin-bottom: 0.5rem;
 }
-.game-titlewrap { min-width: 0; flex: 1 1 auto; }
-.game-back { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3em; opacity: 0.6; color: inherit; transition: opacity 160ms ease; }
+
+.game-titlewrap {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.game-back {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  opacity: 0.6;
+  color: inherit;
+  transition: opacity 160ms ease;
+}
 .game-back:hover { opacity: 1; }
-.game-title { font-size: clamp(1.4rem, 1rem + 2vw, 2.4rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.04; margin-top: 0.15rem; }
-.game-subtitle { font-size: 0.72rem; opacity: 0.6; margin-top: 0.15rem; }
+.game-title {
+  /* Shrinks on very narrow screens so it never wraps to 3 lines. */
+  font-size: clamp(1.1rem, 5vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.game-subtitle {
+  font-size: 0.68rem;
+  opacity: 0.6;
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.game-topbar-aside { display: flex; align-items: center; gap: 0.5rem 0.75rem; flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
-/* flex-wrap is the key to never overflowing: every row of widgets can break
-   onto the next line on a narrow screen instead of running off the edge. */
-.game-toolbar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
+/* Right side: stats + toolbar, both wrapping. */
+.game-topbar-aside {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  max-width: 100%;
+}
 
-/* Shared stat chips — consistent across every game. */
-.game-stats { display: flex; align-items: stretch; gap: 0.4rem; flex-wrap: wrap; min-width: 0; }
+.game-stats {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 .game-stat {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   line-height: 1.08;
-  padding: 0.42rem 1rem;
-  border-radius: 0.7rem;
+  /* Padding scales down on narrow screens. */
+  padding: 0.3rem clamp(0.5rem, 2.5vw, 1rem);
+  border-radius: 0.65rem;
   background: rgba(255, 255, 255, 0.62);
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 8px 18px -12px rgba(0, 0, 0, 0.4);
   transition: background 180ms ease, transform 180ms ease;
 }
-.game-stat i { font-style: normal; font-family: "Geologica", sans-serif; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.55; }
-.game-stat b { font-size: 1.3rem; font-weight: 700; white-space: nowrap; }
-.game-stat.active { background: #fff; transform: translateY(-2px); box-shadow: 0 12px 22px -14px rgba(0, 0, 0, 0.5); }
+.game-stat i {
+  font-style: normal;
+  font-family: "Geologica", sans-serif;
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+}
+/* Value scales with the viewport so it never pushes chips off-screen. */
+.game-stat b {
+  font-size: clamp(0.88rem, 3.5vw, 1.3rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.game-stat.active {
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px -14px rgba(0, 0, 0, 0.5);
+}
+
+.game-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .game-fsbtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.4rem;
+  height: 2.4rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.7rem;
+  border-radius: 0.65rem;
   background: rgba(255, 255, 255, 0.65);
   color: var(--game-ink);
   cursor: pointer;
+  flex-shrink: 0;
   transition: transform 120ms ease, background 160ms ease;
 }
-.game-fsbtn svg { width: 19px; height: 19px; }
+.game-fsbtn svg { width: 17px; height: 17px; }
 .game-fsbtn:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.9); }
 
-/* ── Body: stage + aside ──────────────────────────────────────── */
+/* ─── Body: stage + aside ──────────────────────────────────────
+   Desktop: side by side (stage fills, aside is fixed-width panel).
+   Mobile: stacked (stage auto-heights, aside scrolls below).      */
 .game-body {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
-  gap: clamp(0.8rem, 2vw, 1.5rem);
+  gap: clamp(0.6rem, 2vw, 1.5rem);
 }
 .game-stage {
   flex: 1 1 auto;
@@ -101,30 +192,45 @@
   display: flex;
   flex-direction: column;
 }
-
 .game-aside {
-  flex: 0 0 clamp(240px, 24vw, 330px);
+  flex: 0 0 clamp(220px, 22vw, 310px);
   overflow-y: auto;
   border-radius: 1.1rem;
   background: rgba(255, 255, 255, 0.52);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 1.1rem 1.25rem;
+  padding: 1rem 1.15rem;
   box-shadow: 0 18px 44px -30px rgba(0, 0, 0, 0.45);
   scrollbar-width: thin;
 }
 
-.game-info { display: flex; flex-direction: column; gap: 1.1rem; }
-.game-info-h { font-family: "Geologica", sans-serif; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.55; margin-bottom: 0.4rem; }
-.game-info-p { font-size: 0.86rem; line-height: 1.55; opacity: 0.85; }
-.game-info-steps { display: flex; flex-direction: column; gap: 0.4rem; padding-left: 1.1rem; list-style: decimal; font-size: 0.86rem; line-height: 1.45; opacity: 0.85; }
-.game-info-tips { display: flex; flex-direction: column; gap: 0.4rem; padding-left: 1.1rem; list-style: disc; font-size: 0.84rem; line-height: 1.45; opacity: 0.8; }
-.game-info-keys { display: flex; flex-direction: column; gap: 0.45rem; }
-.game-info-keys li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; }
+/* ─── Info panel content ───────────────────────────────────────── */
+.game-info { display: flex; flex-direction: column; gap: 1rem; }
+.game-info-h {
+  font-family: "Geologica", sans-serif;
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  opacity: 0.55;
+  margin-bottom: 0.35rem;
+}
+.game-info-p { font-size: 0.84rem; line-height: 1.55; opacity: 0.85; }
+.game-info-steps {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  padding-left: 1.1rem; list-style: decimal;
+  font-size: 0.84rem; line-height: 1.45; opacity: 0.85;
+}
+.game-info-tips {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  padding-left: 1.1rem; list-style: disc;
+  font-size: 0.82rem; line-height: 1.45; opacity: 0.8;
+}
+.game-info-keys { display: flex; flex-direction: column; gap: 0.4rem; }
+.game-info-keys li { display: flex; align-items: center; gap: 0.55rem; font-size: 0.8rem; }
 .game-info-keys kbd {
   font-family: "Geologica", sans-serif;
-  font-size: 0.7rem;
-  padding: 0.18rem 0.5rem;
-  border-radius: 0.4rem;
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
   background: rgba(26, 20, 19, 0.9);
   color: #fdf6e3;
   white-space: nowrap;
@@ -132,37 +238,78 @@
 }
 .game-info-keys span { opacity: 0.8; }
 
-.game-info-legend { display: flex; flex-direction: column; gap: 0.5rem; }
-.game-info-legend li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.84rem; }
+.game-info-legend { display: flex; flex-direction: column; gap: 0.45rem; }
+.game-info-legend li { display: flex; align-items: center; gap: 0.55rem; font-size: 0.82rem; }
 .game-legend-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 1.35rem;
-  border-radius: 0.45rem;
+  width: 1.9rem;
+  height: 1.25rem;
+  border-radius: 0.4rem;
   color: #fff;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
   box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.45);
 }
 .game-info-legend em { font-style: normal; opacity: 0.6; }
 
-/* ── Mobile: stack, allow page scroll for the info panel ──────── */
+/* ─── Mobile (≤ 860 px) ────────────────────────────────────────
+   The shell is taller than the screen; the page scrolls for aside. */
 @media (max-width: 860px) {
-  .game-shell { height: auto; min-height: 100dvh; overflow-x: clip; overflow-y: visible; padding-top: 4.6rem; }
-  .game-body { flex-direction: column; gap: 0.9rem; }
-  /* Size the stage to the game itself (not the full viewport) so the rules
-     panel sits right beneath it instead of a screen away. */
-  .game-stage { flex: 0 0 auto; min-height: 0; }
-  .game-aside { flex: none; width: 100%; max-height: none; overflow: visible; }
-  /* In fullscreen on a phone the rules panel just gets in the way: hide it and
-     centre the game so it isn't stuck at the top with empty space below. */
-  .game-shell:fullscreen { height: 100dvh; min-height: 0; overflow: hidden; }
-  .game-shell:fullscreen .game-aside { display: none; }
+  .game-shell {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: clip;
+    overflow-y: visible;
+    padding-top: 4.4rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .game-topbar { margin-bottom: 0.4rem; }
+
+  .game-body {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Stage sizes to game content, not the viewport. */
+  .game-stage {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+
+  .game-aside {
+    flex: none;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* ── Mobile fullscreen: game fills the screen, aside hidden ── */
+  .game-shell:fullscreen,
+  .game-shell.is-fs {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding-top: 0.9rem;
+    padding-bottom: 0.6rem;
+  }
+  .game-shell:fullscreen .game-aside,
+  .game-shell.is-fs .game-aside { display: none; }
+
+  /* Stage re-expands to fill the whole height when aside is gone. */
+  .game-shell:fullscreen .game-stage,
+  .game-shell.is-fs .game-stage { flex: 1 1 auto; }
+
+  /* Centre the game content in the remaining space. */
   .game-shell.is-fs .game-body { justify-content: center; }
 }
-@media (max-height: 560px) {
-  .game-shell { padding-top: 4rem; }
+
+/* Very short landscape phones. */
+@media (max-height: 480px) {
+  .game-shell { padding-top: 3.8rem; }
+  .game-topbar { margin-bottom: 0.2rem; }
+  .game-stat b { font-size: 0.88rem; }
 }
