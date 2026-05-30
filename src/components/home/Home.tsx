@@ -122,6 +122,7 @@ const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const Home = () => {
   const container = useRef<HTMLDivElement>(null);
+  const overlay = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP();
   const reduced = useReducedMotion();
 
@@ -143,12 +144,17 @@ const Home = () => {
     );
   }, { scope: container, dependencies: [reduced] });
 
-  const handleMouseEnter = contextSafe((color: string) => {
-    gsap.to(container.current, { backgroundColor: color, duration: 0.4, ease: "power3.out" });
+  // Hover — blend the project's accent at ~60 % so the warm gradient shows
+  // through underneath (parse the hex to an rgba so opacity can be controlled).
+  const handleMouseEnter = contextSafe((hex: string) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    gsap.to(overlay.current, { backgroundColor: `rgba(${r},${g},${b},0.6)`, duration: 0.4, ease: "power3.out" });
   });
 
   const handleMouseLeave = contextSafe(() => {
-    gsap.to(container.current, { backgroundColor: "white", duration: 0.4, ease: "power3.out" });
+    gsap.to(overlay.current, { backgroundColor: "rgba(255,255,255,0)", duration: 0.4, ease: "power3.out" });
   });
 
   return (
@@ -158,9 +164,20 @@ const Home = () => {
       initial={reduced ? false : "initial"}
       animate={reduced ? undefined : "animate"}
       exit={reduced ? undefined : "exit"}
-      className="min-h-screen bg-white flex justify-center items-start pt-28 pb-32"
+      className="warm-gradient relative min-h-screen flex justify-center items-start pt-28 pb-32"
     >
-      <ul className="w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12 divide-y divide-black/10">
+      <div ref={overlay} className="absolute inset-0 pointer-events-none transition-none" style={{ backgroundColor: "rgba(255,255,255,0)" }} aria-hidden />
+      <div className="relative z-10 w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12">
+        <header className="mb-10 md:mb-14">
+          <p className="mono text-xs uppercase tracking-[0.2em] text-zinc-500">/ work</p>
+          <h1 className="mt-2 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-semibold tracking-tight">
+            Things I've built.
+          </h1>
+          <p className="mono text-sm xl:text-base text-zinc-500 mt-3 max-w-2xl">
+            A selection of full-stack products I've shipped — from real-time fintech platforms to multi-role portals.
+          </p>
+        </header>
+        <ul className="divide-y divide-black/10">
         {projects.map((project, index) => (
           /* ParallaxRow is a plain motion.li with only the y spring — no opacity/animate */
           <ParallaxRow key={index}>
@@ -217,7 +234,8 @@ const Home = () => {
             </div>
           </ParallaxRow>
         ))}
-      </ul>
+        </ul>
+      </div>
     </motion.main>
   );
 };
