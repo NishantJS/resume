@@ -50,6 +50,32 @@ const MutedIcon = () => (
     <path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M22 9l-6 6M16 9l6 6" />
   </svg>
 );
+const HelpIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <circle cx="12" cy="12" r="9.2" />
+    <path d="M9.2 9.2a2.8 2.8 0 1 1 3.9 2.6c-.8.36-1.1.9-1.1 1.7v.3" />
+    <circle cx="12" cy="17.2" r="0.4" fill="currentColor" />
+  </svg>
+);
+
+const ControlChips: FC<{ controls: NonNullable<GameInfo["controls"]> }> = ({ controls }) => (
+  <ul className="game-info-keys">
+    {controls.map((c, i) => (
+      <li key={i}><kbd>{c.keys}</kbd><span>{c.desc}</span></li>
+    ))}
+  </ul>
+);
+
+const LegendList: FC<{ legend: NonNullable<GameInfo["legend"]> }> = ({ legend }) => (
+  <ul className="game-info-legend">
+    {legend.map((l, i) => (
+      <li key={i}>
+        <span className="game-legend-chip" style={{ background: l.swatch }}>{l.glyph}</span>
+        <span>{l.label}{l.bad ? <em> — avoid</em> : null}</span>
+      </li>
+    ))}
+  </ul>
+);
 
 const InfoPanel: FC<{ info: GameInfo }> = ({ info }) => (
   <div className="game-info">
@@ -66,24 +92,13 @@ const InfoPanel: FC<{ info: GameInfo }> = ({ info }) => (
     {info.controls && info.controls.length > 0 && (
       <section>
         <h2 className="game-info-h">Controls</h2>
-        <ul className="game-info-keys">
-          {info.controls.map((c, i) => (
-            <li key={i}><kbd>{c.keys}</kbd><span>{c.desc}</span></li>
-          ))}
-        </ul>
+        <ControlChips controls={info.controls} />
       </section>
     )}
     {info.legend && info.legend.length > 0 && (
       <section>
         <h2 className="game-info-h">Power-ups</h2>
-        <ul className="game-info-legend">
-          {info.legend.map((l, i) => (
-            <li key={i}>
-              <span className="game-legend-chip" style={{ background: l.swatch }}>{l.glyph}</span>
-              <span>{l.label}{l.bad ? <em> — avoid</em> : null}</span>
-            </li>
-          ))}
-        </ul>
+        <LegendList legend={info.legend} />
       </section>
     )}
     {info.tips && info.tips.length > 0 && (
@@ -97,6 +112,55 @@ const InfoPanel: FC<{ info: GameInfo }> = ({ info }) => (
   </div>
 );
 
+/* ── First-visit / on-demand "How to play" overlay ─────────────
+   On mobile the info aside sits below the fold, so without this a new
+   player gets no guidance at all. Shown once per game (localStorage),
+   reopenable any time from the ? button in the top bar.              */
+const HelpOverlay: FC<{ title: string; info: GameInfo; onClose: () => void }> = ({ title, info, onClose }) => {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="game-help-backdrop" onClick={onClose} role="presentation">
+      <div
+        className="game-help-card"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`How to play ${title}`}
+        onClick={e => e.stopPropagation()}
+      >
+        <p className="game-help-kicker mono">How to play</p>
+        <h2 className="game-help-title">{title}</h2>
+        <p className="game-help-about">{info.about}</p>
+        <ol className="game-help-steps">
+          {info.howTo.map((s, i) => (
+            <li key={i} style={{ ["--i" as string]: i } as React.CSSProperties}>
+              <span className="game-help-num" aria-hidden>{i + 1}</span>
+              <span>{s}</span>
+            </li>
+          ))}
+        </ol>
+        {info.controls && info.controls.length > 0 && (
+          <div className="game-help-controls">
+            {info.controls.map((c, i) => (
+              <span key={i} className="game-help-kbd"><kbd>{c.keys}</kbd>{c.desc}</span>
+            ))}
+          </div>
+        )}
+        {info.legend && info.legend.length > 0 && <LegendList legend={info.legend} />}
+        <button type="button" className="game-help-cta" onClick={onClose} autoFocus>
+          Got it — let&rsquo;s play
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const helpSeenKey = (slug: string) => `game-help-seen:${slug}`;
+
 const GameShell: FC<GameShellProps> = ({ slug, subtitle, info, stats, toolbar, children }) => {
   const meta = games.find(g => g.slug === slug);
   const title = meta?.title ?? "Game";
@@ -105,6 +169,9 @@ const GameShell: FC<GameShellProps> = ({ slug, subtitle, info, stats, toolbar, c
   const rootRef = useRef<HTMLElement>(null);
   const [isFs, setIsFs] = useState(false);
   const [muted, setMuted] = useState(isMuted());
+  const [showHelp, setShowHelp] = useState<boolean>(() => {
+    try { return localStorage.getItem(helpSeenKey(slug)) == null; } catch { return false; }
+  });
 
   useEffect(() => {
     const onFs = () => setIsFs(!!document.fullscreenElement);
@@ -121,15 +188,27 @@ const GameShell: FC<GameShellProps> = ({ slug, subtitle, info, stats, toolbar, c
     else void el.requestFullscreen?.();
   }, []);
 
+  const closeHelp = useCallback(() => {
+    setShowHelp(false);
+    try { localStorage.setItem(helpSeenKey(slug), "1"); } catch { /* private mode */ }
+  }, [slug]);
+
   return (
     <main
       ref={rootRef}
       className={`game-shell${isFs ? " is-fs" : ""}`}
       style={{ ["--game" as string]: color } as React.CSSProperties}
     >
+      {/* Ambient backdrop — soft drifting colour orbs + film grain. */}
+      <div className="game-ambient" aria-hidden>
+        <span className="game-orb game-orb-a" />
+        <span className="game-orb game-orb-b" />
+        <span className="game-grain" />
+      </div>
+
       <div className="game-topbar">
         <div className="game-titlewrap">
-          <Link to="/games" viewTransition className="game-back mono">← Games</Link>
+          <Link to="/games" viewTransition className="game-back mono"><span aria-hidden>←</span> Games</Link>
           <h1 className="game-title">{title}</h1>
           {subtitle != null && <p className="game-subtitle mono">{subtitle}</p>}
         </div>
@@ -137,6 +216,15 @@ const GameShell: FC<GameShellProps> = ({ slug, subtitle, info, stats, toolbar, c
           {stats != null && <div className="game-stats">{stats}</div>}
           <div className="game-toolbar">
             {toolbar}
+            <button
+              type="button"
+              className="game-fsbtn"
+              onClick={() => setShowHelp(true)}
+              aria-label="How to play"
+              title="How to play"
+            >
+              <HelpIcon />
+            </button>
             <button
               type="button"
               className="game-fsbtn"
@@ -165,6 +253,8 @@ const GameShell: FC<GameShellProps> = ({ slug, subtitle, info, stats, toolbar, c
           <InfoPanel info={info} />
         </aside>
       </div>
+
+      {showHelp && <HelpOverlay title={title} info={info} onClose={closeHelp} />}
     </main>
   );
 };

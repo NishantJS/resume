@@ -23,6 +23,7 @@
   --game: #fde68a;
   --game-ink: #2a2018;
   color: var(--game-ink);
+  position: relative;
 
   /* Desktop: fill the viewport exactly. */
   height: 100dvh;
@@ -52,6 +53,51 @@
   padding-top: 0.9rem;
 }
 
+/* ─── Ambient backdrop: drifting colour orbs + film grain ─────── */
+.game-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.game-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56px);
+  opacity: 0.5;
+  will-change: transform;
+}
+.game-orb-a {
+  width: 46vmin; height: 46vmin;
+  top: -14vmin; right: -10vmin;
+  background: radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--game) 90%, white), transparent 70%);
+  animation: game-orb-a 16s ease-in-out infinite alternate;
+}
+.game-orb-b {
+  width: 38vmin; height: 38vmin;
+  bottom: -12vmin; left: -9vmin;
+  background: radial-gradient(circle at 60% 60%, color-mix(in srgb, var(--game) 75%, white), transparent 70%);
+  animation: game-orb-b 21s ease-in-out infinite alternate;
+}
+@keyframes game-orb-a {
+  to { transform: translate(-7vmin, 6vmin) scale(1.14); }
+}
+@keyframes game-orb-b {
+  to { transform: translate(6vmin, -5vmin) scale(1.1); }
+}
+.game-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+}
+
+/* Content layers sit above the ambient backdrop. */
+.game-topbar, .game-body { position: relative; z-index: 1; }
+
 /* ─── Top bar ──────────────────────────────────────────────────
    Left: title block.  Right: stats + action buttons + icons.
    Both sides wrap independently so neither ever clips off-screen. */
@@ -64,6 +110,7 @@
   flex-wrap: wrap;
   /* Limit vertical growth so the top bar never steals board space. */
   margin-bottom: 0.5rem;
+  animation: game-fade-down 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .game-titlewrap {
@@ -71,6 +118,9 @@
   flex: 1 1 auto;
 }
 .game-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -78,7 +128,9 @@
   color: inherit;
   transition: opacity 160ms ease;
 }
+.game-back span { transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); }
 .game-back:hover { opacity: 1; }
+.game-back:hover span { transform: translateX(-3px); }
 .game-title {
   /* Shrinks on very narrow screens so it never wraps to 3 lines. */
   font-size: clamp(1.1rem, 5vw, 2.4rem);
@@ -89,6 +141,21 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* Per-game identity dot before the title. */
+.game-title::before {
+  content: "";
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  margin-right: 0.32em;
+  margin-bottom: 0.06em;
+  border-radius: 50%;
+  vertical-align: baseline;
+  background: radial-gradient(circle at 32% 30%, color-mix(in srgb, var(--game) 45%, white), color-mix(in srgb, var(--game) 80%, #5b4a2f));
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 0 14px 1px color-mix(in srgb, var(--game) 70%, transparent);
 }
 .game-subtitle {
   font-size: 0.68rem;
@@ -125,10 +192,12 @@
   line-height: 1.08;
   /* Padding scales down on narrow screens. */
   padding: 0.3rem clamp(0.5rem, 2.5vw, 1rem);
-  border-radius: 0.65rem;
+  border-radius: 0.7rem;
   background: rgba(255, 255, 255, 0.62);
   border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 8px 18px -12px rgba(0, 0, 0, 0.4);
+  border-top: 3px solid color-mix(in srgb, var(--game) 80%, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 8px 18px -12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
   transition: background 180ms ease, transform 180ms ease;
 }
 .game-stat i {
@@ -144,11 +213,12 @@
   font-size: clamp(0.88rem, 3.5vw, 1.3rem);
   font-weight: 700;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .game-stat.active {
   background: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 12px 22px -14px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 22px -14px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .game-toolbar {
@@ -166,15 +236,24 @@
   width: 2.4rem;
   height: 2.4rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.65rem;
+  border-radius: 0.7rem;
   background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(8px);
   color: var(--game-ink);
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 120ms ease, background 160ms ease;
+  transition: transform 120ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 .game-fsbtn svg { width: 17px; height: 17px; }
-.game-fsbtn:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.9); }
+.game-fsbtn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 16px -10px rgba(0, 0, 0, 0.35);
+}
+.game-fsbtn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--game) 70%, #1a1413);
+  outline-offset: 2px;
+}
 
 /* ─── Body: stage + aside ──────────────────────────────────────
    Desktop: side by side (stage fills, aside is fixed-width panel).
@@ -191,39 +270,98 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  animation: game-stage-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .game-aside {
   flex: 0 0 clamp(220px, 22vw, 310px);
   overflow-y: auto;
   border-radius: 1.1rem;
-  background: rgba(255, 255, 255, 0.52);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 1rem 1.15rem;
-  box-shadow: 0 18px 44px -30px rgba(0, 0, 0, 0.45);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  padding: 1.05rem 1.15rem;
+  box-shadow: 0 18px 44px -30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px) saturate(1.05);
   scrollbar-width: thin;
+  animation: game-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+@keyframes game-fade-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes game-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes game-stage-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Shared by every game's result overlay (shell css always loads first). */
+@keyframes game-pop-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* ─── Info panel content ───────────────────────────────────────── */
-.game-info { display: flex; flex-direction: column; gap: 1rem; }
+.game-info { display: flex; flex-direction: column; gap: 1.05rem; }
+.game-info section + section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 0.9rem;
+}
 .game-info-h {
   font-family: "Geologica", sans-serif;
   font-size: 0.63rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
   opacity: 0.55;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
 }
 .game-info-p { font-size: 0.84rem; line-height: 1.55; opacity: 0.85; }
+
+/* Numbered steps with accent counters instead of plain decimals. */
 .game-info-steps {
-  display: flex; flex-direction: column; gap: 0.4rem;
-  padding-left: 1.1rem; list-style: decimal;
-  font-size: 0.84rem; line-height: 1.45; opacity: 0.85;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  list-style: none;
+  counter-reset: step;
+  font-size: 0.84rem; line-height: 1.45; opacity: 0.88;
 }
+.game-info-steps li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 1.65rem;
+}
+.game-info-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0.12em;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: "Geologica", sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--game-ink);
+  background: color-mix(in srgb, var(--game) 60%, white);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 5px -2px rgba(0, 0, 0, 0.35);
+}
+
 .game-info-tips {
   display: flex; flex-direction: column; gap: 0.4rem;
-  padding-left: 1.1rem; list-style: disc;
+  list-style: none;
   font-size: 0.82rem; line-height: 1.45; opacity: 0.8;
 }
+.game-info-tips li { position: relative; padding-left: 1.1rem; }
+.game-info-tips li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  opacity: 0.55;
+}
+
 .game-info-keys { display: flex; flex-direction: column; gap: 0.4rem; }
 .game-info-keys li { display: flex; align-items: center; gap: 0.55rem; font-size: 0.8rem; }
 .game-info-keys kbd {
@@ -235,6 +373,7 @@
   color: #fdf6e3;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 .game-info-keys span { opacity: 0.8; }
 
@@ -255,6 +394,146 @@
 }
 .game-info-legend em { font-style: normal; opacity: 0.6; }
 
+/* ─── "How to play" overlay ────────────────────────────────────
+   First visit (per game) + reopenable from the ? toolbar button.  */
+.game-help-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: color-mix(in srgb, var(--game) 12%, rgba(24, 19, 14, 0.55));
+  backdrop-filter: blur(10px) saturate(1.1);
+  animation: game-help-fade 240ms ease both;
+}
+.game-help-card {
+  width: min(33rem, 100%);
+  max-height: min(86dvh, 46rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  border-radius: 1.4rem;
+  background:
+    radial-gradient(ellipse at 90% -8%, color-mix(in srgb, var(--game) 38%, white) 0%, transparent 55%),
+    linear-gradient(180deg, #fffdf8 0%, color-mix(in srgb, var(--game) 16%, white) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  padding: clamp(1.4rem, 4vw, 2.1rem);
+  animation: game-help-pop 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.game-help-kicker {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: color-mix(in srgb, var(--game) 40%, #4a3a24);
+}
+.game-help-title {
+  margin-top: 0.3rem;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.game-help-about {
+  margin-top: 0.55rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.78;
+}
+.game-help-steps {
+  margin-top: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  list-style: none;
+}
+.game-help-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 6px 16px -12px rgba(0, 0, 0, 0.35);
+  animation: game-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(120ms + var(--i, 0) * 70ms);
+}
+.game-help-num {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  margin-top: 0.05rem;
+  border-radius: 50%;
+  font-family: "Geologica", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game) 55%, white), color-mix(in srgb, var(--game) 90%, #6b5836));
+  color: var(--game-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 3px 7px -3px rgba(0, 0, 0, 0.4);
+}
+.game-help-controls {
+  margin-top: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.game-help-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  opacity: 0.85;
+  padding: 0.3rem 0.6rem 0.3rem 0.3rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.game-help-kbd kbd {
+  font-family: "Geologica", sans-serif;
+  font-size: 0.66rem;
+  padding: 0.16rem 0.45rem;
+  border-radius: 0.35rem;
+  background: rgba(26, 20, 19, 0.9);
+  color: #fdf6e3;
+  white-space: nowrap;
+  box-shadow: inset 0 -1.5px 0 rgba(0, 0, 0, 0.55);
+}
+.game-help-card .game-info-legend { margin-top: 1.1rem; }
+.game-help-cta {
+  margin-top: 1.3rem;
+  width: 100%;
+  border: 0;
+  padding: 0.85rem 1.2rem;
+  border-radius: 999px;
+  background: #1a1413;
+  color: #fdf6e3;
+  font-family: "Geologica", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
+  transition: transform 140ms ease, filter 160ms ease;
+}
+.game-help-cta:hover { transform: translateY(-2px); filter: brightness(1.15); }
+.game-help-cta:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--game) 75%, #1a1413);
+  outline-offset: 3px;
+}
+@keyframes game-help-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes game-help-pop {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* ─── Mobile (≤ 860 px) ────────────────────────────────────────
    The shell is taller than the screen; the page scrolls for aside. */
 @media (max-width: 860px) {
@@ -266,6 +545,15 @@
     padding-top: 4.4rem;
     padding-bottom: 1.5rem;
   }
+
+  /* Heavy compositing (blur filters, grain blending, backdrop blurs)
+     hurts phone GPUs — the gradient backdrop carries the look instead. */
+  .game-orb, .game-grain { display: none; }
+  .game-aside, .game-stat, .game-fsbtn, .game-help-backdrop { backdrop-filter: none; }
+
+  /* Orbs are sized for a viewport-filling shell — pin the ambient
+     layer to the first screenful so it never stretches with content. */
+  .game-ambient { height: 100dvh; inset: auto 0 auto 0; top: 0; }
 
   .game-topbar { margin-bottom: 0.4rem; }
 
@@ -312,4 +600,11 @@
   .game-shell { padding-top: 3.8rem; }
   .game-topbar { margin-bottom: 0.2rem; }
   .game-stat b { font-size: 0.88rem; }
+}
+
+/* ─── Reduced motion: no drift, no entrances ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .game-orb-a, .game-orb-b { animation: none; }
+  .game-topbar, .game-stage, .game-aside,
+  .game-help-backdrop, .game-help-card, .game-help-steps li { animation: none; }
 }
