@@ -251,8 +251,9 @@ const Home = () => {
                   {project.description}
                 </p>
 
-                {/* Skill tags — revealed on hover; always visible on touch screens */}
-                <div className="ml-7 sm:ml-8 md:ml-9 overflow-hidden max-h-0 group-hover:max-h-12 max-md:max-h-12 transition-all duration-300 ease-out">
+                {/* Skill tags — hover-revealed on desktop; always fully visible
+                    on mobile (≤767px), where two wrapped rows used to be clipped. */}
+                <div className="ml-7 sm:ml-8 md:ml-9 overflow-hidden max-h-0 group-hover:max-h-24 transition-all duration-300 ease-out max-md:!max-h-none max-md:!overflow-visible">
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {project.skills.slice(0, 6).map(skill => (
                       <span
