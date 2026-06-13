@@ -51,12 +51,19 @@ const Contact: FC = () => {
 
     // Each character rises with a 3D tilt and ignites in an accent colour
     // (purple ↔ cyan, matching the swoosh gradient) before settling to white
-    // — a calmer echo of the name hero's lock-in flash.
+    // — a calmer echo of the name hero's lock-in flash. The whole reveal is
+    // SCRUBBED to scroll: letters rise and settle as the heading travels up
+    // the viewport, and re-hide when you scroll back.
     const accents = ["#a855f7", "#22d3ee"];
     gsap.set(split.chars, { transformPerspective: 500 });
 
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: el, start: "top 72%", once: true },
+      scrollTrigger: {
+        trigger: heading,
+        start: "top 85%",
+        end: "top 38%",
+        scrub: 0.6,
+      },
     });
     tl.from(split.chars, {
       yPercent: 120,
@@ -74,10 +81,15 @@ const Contact: FC = () => {
         0.12 + i * 0.022,
       );
     });
-    tl.fromTo(rest,
+
+    // Supporting copy + CTA just fade up once when the section enters — they
+    // sit below the heading and shouldn't depend on the scrub position.
+    gsap.fromTo(rest,
       { opacity: 0, y: 18 },
-      { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.12 },
-      "<+0.3",
+      {
+        opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.12,
+        scrollTrigger: { trigger: el, start: "top 55%", once: true },
+      },
     );
 
     // The swoosh is scrubbed to scroll — it strokes in as it rises through
