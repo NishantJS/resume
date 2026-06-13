@@ -2,8 +2,15 @@ import { useEffect, useRef, FC } from "react";
 import Intro from "./Intro";
 import Paragraph from "./AboutText";
 import { Skills } from "./Skills";
+import VelocityMarquee from "./VelocityMarquee";
+import StatsStrip from "./StatsStrip";
+import Contact from "./Contact";
 import { motion, useScroll, useReducedMotion } from "motion/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -74,90 +81,153 @@ const EDUCATION = [
   },
 ];
 
-const SectionDivider = ({ label }: { label: string }) => (
-  <div className="px-6 md:px-12 xl:px-16 pt-20 pb-10 max-w-5xl 2xl:max-w-screen-xl mx-auto w-full">
-    <div className="flex items-center gap-5">
-      <p className="mono text-xs uppercase tracking-[0.22em] text-gray-400 shrink-0">{label}</p>
-      <div className="flex-1 h-px bg-white/10" />
-    </div>
-  </div>
-);
-
-/* Single experience card — animates when 80% in view */
-const ExpCard: FC<{
-  color: string;
-  period: string;
-  title: string;
-  company: string;
-  sub?: string | null;
-  location: string;
-  bullets?: string[];
-}> = ({ color, period, title, company, sub, location, bullets }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
+/* Divider whose rule draws itself in as it scrolls into view. */
+const SectionDivider = ({ label }: { label: string }) => {
+  const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useEffect(() => {
-    const el = cardRef.current;
+  useGSAP(() => {
+    const el = ref.current;
     if (!el) return;
-
-    const line    = el.querySelector<HTMLElement>(".acc-line");
-    const dot     = el.querySelector<HTMLElement>(".acc-dot");
-    const content = el.querySelectorAll<HTMLElement>(".acc-text");
-
+    const lab = el.querySelector(".sd-label");
+    const line = el.querySelector(".sd-line");
     if (reduced) {
-      gsap.set([el, line, dot, content], { clearProps: "all" });
+      gsap.set([lab, line], { clearProps: "all", opacity: 1 });
+      return;
+    }
+    // Hide before the trigger fires so nothing flashes at full width.
+    gsap.set(line, { scaleX: 0, transformOrigin: "left center" });
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: el, start: "top 88%", once: true },
+      defaults: { ease: "power3.out" },
+    });
+    tl.fromTo(lab, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.5 })
+      .to(line, { scaleX: 1, duration: 0.9 }, "-=0.25");
+  }, { scope: ref, dependencies: [reduced] });
+
+  return (
+    <div ref={ref} className="px-6 md:px-12 xl:px-16 pt-20 pb-10 max-w-5xl 2xl:max-w-screen-xl mx-auto w-full">
+      <div className="flex items-center gap-5">
+        <p className="sd-label mono text-xs uppercase tracking-[0.22em] text-gray-400 shrink-0 opacity-0">{label}</p>
+        <div className="sd-line flex-1 h-px bg-white/10" />
+      </div>
+    </div>
+  );
+};
+
+/* ── Timeline: shared track that draws itself as you scroll ────
+   A faint rail runs down the whole section; a gradient progress
+   line scrubs along it, and each entry is a glass card hanging
+   off a dot on the rail. */
+const TimelineSection: FC<{ children: React.ReactNode }> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+
+  useGSAP(() => {
+    const el = ref.current;
+    if (!el) return;
+    const progress = el.querySelector<HTMLElement>(".tl-progress");
+    const track = el.querySelector<HTMLElement>(".tl-track");
+    const dots = el.querySelectorAll<HTMLElement>(".tl-dot");
+    if (reduced) {
+      gsap.set(progress, { scaleY: 1 });
+      dots.forEach(d => d.classList.add("on"));
       return;
     }
 
-    gsap.set(el,      { opacity: 0, x: -24 });
-    gsap.set(line,    { scaleY: 0, transformOrigin: "top" });
-    gsap.set(dot,     { scale: 0 });
-    gsap.set(content, { opacity: 0, y: 12 });
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        observer.disconnect();
-
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-        tl.to(el,      { opacity: 1, x: 0,      duration: 0.5 })
-          .to(line,    { scaleY: 1,              duration: 0.5 }, "-=0.3")
-          .to(dot,     { scale: 1,               duration: 0.3 }, "-=0.2")
-          .to(content, { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, "-=0.2");
+    // One scrubbed tween drives the gradient line AND the dots: a dot
+    // lights up the moment the line's rendered edge reaches it, and goes
+    // dark again when you scroll back above it. Reading the rendered
+    // scaleY (not scroll progress) keeps dots in lockstep with the
+    // scrub-smoothed line.
+    gsap.fromTo(progress,
+      { scaleY: 0, transformOrigin: "top center" },
+      {
+        scaleY: 1,
+        ease: "none",
+        onUpdate() {
+          if (!track || !progress) return;
+          const r = track.getBoundingClientRect();
+          const lit = r.top + r.height * Number(gsap.getProperty(progress, "scaleY"));
+          dots.forEach(dot => {
+            const d = dot.getBoundingClientRect();
+            dot.classList.toggle("on", d.top + d.height / 2 <= lit + 1);
+          });
+        },
+        scrollTrigger: { trigger: el, start: "top 78%", end: "bottom 55%", scrub: 0.6 },
       },
-      { threshold: 0.15 }
     );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [reduced]);
+  }, { scope: ref, dependencies: [reduced] });
 
   return (
-    <div ref={cardRef} className="flex gap-5 md:gap-8">
-      {/* Accent line + dot */}
-      <div className="flex flex-col items-center pt-1 shrink-0">
-        <div
-          className="acc-line w-px flex-1 min-h-[4.5rem]"
-          style={{ backgroundColor: color, opacity: 0.5 }}
-        />
-        <div
-          className="acc-dot w-2.5 h-2.5 rounded-full mt-1.5 shrink-0"
-          style={{ backgroundColor: color }}
-        />
-      </div>
+    <div ref={ref} className="relative">
+      <div className="tl-track" aria-hidden><div className="tl-progress" /></div>
+      <div className="space-y-5 md:space-y-6">{children}</div>
+    </div>
+  );
+};
 
-      {/* Text */}
-      <div className="flex-1 pb-4">
-        <p className="acc-text mono text-xs text-gray-500 tabular-nums mb-1.5">{period}</p>
-        <p className="acc-text text-xl md:text-2xl font-semibold leading-snug">{title}</p>
-        <p className="acc-text mono text-base md:text-lg mt-1 font-medium" style={{ color }}>{company}</p>
-        {sub  && <p className="acc-text mono text-sm text-gray-400 mt-0.5">{sub}</p>}
-        <p className="acc-text mono text-sm text-gray-500 mt-0.5">{location}</p>
+/* One timeline entry — works for both experience and education. */
+const TimelineCard: FC<{
+  color: string;
+  period: string;
+  title: string;
+  org: string;
+  sub?: string | null;
+  meta?: string | null;
+  bullets?: string[];
+}> = ({ color, period, title, org, sub, meta, bullets }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+
+  useGSAP(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    // The dot is owned by TimelineSection — it lights with the scrubbed line.
+    const card = el.querySelector<HTMLElement>(".tl-card");
+    const content = el.querySelectorAll<HTMLElement>(".tl-text");
+
+    if (reduced) {
+      gsap.set([card, ...content], { clearProps: "all", opacity: 1 });
+      return;
+    }
+
+    gsap.set(card, { opacity: 0, x: 32 });
+    gsap.set(content, { opacity: 0, y: 12 });
+
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: el, start: "top 80%", once: true },
+      defaults: { ease: "power3.out" },
+    });
+    tl.to(card, { opacity: 1, x: 0, duration: 0.55 })
+      .to(content, { opacity: 1, y: 0, stagger: 0.06, duration: 0.4 }, "-=0.3");
+  }, { scope: cardRef, dependencies: [reduced] });
+
+  return (
+    <div ref={cardRef} className="tl-entry relative pl-9 md:pl-12">
+      <span
+        className="tl-dot"
+        style={{ backgroundColor: color, boxShadow: `0 0 14px 1px ${color}66` }}
+        aria-hidden
+      />
+      <div className="tl-card group" style={{ ["--tl" as string]: color } as React.CSSProperties}>
+        <div className="tl-text flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-3">
+          <span
+            className="mono text-[0.7rem] tabular-nums px-2.5 py-1 rounded-full border"
+            style={{ color, borderColor: `${color}55`, background: `${color}14` }}
+          >
+            {period}
+          </span>
+          {meta && <span className="mono text-xs text-gray-500">{meta}</span>}
+        </div>
+        <p className="tl-text text-xl md:text-2xl font-semibold leading-snug">{title}</p>
+        <p className="tl-text mono text-base md:text-lg mt-1 font-medium" style={{ color }}>{org}</p>
+        {sub && <p className="tl-text mono text-sm text-gray-400 mt-0.5">{sub}</p>}
         {bullets && bullets.length > 0 && (
-          <ul className="acc-text mt-3 space-y-1.5 pl-0">
+          <ul className="tl-text mt-4 space-y-2 pl-0">
             {bullets.map((b, i) => (
-              <li key={i} className="flex gap-2 text-sm text-gray-400 leading-relaxed">
-                <span className="shrink-0 mt-1.5 w-1 h-1 rounded-full" style={{ backgroundColor: color, opacity: 0.7 }} />
+              <li key={i} className="flex gap-2.5 text-sm text-gray-400 leading-relaxed">
+                <span className="shrink-0 mt-[0.55em] w-1 h-1 rounded-full" style={{ backgroundColor: color, opacity: 0.7 }} />
                 <span>{b}</span>
               </li>
             ))}
@@ -168,77 +238,28 @@ const ExpCard: FC<{
   );
 };
 
-/* Single education card */
-const EduCard: FC<{
-  color: string;
-  period: string;
-  degree: string;
-  institution: string;
-  score: string;
-}> = ({ color, period, degree, institution, score }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
-
-    const line    = el.querySelector<HTMLElement>(".acc-line");
-    const dot     = el.querySelector<HTMLElement>(".acc-dot");
-    const content = el.querySelectorAll<HTMLElement>(".acc-text");
-
-    if (reduced) {
-      gsap.set([el, line, dot, content], { clearProps: "all" });
-      return;
-    }
-
-    gsap.set(el,      { opacity: 0, x: -24 });
-    gsap.set(line,    { scaleY: 0, transformOrigin: "top" });
-    gsap.set(dot,     { scale: 0 });
-    gsap.set(content, { opacity: 0, y: 12 });
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        observer.disconnect();
-
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-        tl.to(el,      { opacity: 1, x: 0,      duration: 0.5 })
-          .to(line,    { scaleY: 1,              duration: 0.5 }, "-=0.3")
-          .to(dot,     { scale: 1,               duration: 0.3 }, "-=0.2")
-          .to(content, { opacity: 1, y: 0, stagger: 0.07, duration: 0.4 }, "-=0.2");
-      },
-      { threshold: 0.75 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [reduced]);
-
-  return (
-    <div ref={cardRef} className="flex gap-5 md:gap-8">
-      <div className="flex flex-col items-center pt-1 shrink-0">
-        <div className="acc-line w-px flex-1 min-h-[4.5rem]" style={{ backgroundColor: color, opacity: 0.5 }} />
-        <div className="acc-dot w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: color }} />
-      </div>
-      <div className="flex-1 pb-4">
-        <p className="acc-text mono text-xs text-gray-500 tabular-nums mb-1.5">{period}</p>
-        <p className="acc-text text-xl md:text-2xl font-semibold leading-snug">{degree}</p>
-        <p className="acc-text mono text-base md:text-lg mt-1 font-medium" style={{ color }}>{institution}</p>
-        <p className="acc-text mono text-sm text-gray-400 mt-0.5">{score}</p>
-      </div>
-    </div>
-  );
-};
-
 const About = () => {
   const reduced = useReducedMotion();
+  const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const html = document.documentElement;
     html.style.scrollSnapType = "y proximity";
     return () => { html.style.scrollSnapType = ""; };
   }, []);
+
+  // Orbs drift at different speeds as the page scrolls — cheap depth.
+  useGSAP(() => {
+    const el = mainRef.current;
+    if (!el || reduced) return;
+    el.querySelectorAll<HTMLElement>(".about-orb").forEach((orb, i) => {
+      gsap.to(orb, {
+        yPercent: 26 + i * 14,
+        ease: "none",
+        scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 1.2 },
+      });
+    });
+  }, { scope: mainRef, dependencies: [reduced] });
 
   const textRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: textRef, offset: ["start 0.9", "end 0.9"] });
@@ -251,13 +272,14 @@ const About = () => {
       exit={reduced ? undefined : "exit"}
       className="bg-black text-white relative overflow-x-hidden"
       id="about"
+      ref={mainRef}
     >
       {/* Orbs */}
-      <div className="orb-pulse pointer-events-none absolute top-[8%] -left-40 w-96 h-96 rounded-full blur-3xl"
+      <div className="about-orb orb-pulse pointer-events-none absolute top-[8%] -left-40 w-96 h-96 rounded-full blur-3xl"
            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.14), transparent 70%)" }} />
-      <div className="orb-pulse pointer-events-none absolute top-[55%] -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl"
+      <div className="about-orb orb-pulse pointer-events-none absolute top-[55%] -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl"
            style={{ background: "radial-gradient(circle, rgba(34,211,238,0.09), transparent 70%)", animationDelay: "3s" }} />
-      <div className="orb-pulse pointer-events-none absolute top-[80%] left-1/3 w-72 h-72 rounded-full blur-3xl"
+      <div className="about-orb orb-pulse pointer-events-none absolute top-[80%] left-1/3 w-72 h-72 rounded-full blur-3xl"
            style={{ background: "radial-gradient(circle, rgba(244,63,94,0.07), transparent 70%)", animationDelay: "6s" }} />
 
       {/* Screen 1: Name */}
@@ -270,6 +292,12 @@ const About = () => {
         ))}
       </div>
 
+      {/* ── Quick facts ────────────────────────────────────────────── */}
+      <StatsStrip />
+
+      {/* ── Velocity-reactive marquee ──────────────────────────────── */}
+      <VelocityMarquee />
+
       {/* ── Skills ─────────────────────────────────────────────────── */}
       <SectionDivider label="Skills & Tools" />
       <div className="px-6 md:px-12 xl:px-16 pb-4 max-w-5xl 2xl:max-w-screen-xl mx-auto w-full">
@@ -278,37 +306,42 @@ const About = () => {
 
       {/* ── Experience ──────────────────────────────────────────────── */}
       <SectionDivider label="Experience" />
-      <section className="px-6 md:px-12 xl:px-16 pb-4 max-w-5xl 2xl:max-w-screen-xl mx-auto w-full space-y-6">
-        {EXPERIENCE.map((exp) => (
-          <ExpCard
-            key={exp.company}
-            color={exp.color}
-            period={exp.period}
-            title={exp.role}
-            company={exp.company}
-            sub={exp.sub}
-            location={exp.location}
-            bullets={exp.bullets}
-          />
-        ))}
+      <section className="px-6 md:px-12 xl:px-16 pb-4 max-w-5xl 2xl:max-w-screen-xl mx-auto w-full">
+        <TimelineSection>
+          {EXPERIENCE.map((exp) => (
+            <TimelineCard
+              key={exp.company}
+              color={exp.color}
+              period={exp.period}
+              title={exp.role}
+              org={exp.company}
+              sub={exp.sub}
+              meta={exp.location}
+              bullets={exp.bullets}
+            />
+          ))}
+        </TimelineSection>
       </section>
 
       {/* ── Education ─────────────────────────────────────────────── */}
       <SectionDivider label="Education" />
-      <section className="px-6 md:px-12 xl:px-16 pb-4 max-w-5xl 2xl:max-w-screen-xl mx-auto w-full space-y-6">
-        {EDUCATION.map((edu) => (
-          <EduCard
-            key={edu.institution}
-            color={edu.color}
-            period={edu.period}
-            degree={edu.degree}
-            institution={edu.institution}
-            score={edu.score}
-          />
-        ))}
+      <section className="px-6 md:px-12 xl:px-16 pb-4 max-w-5xl 2xl:max-w-screen-xl mx-auto w-full">
+        <TimelineSection>
+          {EDUCATION.map((edu) => (
+            <TimelineCard
+              key={edu.institution}
+              color={edu.color}
+              period={edu.period}
+              title={edu.degree}
+              org={edu.institution}
+              meta={edu.score}
+            />
+          ))}
+        </TimelineSection>
       </section>
 
-      <div className="pb-28" />
+      {/* ── Contact finale ─────────────────────────────────────────── */}
+      <Contact />
     </motion.main>
   );
 };

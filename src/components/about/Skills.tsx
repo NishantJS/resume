@@ -1,6 +1,10 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const skillGroups: { label: string; color: string; items: string[] }[] = [
   {
@@ -25,44 +29,47 @@ const skillGroups: { label: string; color: string; items: string[] }[] = [
   },
 ];
 
-/* Each skill row animates independently when fully in view */
+/* Each group: label column + a wall of chips that flip in with a stagger. */
 const SkillRow = ({ group }: { group: typeof skillGroups[0] }) => {
   const rowRef = useRef<HTMLLIElement>(null);
   const reduced = useReducedMotion();
 
-  useEffect(() => {
+  useGSAP(() => {
     const el = rowRef.current;
     if (!el) return;
+    const chips = el.querySelectorAll<HTMLElement>(".skill-chip");
+    const label = el.querySelector<HTMLElement>(".skill-label");
 
-    if (reduced) { gsap.set(el, { opacity: 1, x: 0 }); return; }
+    if (reduced) {
+      gsap.set([label, ...chips], { clearProps: "all", opacity: 1 });
+      return;
+    }
 
-    gsap.set(el, { opacity: 0, x: -28 });
+    gsap.set(label, { opacity: 0, x: -20 });
+    gsap.set(chips, { opacity: 0, y: 16, rotateX: -50 });
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          observer.disconnect();
-          gsap.to(el, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" });
-        }
-      },
-      { threshold: 0.9 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [reduced]);
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: el, start: "top 88%", once: true },
+      defaults: { ease: "power3.out" },
+    });
+    tl.to(label, { opacity: 1, x: 0, duration: 0.5 })
+      .to(chips, { opacity: 1, y: 0, rotateX: 0, duration: 0.55, stagger: 0.035 }, "-=0.3");
+  }, { scope: rowRef, dependencies: [reduced] });
 
   return (
     <li
       ref={rowRef}
-      className="flex flex-col md:flex-row md:items-baseline md:gap-6 mono"
+      className="flex flex-col md:flex-row md:items-start md:gap-6 mono"
+      style={{ ["--chip" as string]: group.color, perspective: "600px" } as React.CSSProperties}
     >
-      <span className="flex items-center gap-2 font-semibold tracking-wide uppercase text-sm md:text-base xl:text-lg text-gray-300 md:w-36 xl:w-44 shrink-0 mb-1 md:mb-0">
+      <span className="skill-label flex items-center gap-2 font-semibold tracking-wide uppercase text-sm md:text-base xl:text-lg text-gray-300 md:w-36 xl:w-44 shrink-0 mb-2.5 md:mb-0 md:pt-1.5">
         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: group.color }} aria-hidden />
         {group.label}
       </span>
-      <span className="text-white/80 leading-relaxed text-base md:text-xl xl:text-2xl 2xl:text-3xl">
-        {group.items.join(" · ")}
+      <span className="flex flex-wrap gap-2 md:gap-2.5">
+        {group.items.map(item => (
+          <span key={item} className="skill-chip">{item}</span>
+        ))}
       </span>
     </li>
   );
@@ -70,7 +77,7 @@ const SkillRow = ({ group }: { group: typeof skillGroups[0] }) => {
 
 export function Skills() {
   return (
-    <ul className="w-full flex flex-col gap-4 md:gap-5">
+    <ul className="w-full flex flex-col gap-7 md:gap-8">
       {skillGroups.map((group) => (
         <SkillRow key={group.label} group={group} />
       ))}
