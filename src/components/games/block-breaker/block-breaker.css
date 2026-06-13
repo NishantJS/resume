@@ -44,7 +44,20 @@
   margin: 0 auto;
   border-radius: 1.1rem;
   overflow: hidden;
-  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 30px 60px -28px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 4px rgba(10, 12, 29, 0.55),
+    0 0 0 5px rgba(255, 255, 255, 0.22);
+}
+/* Arcade-cabinet vignette over the playfield (never blocks input). */
+.bb-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
 }
 .bb-canvas {
   display: block;

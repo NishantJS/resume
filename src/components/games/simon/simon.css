@@ -24,20 +24,28 @@
 .simon-pad {
   border: 0;
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.55;
+  /* Glossy arcade-button cap over the base colour. */
+  background-image: radial-gradient(ellipse at 32% 28%, rgba(255, 255, 255, 0.5), transparent 55%);
+  box-shadow:
+    inset 0 3px 6px rgba(255, 255, 255, 0.35),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.3);
   transition: opacity 120ms ease, filter 120ms ease, transform 120ms ease;
   -webkit-tap-highlight-color: transparent;
 }
-.simon-pad.green { background: #22c55e; border-top-left-radius: 100%; }
-.simon-pad.red { background: #ef4444; border-top-right-radius: 100%; }
-.simon-pad.yellow { background: #facc15; border-bottom-left-radius: 100%; }
-.simon-pad.blue { background: #3b82f6; border-bottom-right-radius: 100%; }
-.simon-board:not(.locked) .simon-pad:hover { opacity: 0.72; }
+.simon-pad.green { background-color: #22c55e; border-top-left-radius: 100%; }
+.simon-pad.red { background-color: #ef4444; border-top-right-radius: 100%; }
+.simon-pad.yellow { background-color: #facc15; border-bottom-left-radius: 100%; }
+.simon-pad.blue { background-color: #3b82f6; border-bottom-right-radius: 100%; }
+.simon-board:not(.locked) .simon-pad:hover { opacity: 0.75; }
+.simon-board:not(.locked) .simon-pad:active { transform: scale(0.97); }
 .simon-pad.active {
   opacity: 1;
   filter: brightness(1.3) saturate(1.2);
   transform: scale(0.98);
-  box-shadow: 0 0 36px 6px currentColor;
+  box-shadow:
+    0 0 36px 6px currentColor,
+    inset 0 3px 6px rgba(255, 255, 255, 0.45);
 }
 .simon-pad:disabled { cursor: default; }
 
@@ -48,13 +56,18 @@
   width: 34%;
   height: 34%;
   border-radius: 50%;
-  background: #1a1413;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.14), transparent 55%),
+    #1a1413;
   color: #fdf6e3;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 10px 24px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 4px rgba(26, 20, 19, 0.35);
 }
 .simon-hub-round { font-size: clamp(1.6rem, 9cqw, 2.6rem); font-weight: 800; line-height: 1; }
 .simon-hub-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.18em; opacity: 0.55; margin-top: 0.15rem; }

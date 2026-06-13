@@ -16,25 +16,55 @@
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
   gap: clamp(0.3rem, 1.5cqw, 0.7rem);
-  padding: clamp(0.4rem, 2cqw, 0.9rem);
-  border-radius: 1.2rem;
-  background: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  padding: clamp(0.5rem, 2.2cqw, 1rem);
+  border-radius: 1.3rem;
+  /* Dark console plate the lamps sit in. */
+  background:
+    radial-gradient(ellipse at 50% -15%, rgba(120, 150, 255, 0.18), transparent 60%),
+    linear-gradient(180deg, #1c2436 0%, #131a29 100%);
+  box-shadow:
+    0 30px 60px -26px rgba(0, 0, 0, 0.6),
+    inset 0 2px 5px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 .lo-cell {
   border: 0;
-  border-radius: 0.6rem;
+  border-radius: 0.65rem;
   cursor: pointer;
-  transition: background 140ms ease, box-shadow 160ms ease, transform 120ms ease;
+  transition: background 140ms ease, box-shadow 160ms ease, transform 120ms ease, filter 140ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 .lo-cell.on {
-  background: linear-gradient(180deg, #93c5fd, #3b82f6);
-  box-shadow: 0 0 18px 2px rgba(59, 130, 246, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  /* Lit lamp: glassy lens highlight over the glow. */
+  background:
+    radial-gradient(ellipse at 50% 22%, rgba(255, 255, 255, 0.65), transparent 48%),
+    linear-gradient(180deg, #93c5fd, #3b82f6);
+  box-shadow:
+    0 0 22px 3px rgba(59, 130, 246, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 4px rgba(13, 38, 92, 0.45);
 }
-.lo-cell.off { background: #2a3346; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4); }
-.lo-cell:not(:disabled):hover { transform: translateY(-1px); }
-.lo-cell.hint { box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.95), 0 0 18px 3px rgba(250, 204, 21, 0.6); z-index: 1; }
+.lo-cell.off {
+  background:
+    radial-gradient(ellipse at 50% 25%, rgba(255, 255, 255, 0.05), transparent 50%),
+    linear-gradient(180deg, #2c3650, #232c42);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+.lo-cell:not(:disabled):hover { transform: translateY(-1px); filter: brightness(1.12); }
+.lo-cell:not(:disabled):active { transform: translateY(0) scale(0.97); }
+.lo-cell.hint {
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.95), 0 0 18px 3px rgba(250, 204, 21, 0.6);
+  z-index: 1;
+  animation: lo-hint-pulse 0.9s ease-in-out infinite;
+}
+@keyframes lo-hint-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.95), 0 0 16px 3px rgba(250, 204, 21, 0.5); }
+  50%       { box-shadow: 0 0 0 5px rgba(250, 204, 21, 1),    0 0 28px 8px rgba(250, 204, 21, 0.75); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lo-cell.hint { animation: none; }
+}
 
 .lo-win {
   position: absolute;
@@ -44,11 +74,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.9rem;
-  border-radius: 1.2rem;
-  background: rgba(252, 247, 238, 0.85);
-  backdrop-filter: blur(2px);
-  font-size: 1.4rem;
-  font-weight: 700;
+  border-radius: 1.3rem;
+  background: rgba(252, 247, 238, 0.88);
+  backdrop-filter: blur(3px);
+  font-size: 1.5rem;
+  font-weight: 800;
+  animation: game-pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .lo-btn {

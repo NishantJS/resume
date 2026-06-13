@@ -16,6 +16,19 @@
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: clamp(0.5rem, 2.5cqw, 1rem);
+  /* Grass field the burrows are dug into. */
+  padding: clamp(0.6rem, 3cqw, 1.2rem);
+  border-radius: 1.4rem;
+  background:
+    radial-gradient(ellipse at 50% -12%, rgba(255, 255, 255, 0.35), transparent 55%),
+    radial-gradient(rgba(255, 255, 255, 0.12) 8%, transparent 9%),
+    linear-gradient(180deg, #8fd14f 0%, #5fae3a 100%);
+  background-size: 100% 100%, 26px 26px, 100% 100%;
+  box-shadow:
+    0 30px 60px -26px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.35),
+    inset 0 -4px 10px rgba(38, 80, 18, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .whk-hole {
@@ -59,9 +72,10 @@
   gap: 0.7rem;
   text-align: center;
   padding: 1rem;
-  border-radius: 1.2rem;
+  border-radius: 1.4rem;
   background: rgba(252, 247, 238, 0.86);
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
+  animation: game-pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .whk-overlay-title { font-size: 1.7rem; font-weight: 800; }
 .whk-overlay-sub { font-size: 0.85rem; opacity: 0.7; }
