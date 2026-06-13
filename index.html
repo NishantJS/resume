@@ -58,16 +58,8 @@
   <meta name="apple-mobile-web-app-title" content="Nishant" />
   <link rel="manifest" href="site.webmanifest" />
   
-  <!-- Fonts: preconnect → non-blocking async load → noscript fallback -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=Geologica:wght@400&family=Rubik:wght@400;500;600;700&display=swap&font-display=swap"
-    onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript>
-    <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geologica:wght@400&family=Rubik:wght@400;500;600;700&display=swap&font-display=swap" />
-  </noscript>
+  <!-- Fonts are self-hosted (see @fontsource imports in src/main.tsx);
+       the critical woff2 files are preloaded by inject-font-preloads.mjs. -->
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">

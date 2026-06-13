@@ -1,5 +1,5 @@
 import { FC, useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
+import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, useReducedMotion } from "motion/react";
 import { ProjectData } from "../home/Home";
 
 type Props = { project: ProjectData };
@@ -36,6 +36,7 @@ const Contents: FC<Props> = ({ project }) => {
   const outerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [scrollDist, setScrollDist] = useState(0);
+  const [current, setCurrent] = useState(1);
 
   useEffect(() => {
     if (!total || isMobile) return;
@@ -65,6 +66,12 @@ const Contents: FC<Props> = ({ project }) => {
     offset: ["start start", "end end"],
   });
   const x = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : -scrollDist]);
+  const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 28, mass: 0.4 });
+
+  useMotionValueEvent(scrollYProgress, "change", v => {
+    if (!total) return;
+    setCurrent(Math.min(total, Math.max(1, Math.round(v * (total - 1)) + 1)));
+  });
 
   if (!total) return null;
 
@@ -72,8 +79,13 @@ const Contents: FC<Props> = ({ project }) => {
   const light = isLight(project.color);
   const inkLow = light ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)";
   const border = light ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)";
+  const barInk = light ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.85)";
   const images = Array.from({ length: total }, (_, i) => i + 1);
+  // WebP (~80 % smaller) with the original PNG as fallback. The filename
+  // contains a space, which is a delimiter in srcset syntax — encode it or
+  // the webp candidate is silently dropped and the PNG loads instead.
   const src = (n: number) => `/project/${project.title}/img (${n}).png`;
+  const srcWebp = (n: number) => encodeURI(`/project/${project.title}/img (${n}).webp`);
 
   const Label = (
     <div
@@ -102,13 +114,16 @@ const Contents: FC<Props> = ({ project }) => {
               className="proj-shot proj-shot--stacked"
               style={{ border: `1px solid ${border}` }}
             >
-              <img
-                src={src(n)}
-                alt={`${title} screenshot ${n}`}
-                loading={n <= 2 ? "eager" : "lazy"}
-                decoding="async"
-                onLoad={e => e.currentTarget.classList.add("is-loaded")}
-              />
+              <picture>
+                <source srcSet={srcWebp(n)} type="image/webp" />
+                <img
+                  src={src(n)}
+                  alt={`${title} screenshot ${n}`}
+                  loading={n <= 2 ? "eager" : "lazy"}
+                  decoding="async"
+                  onLoad={e => e.currentTarget.classList.add("is-loaded")}
+                />
+              </picture>
             </figure>
           ))}
         </div>
@@ -149,16 +164,36 @@ const Contents: FC<Props> = ({ project }) => {
                 className="proj-shot proj-shot--rail"
                 style={{ border: `1px solid ${border}` }}
               >
-                <img
-                  src={src(n)}
-                  alt={`${title} screenshot ${n}`}
-                  loading={n <= 3 ? "eager" : "lazy"}
-                  decoding="async"
-                  onLoad={e => e.currentTarget.classList.add("is-loaded")}
-                />
+                <picture>
+                  <source srcSet={srcWebp(n)} type="image/webp" />
+                  <img
+                    src={src(n)}
+                    alt={`${title} screenshot ${n}`}
+                    loading={n <= 3 ? "eager" : "lazy"}
+                    decoding="async"
+                    onLoad={e => e.currentTarget.classList.add("is-loaded")}
+                  />
+                </picture>
+                <figcaption className="proj-shot-caption mono" aria-hidden>
+                  {String(n).padStart(2, "0")}
+                </figcaption>
               </figure>
             ))}
           </motion.div>
+
+          {/* ── Rail HUD: live counter + scroll progress ───────────── */}
+          <div className="proj-rail-hud" aria-hidden>
+            <span className="mono text-xs tabular-nums tracking-[0.2em]" style={{ color: inkLow }}>
+              <b style={{ color: barInk, fontWeight: 600 }}>{String(current).padStart(2, "0")}</b>
+              &nbsp;/&nbsp;{String(total).padStart(2, "0")}
+            </span>
+            <div className="proj-rail-bar" style={{ backgroundColor: border }}>
+              <motion.div
+                className="proj-rail-bar-fill"
+                style={{ scaleX: progress, backgroundColor: barInk }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
