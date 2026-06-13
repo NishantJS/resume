@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "motion/react";
 import { games } from "./games.data";
+import { useSeo } from "../../hooks/useSeo";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -33,6 +34,13 @@ const Games = () => {
   const overlay = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP();
   const reduced = useReducedMotion();
+
+  useSeo({
+    title: "Games — Nishant Chorge",
+    description:
+      "Ten little browser games built from scratch by Nishant Chorge — Parking Escape, 2048, Snake, Block Breaker, Memory, Simon, Lights Out, Sliding Puzzle and more. No installs, plays instantly.",
+    path: "/games",
+  });
 
   // Heading: SplitText masked char reveal. Rows reveal as they enter view.
   useGSAP(() => {
@@ -150,7 +158,6 @@ const Games = () => {
                       viewTransition
                       to={`/games/${game.slug}`}
                       className="block link"
-                      data-cursor-color={game.color}
                       aria-label={`Play ${game.title}`}
                     >
                       {Inner}
