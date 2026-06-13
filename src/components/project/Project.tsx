@@ -15,20 +15,31 @@ const NavProject = ({ index = 0, direction = "next" }: { index: number; directio
   const project = direction === "prev"
     ? projects[index ? index - 1 : projects.length - 1]
     : projects[index < projects.length - 1 ? index + 1 : 0];
-  const label = direction === "prev" ? "← Prev" : "Next →";
+  const isNext = direction === "next";
   return (
-    <Link viewTransition to={project.path} className="link group flex flex-col gap-1">
-      <span className="mono text-xs uppercase tracking-widest opacity-40 group-hover:opacity-70 transition-opacity">
-        {label}
+    <Link
+      viewTransition
+      to={project.path}
+      className={`link proj-nav-card group ${isNext ? "proj-nav-card--next" : ""}`}
+      style={{ ["--target" as string]: project.color } as React.CSSProperties}
+    >
+      <span className="mono text-[0.62rem] uppercase tracking-[0.28em] opacity-45 group-hover:opacity-80 transition-opacity">
+        {isNext ? "Next project" : "Previous project"}
       </span>
-      <span className="text-lg md:text-2xl xl:text-3xl font-semibold group-hover:opacity-60 transition-opacity">
-        {project.displayTitle ?? project.title}
+      <span className="proj-nav-title">
+        <span className="proj-nav-arrow" aria-hidden>{isNext ? "→" : "←"}</span>
+        <span className="text-xl md:text-3xl xl:text-4xl font-semibold tracking-tight">
+          {project.displayTitle ?? project.title}
+        </span>
+      </span>
+      <span className="mono text-xs opacity-40 group-hover:opacity-70 transition-opacity">
+        {project.contribution}
       </span>
     </Link>
   );
 };
 
-/** Infinite horizontal scrolling marquee of skill tags */
+/** Infinite horizontal scrolling marquee of skill tags. */
 const SkillsMarquee = ({ skills, ink, border }: { skills: string[]; ink: string; border: string }) => {
   const repeated = [...skills, ...skills, ...skills];
   return (
@@ -60,6 +71,9 @@ const Project = () => {
       className="project-gradient min-h-screen flex flex-col relative"
       style={{ ["--proj" as string]: project.color, color: ink } as React.CSSProperties}
     >
+      {/* Film grain over the whole page for texture. */}
+      <div className="proj-grain" aria-hidden />
+
       <AboutSection project={project} index={index} total={projects.length} />
 
       <SkillsMarquee skills={project.skills} ink={ink} border={border} />
@@ -68,8 +82,8 @@ const Project = () => {
 
       {/* Prev / Next navigation */}
       <nav
-        className="px-6 md:px-14 xl:px-20 py-14 pb-28 flex justify-between items-start border-t"
-        style={{ borderColor: border }}
+        className="proj-nav grid md:grid-cols-2 border-t"
+        style={{ borderColor: border, ["--nav-border" as string]: border } as React.CSSProperties}
         aria-label="Project navigation"
       >
         <NavProject index={index} direction="prev" />
