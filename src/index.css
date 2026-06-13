@@ -119,6 +119,95 @@ html {
   .proj-shot img { transition: none; }
 }
 
+/* ── About: scroll cue (mouse outline with travelling dot) ────── */
+.scroll-cue {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0;
+}
+.scroll-cue-mouse {
+  position: relative;
+  width: 1.6rem;
+  height: 2.7rem;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  opacity: 0.7;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+.scroll-cue:hover .scroll-cue-mouse { opacity: 1; transform: translateY(2px); }
+.scroll-cue-dot {
+  position: absolute;
+  top: 0.45rem;
+  left: 50%;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: currentColor;
+  translate: -50% 0;
+  animation: scroll-cue-dot 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes scroll-cue-dot {
+  0%        { opacity: 0; transform: translateY(0); }
+  25%       { opacity: 1; }
+  60%       { opacity: 1; transform: translateY(0.85rem); }
+  100%      { opacity: 0; transform: translateY(0.95rem); }
+}
+.scroll-cue-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+}
+.scroll-cue:hover .scroll-cue-label { opacity: 0.85; }
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-dot { animation: none; opacity: 0.9; }
+}
+
+/* ── Footer links: sliding underline + arrow that nudges out ──── */
+.footer-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.5rem 0;
+  color: inherit;
+}
+.footer-link-label { position: relative; }
+.footer-link-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.footer-link--right .footer-link-label::after { transform-origin: right center; }
+.footer-link:hover .footer-link-label::after,
+.footer-link:focus-visible .footer-link-label::after { transform: scaleX(1); }
+.footer-link-icon {
+  display: inline-block;
+  font-size: 0.85em;
+  opacity: 0;
+  transform: translate(-4px, 2px);
+  transition: opacity 300ms ease, transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.footer-link:hover .footer-link-icon,
+.footer-link:focus-visible .footer-link-icon {
+  opacity: 0.85;
+  transform: translate(0, 0);
+}
+
 /* ── Header nav: underline grows in on hover (inactive links) ── */
 .nav-link { position: relative; }
 .nav-link:not([aria-current])::after {

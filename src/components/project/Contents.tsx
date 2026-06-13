@@ -102,17 +102,21 @@ const Contents: FC<Props> = ({ project }) => {
     </div>
   );
 
-  /* ── Mobile: simple vertical stack, one image per row ──────────── */
+  /* ── Mobile: vertical stack, each shot rises in as it scrolls in ─ */
   if (isMobile) {
     return (
       <div>
         {Label}
         <div className="flex flex-col gap-4 px-5 pb-12">
           {images.map(n => (
-            <figure
+            <motion.figure
               key={n}
               className="proj-shot proj-shot--stacked"
               style={{ border: `1px solid ${border}` }}
+              initial={reduced ? false : { opacity: 0, y: 36 }}
+              whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
               <picture>
                 <source srcSet={srcWebp(n)} type="image/webp" />
@@ -124,7 +128,7 @@ const Contents: FC<Props> = ({ project }) => {
                   onLoad={e => e.currentTarget.classList.add("is-loaded")}
                 />
               </picture>
-            </figure>
+            </motion.figure>
           ))}
         </div>
       </div>

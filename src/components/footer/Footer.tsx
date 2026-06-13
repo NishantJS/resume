@@ -61,23 +61,28 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
       aria-label="Contact and social links"
       className="fixed bottom-0 w-full flex justify-between items-end mono text-sm md:text-base px-6 py-4 md:px-20 xl:px-28 2xl:px-40 pointer-events-none"
     >
-      <div className="flex flex-col gap-0.5 pointer-events-auto">
-        <a href="https://www.linkedin.com/in/nishant-chorge/" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
-          LinkedIn
+      <div className="flex flex-col items-start gap-0.5 pointer-events-auto">
+        <a href="https://www.linkedin.com/in/nishant-chorge/" target="_blank" rel="noreferrer noopener" className="footer-link">
+          <span className="footer-link-label">LinkedIn</span>
+          <span className="footer-link-icon" aria-hidden>↗</span>
         </a>
-        <a href="https://www.github.com/NishantJS" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
-          GitHub
+        <a href="https://www.github.com/NishantJS" target="_blank" rel="noreferrer noopener" className="footer-link">
+          <span className="footer-link-label">GitHub</span>
+          <span className="footer-link-icon" aria-hidden>↗</span>
         </a>
-        <a href="/Nishant Chorge Software Developer.pdf" target="_blank" rel="noreferrer noopener" download className="py-2 hover:underline inline-block" aria-label="Resume — download PDF">
-          Resume
+        <a href="/Nishant Chorge Software Developer.pdf" target="_blank" rel="noreferrer noopener" download className="footer-link" aria-label="Resume — download PDF">
+          <span className="footer-link-label">Resume</span>
+          <span className="footer-link-icon" aria-hidden>↓</span>
         </a>
       </div>
-      <div className="flex flex-col gap-0.5 text-right pointer-events-auto">
-        <a href="mailto:itsnishantchorge@gmail.com" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
-          Email
+      <div className="flex flex-col items-end gap-0.5 text-right pointer-events-auto">
+        <a href="mailto:itsnishantchorge@gmail.com" target="_blank" rel="noreferrer noopener" className="footer-link footer-link--right">
+          <span className="footer-link-icon" aria-hidden>↗</span>
+          <span className="footer-link-label">Email</span>
         </a>
-        <a href="tel:+916283925737" target="_blank" rel="noreferrer noopener" className="py-2 hover:underline inline-block">
-          Phone
+        <a href="tel:+916283925737" target="_blank" rel="noreferrer noopener" className="footer-link footer-link--right">
+          <span className="footer-link-icon" aria-hidden>↗</span>
+          <span className="footer-link-label">Phone</span>
         </a>
       </div>
     </footer>

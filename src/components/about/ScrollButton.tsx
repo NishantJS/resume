@@ -4,33 +4,32 @@ import gsap from 'gsap';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 export function ScrollButton() {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLButtonElement>(null);
   const reduced = useReducedMotion();
 
   useGSAP(() => {
-    const button = ref.current;
-    if (!button) return;
-    if (reduced) { gsap.set(button, { opacity: 1, y: 0 }); return; }
-
-    gsap.fromTo(
-      button,
-      { y: 10, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, delay: 0.8, yoyo: true, repeat: -1, ease: "power2.inOut" }
-    );
+    const el = ref.current;
+    if (!el) return;
+    if (reduced) { gsap.set(el, { opacity: 1, y: 0 }); return; }
+    gsap.fromTo(el, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, delay: 0.9, ease: "power2.out" });
   }, [reduced]);
 
+  const scrollDown = () => {
+    window.scrollTo({ top: window.innerHeight * 0.92, behavior: reduced ? "auto" : "smooth" });
+  };
+
   return (
-    <div className="flex justify-center items-center" ref={ref}>
-      <svg
-        className="w-10 h-10 link"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-label="Scroll down to read more"
-        role="img"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-      </svg>
-    </div>
+    <button
+      ref={ref}
+      type="button"
+      onClick={scrollDown}
+      className="scroll-cue link"
+      aria-label="Scroll down to read more"
+    >
+      <span className="scroll-cue-mouse" aria-hidden>
+        <span className="scroll-cue-dot" />
+      </span>
+      <span className="scroll-cue-label mono" aria-hidden>Scroll</span>
+    </button>
   );
 }
