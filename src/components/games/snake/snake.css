@@ -34,15 +34,34 @@
   display: block;
   width: 100%;
   height: 100%;
+  /* Deep phosphor-CRT green-black. */
   background:
-    radial-gradient(ellipse at 50% 0%, #0f2e2a 0%, transparent 60%),
-    linear-gradient(180deg, #0b1a1c 0%, #060d0f 100%);
+    radial-gradient(ellipse at 50% 0%, #0c3a30 0%, transparent 62%),
+    linear-gradient(180deg, #07140f 0%, #040a08 100%);
   touch-action: none;
+}
+
+/* CRT scanlines over the snake playfield. */
+.snake-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(110, 231, 183, 0.05) 0px,
+    rgba(110, 231, 183, 0.05) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mix-blend-mode: screen;
 }
 
 .snake-overlay {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;

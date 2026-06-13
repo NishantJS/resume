@@ -58,35 +58,42 @@ function initial(): GameRef {
   return { snake, dir: { x: 1, y: 0 }, queue: [], food: spawnFood(snake), grow: 0, acc: 0, stepMs: 150, last: 0 };
 }
 
+/** Retro phosphor-CRT styling: a bloomed green snake and amber pellet on a
+ *  faint green grid, evoking an old arcade/Nokia screen. */
 function draw(ctx: CanvasRenderingContext2D, g: GameRef) {
   ctx.clearRect(0, 0, SIZE, SIZE);
-  // subtle grid
-  ctx.strokeStyle = "rgba(255,255,255,0.04)";
+  // phosphor grid
+  ctx.strokeStyle = "rgba(110,231,183,0.07)";
   ctx.lineWidth = 1;
   for (let i = 1; i < GRID; i++) {
     ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, SIZE); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(SIZE, i * CELL); ctx.stroke();
   }
-  // food
+  // food — amber pellet with CRT bloom
   ctx.save();
-  ctx.fillStyle = "#f43f5e";
-  ctx.shadowColor = "rgba(244,63,94,0.8)";
-  ctx.shadowBlur = 14;
+  ctx.fillStyle = "#fbbf24";
+  ctx.shadowColor = "rgba(251,191,36,0.9)";
+  ctx.shadowBlur = 16;
   ctx.beginPath();
-  ctx.arc(g.food.x * CELL + CELL / 2, g.food.y * CELL + CELL / 2, CELL * 0.34, 0, Math.PI * 2);
+  ctx.arc(g.food.x * CELL + CELL / 2, g.food.y * CELL + CELL / 2, CELL * 0.32, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
-  // snake
+  // snake — phosphor green, head brightest, every segment blooms
+  ctx.save();
+  ctx.shadowColor = "rgba(74,222,128,0.85)";
   for (let i = g.snake.length - 1; i >= 0; i--) {
     const s = g.snake[i];
     const head = i === 0;
-    ctx.fillStyle = head ? "#5eead4" : `rgba(20,184,166,${0.55 + 0.4 * (1 - i / g.snake.length)})`;
+    const fade = 0.55 + 0.4 * (1 - i / g.snake.length);
+    ctx.fillStyle = head ? "#bbf7d0" : `rgba(74,222,128,${fade})`;
+    ctx.shadowBlur = head ? 16 : 9;
     const pad = head ? 2 : 3;
     const r = head ? 9 : 7;
     ctx.beginPath();
     ctx.roundRect(s.x * CELL + pad, s.y * CELL + pad, CELL - pad * 2, CELL - pad * 2, r);
     ctx.fill();
   }
+  ctx.restore();
 }
 
 const Snake: FC = () => {

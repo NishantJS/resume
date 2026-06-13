@@ -63,11 +63,38 @@
   display: block;
   width: 100%;
   height: 100%;
+  /* Cyberpunk wash: magenta top-glow + cyan corner over near-black. */
   background:
-    radial-gradient(ellipse at 50% 0%, #1b2050 0%, transparent 60%),
-    linear-gradient(180deg, #11142e 0%, #0a0c1d 100%);
+    radial-gradient(ellipse at 50% -8%, rgba(236, 72, 153, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(34, 211, 238, 0.16) 0%, transparent 55%),
+    linear-gradient(180deg, #120726 0%, #07060f 100%);
   touch-action: none;
   cursor: pointer;
+}
+
+/* Animated CRT scanlines drifting down over the playfield. */
+.bb-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mix-blend-mode: overlay;
+  animation: bb-scan 7s linear infinite;
+}
+@keyframes bb-scan {
+  from { background-position-y: 0; }
+  to   { background-position-y: 80px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bb-frame::before { animation: none; }
 }
 
 /* ── Toast (power-up feedback) ────────────────────────────────── */
@@ -84,6 +111,7 @@
   font-size: 0.8rem;
   letter-spacing: 0.02em;
   pointer-events: none;
+  z-index: 3;
   animation: bb-toast 1.3s ease forwards;
 }
 @keyframes bb-toast {
@@ -107,6 +135,7 @@
   background: radial-gradient(ellipse at center, rgba(8, 10, 24, 0.55), rgba(8, 10, 24, 0.82));
   color: #fdf6e3;
   backdrop-filter: blur(2px);
+  z-index: 3;
 }
 .bb-overlay-title { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em; }
 .bb-overlay-sub { font-size: 0.82rem; opacity: 0.75; max-width: 18rem; }

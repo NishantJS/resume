@@ -118,34 +118,70 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-/** Paint one frame. Pure over its args + module constants. */
+const TWO_PI = Math.PI * 2;
+const NEON = "#22d3ee"; // signature cyan for paddle + ball
+
+function withAlpha(hex: string, a: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/** Faint cyber grid behind the playfield — cheap, drawn once per frame. */
+function drawGrid(ctx: CanvasRenderingContext2D) {
+  ctx.save();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgba(34,211,238,0.05)";
+  const step = 30;
+  ctx.beginPath();
+  for (let x = step; x < W; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for (let y = step; y < H; y += step) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Paint one frame. Pure over its args + module constants.
+ *  Neon-cyberpunk styling: dark glowing glass bricks, a cyan light-bar
+ *  paddle, and balls that streak a velocity trail. */
 function draw(ctx: CanvasRenderingContext2D, g: GameRef) {
   ctx.clearRect(0, 0, W, H);
+  drawGrid(ctx);
 
+  // bricks — translucent dark fill, glowing neon edge, top light strip
   for (const br of g.bricks) {
     const dim = br.max === 2 && br.hp === 1;
     ctx.save();
-    ctx.globalAlpha = dim ? 0.5 : 1;
-    ctx.fillStyle = br.color;
-    roundRect(ctx, br.x, br.y, BRICK_W, BRICK_H, 6);
+    roundRect(ctx, br.x, br.y, BRICK_W, BRICK_H, 4);
+    ctx.shadowColor = br.color;
+    ctx.shadowBlur = dim ? 5 : 14;
+    ctx.fillStyle = withAlpha(br.color, dim ? 0.12 : 0.22);
     ctx.fill();
-    ctx.globalAlpha = dim ? 0.2 : 0.4;
-    ctx.fillStyle = "#ffffff";
-    roundRect(ctx, br.x + 3, br.y + 3, BRICK_W - 6, BRICK_H * 0.34, 4);
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = dim ? 0.45 : 1;
+    ctx.strokeStyle = br.color;
+    ctx.stroke();
+    ctx.globalAlpha = dim ? 0.2 : 0.55;
+    ctx.fillStyle = br.color;
+    roundRect(ctx, br.x + 4, br.y + 3.5, BRICK_W - 8, 2, 1);
     ctx.fill();
     ctx.restore();
   }
 
-  // power-up capsules
+  // power-up capsules — neon ring with glyph
   for (const p of g.powers) {
     const meta = POWER_META[p.kind];
     ctx.save();
-    ctx.fillStyle = meta.color;
     ctx.shadowColor = meta.color;
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = withAlpha(meta.color, 0.25);
     roundRect(ctx, p.x - 15, p.y - 9, 30, 18, 9);
     ctx.fill();
     ctx.shadowBlur = 0;
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = meta.color;
+    ctx.stroke();
     ctx.fillStyle = "#fff";
     ctx.font = "bold 14px Geologica, sans-serif";
     ctx.textAlign = "center";
@@ -154,27 +190,42 @@ function draw(ctx: CanvasRenderingContext2D, g: GameRef) {
     ctx.restore();
   }
 
-  // paddle
+  // paddle — cyan light bar with a bright core line
   ctx.save();
   const px = g.paddleX - g.paddleW / 2;
-  const grad = ctx.createLinearGradient(0, PADDLE_Y, 0, PADDLE_Y + PADDLE_H);
-  grad.addColorStop(0, "#fef3c7");
-  grad.addColorStop(1, "#f59e0b");
-  ctx.fillStyle = grad;
-  ctx.shadowColor = "rgba(245,158,11,0.5)";
-  ctx.shadowBlur = 12;
+  ctx.shadowColor = NEON;
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = withAlpha(NEON, 0.3);
   roundRect(ctx, px, PADDLE_Y, g.paddleW, PADDLE_H, 7);
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = NEON;
+  ctx.shadowBlur = 10;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#eafdff";
+  roundRect(ctx, px + 6, PADDLE_Y + PADDLE_H / 2 - 1, g.paddleW - 12, 2, 1);
   ctx.fill();
   ctx.restore();
 
-  // balls
+  // balls — velocity trail + glowing core
   ctx.save();
-  ctx.fillStyle = "#fff";
-  ctx.shadowColor = "rgba(255,255,255,0.9)";
-  ctx.shadowBlur = 14;
   for (const b of g.balls) {
+    const sp = Math.hypot(b.dx, b.dy) || 1;
+    const ux = b.dx / sp, uy = b.dy / sp;
+    for (let i = 4; i >= 1; i--) {
+      ctx.globalAlpha = 0.16 * (1 - i / 5);
+      ctx.fillStyle = NEON;
+      ctx.beginPath();
+      ctx.arc(b.x - ux * i * 5, b.y - uy * i * 5, BALL_R * (1 - i * 0.12), 0, TWO_PI);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = NEON;
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = "#fff";
     ctx.beginPath();
-    ctx.arc(b.x, b.y, BALL_R, 0, Math.PI * 2);
+    ctx.arc(b.x, b.y, BALL_R, 0, TWO_PI);
     ctx.fill();
   }
   ctx.restore();
