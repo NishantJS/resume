@@ -255,6 +255,33 @@
   outline-offset: 2px;
 }
 
+/* ─── Shared polish for every game's action buttons ────────────
+   Each game ships its own *-btn pill with a :hover, but none had
+   press feedback, a keyboard focus ring, or (for half of them) a
+   disabled state. Unify all three here so the controls behave
+   consistently and are reachable by keyboard across every game. */
+.lo-btn, .sld-btn, .mem-btn, .g2048-btn, .snake-btn,
+.simon-btn, .whk-btn, .bb-btn, .ttt-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+.lo-btn:active:not(:disabled), .sld-btn:active:not(:disabled),
+.mem-btn:active:not(:disabled), .g2048-btn:active:not(:disabled),
+.snake-btn:active:not(:disabled), .simon-btn:active:not(:disabled),
+.whk-btn:active:not(:disabled), .bb-btn:active:not(:disabled),
+.ttt-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.95);
+}
+.lo-btn:focus-visible, .sld-btn:focus-visible, .mem-btn:focus-visible,
+.g2048-btn:focus-visible, .snake-btn:focus-visible, .simon-btn:focus-visible,
+.whk-btn:focus-visible, .bb-btn:focus-visible, .ttt-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--game) 72%, #1a1413);
+  outline-offset: 2px;
+}
+.g2048-btn:disabled, .simon-btn:disabled, .whk-btn:disabled, .ttt-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* ─── Body: stage + aside ──────────────────────────────────────
    Desktop: side by side (stage fills, aside is fixed-width panel).
    Mobile: stacked (stage auto-heights, aside scrolls below).      */

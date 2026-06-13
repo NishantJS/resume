@@ -82,9 +82,13 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
         ref={ncRef}
         to="/"
         aria-label="NC — go to home"
-        className="font-bold text-3xl sm:text-4xl -rotate-90 inline-block pointer-events-auto shrink-0"
+        className="group font-bold text-3xl sm:text-4xl -rotate-90 inline-block pointer-events-auto shrink-0"
       >
-        NC
+        {/* Inner span scales independently of the magnetic x/y drift GSAP
+            applies to the link itself. */}
+        <span className="inline-block transition-transform duration-300 ease-out group-hover:scale-110">
+          NC
+        </span>
       </Link>
 
       <nav aria-label="Main navigation" className="pointer-events-auto">

@@ -116,7 +116,12 @@ const Games = () => {
                   </h2>
                 </div>
                 <span className="mono text-xs sm:text-sm text-zinc-500 shrink-0 ml-7 sm:ml-0 transition-colors duration-300 group-hover:text-zinc-700">
-                  {game.status === "playable" ? "Play →" : "Coming soon"}
+                  {game.status === "playable" ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      Play
+                      <span className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-1" aria-hidden>→</span>
+                    </span>
+                  ) : "Coming soon"}
                 </span>
               </div>
             );
