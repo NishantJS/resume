@@ -49,8 +49,9 @@ export interface UseGameStateApi {
   isLevelUnlocked: (id: string) => boolean;
 }
 
-/** One hint per level. */
-const HINTS_PER_LEVEL = 1;
+/** Levels are deliberately trappy (wrong order can deadlock the lot), so
+ *  allow a few solver-backed hints per level instead of just one. */
+const HINTS_PER_LEVEL = 3;
 
 export function useGameState(initialLevelId?: string): UseGameStateApi {
   const [savedata, setSavedata] = useState<SaveData>(() => load());
