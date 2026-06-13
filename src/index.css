@@ -39,6 +39,21 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ── Site-wide polish: selection, focus rings, thin scrollbar ── */
+::selection {
+  background: rgba(249, 210, 122, 0.55);
+  color: #1a1413;
+}
+:focus-visible {
+  outline: 2px solid rgba(168, 85, 247, 0.65);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
 @media (min-width: 1024px) {
   html, a { cursor: none; }
 }
@@ -78,6 +93,7 @@ html {
   background-size: 200% 100%;
   animation: proj-shimmer 1.3s ease-in-out infinite;
 }
+.proj-shot picture { display: contents; }
 .proj-shot img { display: block; opacity: 0; transition: opacity 0.4s ease; }
 .proj-shot img.is-loaded { opacity: 1; }
 /* Once loaded the shimmer is no longer needed under the opaque image. */
@@ -101,6 +117,375 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .proj-shot { animation: none; }
   .proj-shot img { transition: none; }
+}
+
+/* ── Header nav: underline grows in on hover (inactive links) ── */
+.nav-link { position: relative; }
+.nav-link:not([aria-current])::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.55;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link:not([aria-current]):hover::after { transform: scaleX(1); }
+
+/* ── About: velocity-reactive marquee ──────────────────────── */
+.vm-wrap {
+  overflow: hidden;
+  padding: clamp(2.5rem, 7vh, 5rem) 0 clamp(1rem, 3vh, 2rem);
+  user-select: none;
+}
+.vm-row {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+}
+.vm-item {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(1.2rem, 3vw, 2.6rem);
+  margin-right: clamp(1.2rem, 3vw, 2.6rem);
+  font-family: "Geologica", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 7vw, 6rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.22);
+  transition: -webkit-text-stroke-color 300ms ease;
+}
+.vm-item:hover { -webkit-text-stroke-color: rgba(255, 255, 255, 0.6); }
+/* Every 8th item filled, not outlined — anchors the rhythm. */
+.vm-item:nth-child(8n) {
+  color: rgba(255, 255, 255, 0.9);
+  -webkit-text-stroke: 0;
+}
+.vm-dot {
+  width: clamp(0.5rem, 1.2vw, 0.9rem);
+  height: clamp(0.5rem, 1.2vw, 0.9rem);
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.55);
+  flex-shrink: 0;
+}
+
+/* ── About: contact finale ──────────────────────────────────── */
+/* SplitText masks clip below the baseline; give them room for
+   descenders (g, y, p) without shifting the layout. */
+.st-line-mask {
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+.st-char-mask {
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+
+/* White pill + dark arrow chip; the arrow rotates ↗ → on hover. */
+.contact-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.45rem 0.45rem 0.45rem 1.7rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0e;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 18px 50px -18px rgba(255, 255, 255, 0.35);
+  transition: box-shadow 350ms ease, scale 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.contact-cta:hover {
+  scale: 1.04;
+  box-shadow:
+    0 22px 60px -16px rgba(168, 85, 247, 0.45),
+    0 18px 50px -18px rgba(34, 211, 238, 0.35);
+}
+.cta-arrow {
+  display: grid;
+  place-items: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 50%;
+  background: #0b0b0e;
+  color: #fff;
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.contact-cta:hover .cta-arrow { transform: rotate(45deg); }
+
+/* Confetti pieces spawned on CTA click (Physics2D). */
+.cta-confetti {
+  position: fixed;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 70;
+  will-change: transform;
+}
+
+/* ── About: experience / education timeline ─────────────────── */
+.tl-track {
+  position: absolute;
+  left: 7px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.tl-progress {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #a855f7, #22d3ee);
+}
+.tl-dot {
+  position: absolute;
+  left: 0;
+  top: 1.55rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #0a0a0a;
+  z-index: 1;
+  /* Dark until the scrubbed progress line reaches it (.on via JS). */
+  transform: scale(0);
+  transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tl-dot.on { transform: scale(1); }
+.tl-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.035);
+  padding: clamp(1.15rem, 3vw, 1.75rem);
+  transition: border-color 300ms ease, background 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 300ms ease;
+}
+.tl-card:hover {
+  border-color: color-mix(in srgb, var(--tl, #a855f7) 45%, transparent);
+  background: rgba(255, 255, 255, 0.055);
+  transform: translateY(-3px);
+  box-shadow: 0 24px 50px -30px color-mix(in srgb, var(--tl, #a855f7) 55%, transparent);
+}
+
+/* ── About: skill chips ─────────────────────────────────────── */
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(0.78rem, 1.5vw, 0.95rem);
+  line-height: 1.2;
+  white-space: nowrap;
+  will-change: transform;
+  transition: border-color 250ms ease, background 250ms ease, color 250ms ease, translate 250ms ease;
+}
+.skill-chip:hover {
+  border-color: var(--chip, #a855f7);
+  background: color-mix(in srgb, var(--chip, #a855f7) 16%, transparent);
+  color: #fff;
+  translate: 0 -2px;
+}
+
+/* ── Work / Games list rows: colour-keyed accent bar on hover ── */
+.project-row, .game-row { position: relative; }
+.project-row::before, .game-row::before {
+  content: "";
+  position: absolute;
+  left: -1.15rem;
+  top: 50%;
+  translate: 0 -50%;
+  width: 4px;
+  height: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--row, #ddd) 75%, #6b5836);
+  transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.project-row:hover::before, .game-row:hover::before { height: 52%; }
+
+/* Title nudges right with the accent bar; the row's trailing meta
+   ("Play →" / contribution) brightens via existing group-hover. */
+.project-row h2, .game-row h2 {
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.project-row:hover h2, .game-row:hover h2 { transform: translateX(0.5rem); }
+
+/* ── Project hero: giant outlined index watermark ──────────── */
+.proj-watermark {
+  position: absolute;
+  top: 4.5rem;
+  right: -0.06em;
+  z-index: 0;
+  font-size: clamp(11rem, 32vw, 30rem);
+  line-height: 0.78;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--wm-ink, #111) 15%, transparent);
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+/* ── Project hero: scroll cue (sweeping line) ──────────────── */
+.proj-scroll-line {
+  display: block;
+  width: 3.25rem;
+  height: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 25%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+.proj-scroll-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  animation: cue-sweep 2.2s ease-in-out infinite;
+}
+@keyframes cue-sweep {
+  0%   { transform: scaleX(0); transform-origin: left; }
+  45%  { transform: scaleX(1); transform-origin: left; }
+  55%  { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+
+/* ── Project hero: visit-project pill button ───────────────── */
+.proj-visit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.65rem 0.65rem 1.25rem;
+  border: 1px solid var(--btn-border, rgba(0, 0, 0, 0.14));
+  border-radius: 999px;
+  color: var(--btn-ink, #111);
+  transition: background 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+}
+.proj-visit-btn:hover {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--btn-ink, #111) 7%, transparent);
+  box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.5);
+}
+.proj-visit-arrow {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--btn-ink, #111);
+  color: var(--proj, #fff);
+}
+.proj-visit-arrow svg { transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+.proj-visit-btn:hover .proj-visit-arrow svg { transform: translate(2px, -2px); }
+
+/* ── Project gallery: rail HUD (counter + progress bar) ────── */
+.proj-rail-hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(1.2rem, 4vh, 2.6rem);
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 0 clamp(1.5rem, 5vw, 6rem);
+  pointer-events: none;
+}
+.proj-rail-bar {
+  flex: 1;
+  height: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.proj-rail-bar-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  border-radius: inherit;
+}
+
+/* ── Project gallery: per-shot index chip + hover lift ─────── */
+.proj-shot-caption {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  color: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.proj-shot--rail:hover .proj-shot-caption,
+.proj-shot--rail:has(img.is-loaded) .proj-shot-caption { opacity: 1; }
+.proj-shot--rail {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 500ms ease;
+}
+.proj-shot--rail:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.24);
+}
+
+/* ── Project footer: prev / next cards ─────────────────────── */
+.proj-nav { padding-bottom: 4.5rem; }
+.proj-nav-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: clamp(2.2rem, 6vw, 4rem) clamp(1.5rem, 5vw, 5rem);
+  transition: background 350ms ease;
+}
+.proj-nav-card:hover { background: color-mix(in srgb, var(--target, #fff) 55%, transparent); }
+.proj-nav-card--next { text-align: right; align-items: flex-end; border-top: 1px solid var(--nav-border, rgba(0, 0, 0, 0.12)); }
+@media (min-width: 768px) {
+  .proj-nav-card--next { border-top: 0; border-left: 1px solid var(--nav-border, rgba(0, 0, 0, 0.12)); }
+}
+.proj-nav-title { display: inline-flex; align-items: center; gap: 0.6rem; }
+.proj-nav-card--next .proj-nav-title { flex-direction: row-reverse; }
+.proj-nav-arrow {
+  font-size: 1.3em;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.proj-nav-card:hover .proj-nav-arrow { transform: translateX(-6px); }
+.proj-nav-card--next:hover .proj-nav-arrow { transform: translateX(6px); }
+
+/* ── Project page: film grain ──────────────────────────────── */
+.proj-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+}
+
+/* ── Mobile rendering cost: grain blending and backdrop blurs are
+   expensive on phone GPUs — drop them below the tablet breakpoint. */
+@media (max-width: 768px) {
+  .proj-grain { display: none; }
+  .proj-shot-caption { backdrop-filter: none; }
 }
 
 /* ── Page-transition overlay (legacy class, kept for safety) */
@@ -146,21 +531,30 @@ html {
 }
 .skill-marquee:hover { animation-play-state: paused; }
 
-/* ── Native View Transitions (progressive enhancement) ───── */
+/* ── Native View Transitions (progressive enhancement) ─────
+   The incoming page sweeps up like a sheet (rounded leading edge)
+   while the outgoing page recedes and dims underneath it. */
 @supports (view-transition-name: none) {
+  ::view-transition-image-pair(root) { isolation: none; }
   ::view-transition-old(root) {
-    animation: 300ms cubic-bezier(0.4, 0, 0.2, 1) both vt-fade-out;
+    animation: 520ms cubic-bezier(0.4, 0, 0.2, 1) both vt-recede;
   }
   ::view-transition-new(root) {
-    animation: 300ms cubic-bezier(0.4, 0, 0.2, 1) both vt-fade-in;
+    animation: 520ms cubic-bezier(0.65, 0, 0.35, 1) both vt-sweep-up;
   }
-  @keyframes vt-fade-out {
-    from { opacity: 1; }
-    to   { opacity: 0; }
+  @keyframes vt-recede {
+    from { opacity: 1; transform: none; filter: none; }
+    to   { opacity: 0.45; transform: translateY(-7vh) scale(0.94); filter: brightness(0.55); }
   }
-  @keyframes vt-fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+  @keyframes vt-sweep-up {
+    from {
+      clip-path: inset(100% 0 0 0 round 2.5rem 2.5rem 0 0);
+      transform: translateY(7vh);
+    }
+    to {
+      clip-path: inset(0 0 0 0 round 0);
+      transform: none;
+    }
   }
 }
 

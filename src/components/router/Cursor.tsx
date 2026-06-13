@@ -67,6 +67,9 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
             backgroundPosition: 'center',
           };
         }
+      } else if (t.dataset.cursorColor) {
+        // Game rows tint the cursor with the game's accent colour.
+        styles = { backgroundColor: t.dataset.cursorColor, mixBlendMode: 'normal' };
       }
 
       gsap.to(cursor, {

@@ -1,8 +1,12 @@
 import { useRef, FC } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'motion/react';
+
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export interface ProjectData {
   title: string;
@@ -126,22 +130,43 @@ const Home = () => {
   const { contextSafe } = useGSAP();
   const reduced = useReducedMotion();
 
-  // GSAP entrance on the inner divs (not the motion.li wrappers)
+  // Heading: SplitText masked char reveal. Rows: ScrollTrigger batches so
+  // each animates as it scrolls into view (not all at once on load).
   // data-entering="true" is set on the list while rows animate in so the
   // cursor skips the data-image logo effect until entrance is fully done.
   useGSAP(() => {
-    const el   = container.current;
-    const rows = el?.querySelectorAll<HTMLElement>('.project-row');
-    if (!rows) return;
-    if (reduced) { gsap.set(rows, { opacity: 1, y: 0 }); return; }
-    el?.setAttribute('data-entering', 'true');
-    gsap.fromTo(rows,
-      { opacity: 0, y: 28 },
-      {
-        opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: "power3.out", delay: 0.3,
-        onComplete: () => el?.removeAttribute('data-entering'),
-      }
-    );
+    const el = container.current;
+    if (!el) return;
+    const h1   = el.querySelector<HTMLElement>('h1');
+    const rows = el.querySelectorAll<HTMLElement>('.project-row');
+    if (reduced) {
+      if (h1) gsap.set(h1, { opacity: 1 });
+      gsap.set(rows, { opacity: 1, y: 0 });
+      return;
+    }
+
+    let split: SplitText | undefined;
+    if (h1) {
+      // st-char-mask gets bottom padding via CSS so descenders aren't clipped.
+      split = SplitText.create(h1, { type: 'chars', mask: 'chars', charsClass: 'st-char' });
+      gsap.set(h1, { opacity: 1 });
+      gsap.from(split.chars, { yPercent: 115, duration: 0.7, ease: 'power4.out', stagger: 0.02, delay: 0.15 });
+    }
+
+    el.setAttribute('data-entering', 'true');
+    gsap.set(rows, { opacity: 0, y: 30 });
+    ScrollTrigger.batch(rows, {
+      once: true,
+      start: 'top 92%',
+      onEnter: batch =>
+        gsap.to(batch, { opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: 'power3.out' }),
+    });
+    const entering = window.setTimeout(() => el.removeAttribute('data-entering'), 1500);
+
+    return () => {
+      window.clearTimeout(entering);
+      split?.revert();
+    };
   }, { scope: container, dependencies: [reduced] });
 
   // Hover — blend the project's accent at ~60 % so the warm gradient shows
@@ -170,7 +195,7 @@ const Home = () => {
       <div className="relative z-10 w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12">
         <header className="mb-10 md:mb-14">
           <p className="mono text-xs uppercase tracking-[0.2em] text-zinc-500">/ work</p>
-          <h1 className="mt-2 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-semibold tracking-tight">
+          <h1 className="mt-2 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-semibold tracking-tight opacity-0">
             Things I've built.
           </h1>
           <p className="mono text-sm xl:text-base text-zinc-500 mt-3 max-w-2xl">
@@ -184,6 +209,7 @@ const Home = () => {
             {/* .project-row is the GSAP entrance target */}
             <div
               className="project-row py-7 md:py-9 xl:py-10 group"
+              style={{ ["--row" as string]: project.color } as React.CSSProperties}
               onMouseEnter={() => handleMouseEnter(project.color)}
               onMouseLeave={handleMouseLeave}
             >
@@ -217,8 +243,8 @@ const Home = () => {
                   {project.description}
                 </p>
 
-                {/* Skill tags — reveal on hover */}
-                <div className="ml-7 sm:ml-8 md:ml-9 overflow-hidden max-h-0 group-hover:max-h-12 transition-all duration-300 ease-out">
+                {/* Skill tags — revealed on hover; always visible on touch screens */}
+                <div className="ml-7 sm:ml-8 md:ml-9 overflow-hidden max-h-0 group-hover:max-h-12 max-md:max-h-12 transition-all duration-300 ease-out">
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {project.skills.slice(0, 6).map(skill => (
                       <span

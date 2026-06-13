@@ -2,8 +2,12 @@ import { useRef, FC } from "react";
 import { Link } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "motion/react";
 import { games } from "./games.data";
+
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -30,15 +34,35 @@ const Games = () => {
   const { contextSafe } = useGSAP();
   const reduced = useReducedMotion();
 
+  // Heading: SplitText masked char reveal. Rows reveal as they enter view.
   useGSAP(() => {
     const el = container.current;
-    const rows = el?.querySelectorAll<HTMLElement>(".game-row");
-    if (!rows) return;
-    if (reduced) { gsap.set(rows, { opacity: 1, y: 0 }); return; }
-    gsap.fromTo(rows,
-      { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: "power3.out", delay: 0.3 }
-    );
+    if (!el) return;
+    const h1 = el.querySelector<HTMLElement>("h1");
+    const rows = el.querySelectorAll<HTMLElement>(".game-row");
+    if (reduced) {
+      if (h1) gsap.set(h1, { opacity: 1 });
+      gsap.set(rows, { opacity: 1, y: 0 });
+      return;
+    }
+
+    let split: SplitText | undefined;
+    if (h1) {
+      // st-char-mask gets bottom padding via CSS so descenders aren't clipped.
+      split = SplitText.create(h1, { type: "chars", mask: "chars", charsClass: "st-char" });
+      gsap.set(h1, { opacity: 1 });
+      gsap.from(split.chars, { yPercent: 115, duration: 0.7, ease: "power4.out", stagger: 0.012, delay: 0.15 });
+    }
+
+    gsap.set(rows, { opacity: 0, y: 30 });
+    ScrollTrigger.batch(rows, {
+      once: true,
+      start: "top 92%",
+      onEnter: batch =>
+        gsap.to(batch, { opacity: 1, y: 0, stagger: 0.09, duration: 0.7, ease: "power3.out" }),
+    });
+
+    return () => split?.revert();
   }, { scope: container, dependencies: [reduced] });
 
   // The hover fill blends the game's accent colour at ~60% so the warm gradient
@@ -69,7 +93,7 @@ const Games = () => {
           <p className="mono text-xs uppercase tracking-[0.2em] text-zinc-500">/ games</p>
           <h1
             id="games-heading"
-            className="mt-2 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-semibold tracking-tight"
+            className="mt-2 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-semibold tracking-tight opacity-0"
           >
             Cool little games to play in your browser.
           </h1>
@@ -112,6 +136,7 @@ const Games = () => {
               <ParallaxRow key={game.slug}>
                 <div
                   className="game-row py-7 md:py-9 xl:py-10 group"
+                  style={{ ["--row" as string]: game.color } as React.CSSProperties}
                   onMouseEnter={() => handleMouseEnter(game.color)}
                   onMouseLeave={handleMouseLeave}
                 >
@@ -120,6 +145,7 @@ const Games = () => {
                       viewTransition
                       to={`/games/${game.slug}`}
                       className="block link"
+                      data-cursor-color={game.color}
                       aria-label={`Play ${game.title}`}
                     >
                       {Inner}
