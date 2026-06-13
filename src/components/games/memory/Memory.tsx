@@ -91,7 +91,7 @@ const Memory: FC = () => {
     if (!pair) return;
     setHint([pair[0], pair[1]]);
     setMoves(m => m + 1);
-    timers.current.push(window.setTimeout(() => setHint([]), 1000));
+    timers.current.push(window.setTimeout(() => setHint([]), 1400));
   }, [cards, flipped, won, hint.length]);
 
   const flip = (i: number) => {

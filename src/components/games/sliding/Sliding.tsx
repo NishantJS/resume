@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from "motion/react";
 import GameShell, { type GameInfo } from "../GameShell";
 import { idbGet, idbSet } from "../idb";
 import { sfx } from "../sound";
+import { solvePath } from "./solver";
 import "./sliding.css";
 
 const N = 4;
@@ -21,8 +22,12 @@ const INFO: GameInfo = {
   controls: [
     { keys: "Tap / Click", desc: "Slide a tile" },
     { keys: "Swipe / arrows", desc: "Slide into the gap" },
+    { keys: "Hint", desc: "Glow the next tile on a winning line" },
   ],
-  tips: ["Solve the top rows first, then the left columns.", "Work the last two rows together, column by column."],
+  tips: [
+    "Solve the top rows first, then the left columns.",
+    "The hint stays lit until you slide that tile — follow it repeatedly and it walks you to the solution.",
+  ],
 };
 
 const solvedBoard = () => [...Array(SIZE - 1)].map((_, i) => i + 1).concat(0);
@@ -50,17 +55,10 @@ function scramble(): number[] {
   return isSolved(b) ? scramble() : b;
 }
 
-/** Total Manhattan distance of every tile from its goal — the hint heuristic. */
-function manhattan(b: number[]): number {
-  let d = 0;
-  for (let p = 0; p < SIZE; p++) {
-    const v = b[p];
-    if (v === 0) continue;
-    const target = v - 1;
-    d += Math.abs(Math.floor(p / N) - Math.floor(target / N)) + Math.abs((p % N) - (target % N));
-  }
-  return d;
-}
+/** A solved line of play from a specific board position. `key` is the board
+ *  the NEXT move in `path` applies to — if the real board drifts from it the
+ *  plan is stale and gets recomputed on the next hint request. */
+interface HintPlan { path: number[]; idx: number; key: string }
 
 const Sliding: FC = () => {
   const reduced = useReducedMotion() ?? false;
@@ -69,6 +67,7 @@ const Sliding: FC = () => {
   const [best, setBest] = useState(0);
   const [hintValue, setHintValue] = useState<number | null>(null);
   const savedRef = useRef(false);
+  const planRef = useRef<HintPlan | null>(null);
 
   const won = isSolved(board);
   const boardRef = useRef(board);
@@ -92,6 +91,7 @@ const Sliding: FC = () => {
   const newGame = useCallback(() => {
     savedRef.current = false;
     setHintValue(null);
+    planRef.current = null;
     const next = scramble();
     boardRef.current = next;
     setBoard(next);
@@ -102,46 +102,45 @@ const Sliding: FC = () => {
     const b = boardRef.current;
     const empty = b.indexOf(0);
     if (!neighbors(pos).includes(empty)) return;
+    const moved = b[pos];
     sfx.move();
-    setHintValue(null);
     const next = [...b];
     [next[pos], next[empty]] = [next[empty], next[pos]];
+
+    // Keep the solved plan in sync: following the hinted move advances the
+    // plan (so the next hint is instant); any other move makes it stale.
+    const plan = planRef.current;
+    if (plan) {
+      if (plan.path[plan.idx] === moved) {
+        plan.idx += 1;
+        plan.key = next.join(",");
+        if (plan.idx >= plan.path.length) planRef.current = null;
+      } else {
+        planRef.current = null;
+      }
+    }
+    setHintValue(null);
+
     setBoard(next);
     setMoves(m => m + 1);
   }, []);
 
+  /** Hint = the next move of a real solution computed by the staged solver.
+   *  It stays lit until that exact tile is slid, and asking again after
+   *  following it continues the same winning line. */
   const requestHint = useCallback(() => {
     if (won) return;
     const b = boardRef.current;
-    const empty = b.indexOf(0);
-    const candidates = neighbors(empty);
-
-    // First preference: a neighbor tile that will land exactly on its goal
-    // after the swap — moving it is unambiguously correct.
-    for (const src of candidates) {
-      const val = b[src];
-      if (!val) continue;
-      if (empty === val - 1) { // goal position for tile `val` is index `val-1`
-        sfx.pop();
-        setHintValue(val);
-        return;
-      }
+    const key = b.join(",");
+    let plan = planRef.current;
+    if (!plan || plan.key !== key || plan.idx >= plan.path.length) {
+      const path = solvePath(b);
+      if (!path || path.length === 0) return; // unreachable for legal scrambles
+      plan = { path, idx: 0, key };
+      planRef.current = plan;
     }
-
-    // Second preference: the swap that most reduces total Manhattan distance.
-    // We always pick SOMETHING — even if all moves worsen the position, the
-    // least-bad move is still a valid hint (avoids hints silently doing nothing).
-    let bestSrc = -1, bestDelta = -Infinity;
-    for (const src of candidates) {
-      const after = [...b];
-      [after[src], after[empty]] = [after[empty], after[src]];
-      const delta = manhattan(b) - manhattan(after);
-      if (delta > bestDelta) { bestDelta = delta; bestSrc = src; }
-    }
-    if (bestSrc >= 0) {
-      sfx.pop();
-      setHintValue(b[bestSrc]);
-    }
+    sfx.pop();
+    setHintValue(plan.path[plan.idx]);
   }, [won]);
 
   const slideDir = useCallback((dir: "up" | "down" | "left" | "right") => {
@@ -177,24 +176,26 @@ const Sliding: FC = () => {
   useEffect(() => {
     const el = playRef.current;
     if (!el) return;
+    // No setPointerCapture here: capturing retargets the derived `click`
+    // event to the container, which silently killed tile taps (the board
+    // looked unresponsive and "hints stopped working"). The window-level
+    // pointerup still catches swipes that end outside the board.
     const onDown = (e: PointerEvent) => {
-      // Tiles are buttons — record start but let clicks through.
       swipeStart.current = { x: e.clientX, y: e.clientY };
-      try { el.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     };
     const onUp = (e: PointerEvent) => {
       const d = swipeStart.current; swipeStart.current = null;
       if (!d) return;
       const dx = e.clientX - d.x, dy = e.clientY - d.y;
-      if (Math.hypot(dx, dy) < 20) return; // tap — let the button onClick handle it
+      if (Math.hypot(dx, dy) < 20) return; // tap — the tile's onClick handles it
       if (Math.abs(dx) > Math.abs(dy)) slideDir(dx > 0 ? "right" : "left");
       else slideDir(dy > 0 ? "down" : "up");
     };
     el.addEventListener("pointerdown", onDown);
-    el.addEventListener("pointerup", onUp);
+    window.addEventListener("pointerup", onUp);
     return () => {
       el.removeEventListener("pointerdown", onDown);
-      el.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointerup", onUp);
     };
   }, [slideDir]);
 
