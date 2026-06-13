@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'motion/react';
+import { useSeo } from '../../hooks/useSeo';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -129,6 +130,13 @@ const Home = () => {
   const overlay = useRef<HTMLDivElement>(null);
   const { contextSafe } = useGSAP();
   const reduced = useReducedMotion();
+
+  useSeo({
+    title: "Work — Nishant Chorge",
+    description:
+      "Selected full-stack products by Nishant Chorge — real-time fintech platforms, multi-role portals, micro-frontend architectures and more, built with Node.js, React, Next.js and Fastify.",
+    path: "/work",
+  });
 
   // Heading: SplitText masked char reveal. Rows: ScrollTrigger batches so
   // each animates as it scrolls into view (not all at once on load).

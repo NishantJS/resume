@@ -3,6 +3,7 @@ import { projects } from "../home/Home";
 import { motion, useReducedMotion } from "motion/react";
 import AboutSection from "./About";
 import Contents from "./Contents";
+import { useSeo } from "../../hooks/useSeo";
 
 function isLight(hex: string): boolean {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -55,9 +56,20 @@ const SkillsMarquee = ({ skills, ink, border }: { skills: string[]; ink: string;
 
 const Project = () => {
   const { pathname } = useLocation();
-  const project = projects.find(p => p.path === pathname) ?? projects[0];
+  // Match ignoring a trailing slash so /work/qollabb and /work/qollabb/ both
+  // resolve to the right project (and get the right title / canonical).
+  const norm = (s: string) => s.replace(/\/+$/, "");
+  const project = projects.find(p => norm(p.path) === norm(pathname)) ?? projects[0];
   const index   = projects.indexOf(project);
   const reduced = useReducedMotion();
+
+  const projTitle = project.displayTitle ?? project.title;
+  useSeo({
+    title: `${projTitle} — Nishant Chorge`,
+    description: project.description,
+    path: project.path,
+    image: `/project/${project.title}/logo.webp`,
+  });
 
   const light  = isLight(project.color);
   const ink    = light ? "#111111" : "#ffffff";

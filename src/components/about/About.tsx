@@ -9,6 +9,7 @@ import { motion, useScroll, useReducedMotion } from "motion/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { useSeo } from "../../hooks/useSeo";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -241,6 +242,13 @@ const TimelineCard: FC<{
 const About = () => {
   const reduced = useReducedMotion();
   const mainRef = useRef<HTMLElement>(null);
+
+  useSeo({
+    title: "Nishant Chorge — Software Developer",
+    description:
+      "Software Developer building production-grade fintech and enterprise systems — SSE real-time feeds, micro-frontends, resilient APIs. Node.js · React · Next.js · Fastify · Redis · Mumbai.",
+    path: "/",
+  });
 
   useEffect(() => {
     const html = document.documentElement;

@@ -1,7 +1,15 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { useSeo } from '../../hooks/useSeo';
 
-const NotFound = () => (
+const NotFound = () => {
+  useSeo({
+    title: "Page not found — Nishant Chorge",
+    description: "The page you're after has driven off. Head back home, or explore the work and games.",
+    path: "/404",
+  });
+
+  return (
   <motion.div
     initial={{ opacity: 0, y: -30 }}
     animate={{ opacity: 1, y: 0 }}
@@ -47,7 +55,8 @@ const NotFound = () => (
         Play a Game
       </Link>
     </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};
 
 export default NotFound;
