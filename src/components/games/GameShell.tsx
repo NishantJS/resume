@@ -1,4 +1,5 @@
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { games } from "./games.data";
 import { isMuted, toggleMuted } from "./sound";
@@ -116,16 +117,55 @@ const InfoPanel: FC<{ info: GameInfo }> = ({ info }) => (
    On mobile the info aside sits below the fold, so without this a new
    player gets no guidance at all. Shown once per game (localStorage),
    reopenable any time from the ? button in the top bar.              */
-const HelpOverlay: FC<{ title: string; info: GameInfo; onClose: () => void }> = ({ title, info, onClose }) => {
+const HelpOverlay: FC<{
+  title: string;
+  info: GameInfo;
+  color: string;
+  container: HTMLElement;
+  onClose: () => void;
+}> = ({ title, info, color, container, onClose }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+
+    // Lock the page behind the modal so it can't scroll away underneath it
+    // (the game shell is taller than the viewport on mobile). The scrolling
+    // element is <html> in standards mode, so lock both it and <body>.
+    const { documentElement: html, body } = document;
+    const prev = { html: html.style.overflow, body: body.style.overflow };
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+
+    // Show the top of the card and focus the CTA WITHOUT scrolling it into
+    // view — autoFocus / plain focus() would scroll the tall card (and the
+    // page) on mobile, leaving the heading clipped above the fold.
+    cardRef.current?.scrollTo({ top: 0 });
+    ctaRef.current?.focus({ preventScroll: true });
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      html.style.overflow = prev.html;
+      body.style.overflow = prev.body;
+    };
   }, [onClose]);
 
-  return (
-    <div className="game-help-backdrop" onClick={onClose} role="presentation">
+  // Portalled out of the page-transition wrapper (which carries a
+  // will-change/skew transform and would otherwise be the containing block
+  // for this position:fixed backdrop, sizing it to the whole tall page and
+  // pushing the card off the bottom). `--game` is re-applied here since the
+  // portal escapes the shell that normally provides it.
+  return createPortal(
+    <div
+      className="game-help-backdrop"
+      style={{ ["--game" as string]: color } as React.CSSProperties}
+      onClick={onClose}
+      role="presentation"
+    >
       <div
+        ref={cardRef}
         className="game-help-card"
         role="dialog"
         aria-modal="true"
@@ -151,11 +191,12 @@ const HelpOverlay: FC<{ title: string; info: GameInfo; onClose: () => void }> = 
           </div>
         )}
         {info.legend && info.legend.length > 0 && <LegendList legend={info.legend} />}
-        <button type="button" className="game-help-cta" onClick={onClose} autoFocus>
+        <button ref={ctaRef} type="button" className="game-help-cta" onClick={onClose}>
           Got it — let&rsquo;s play
         </button>
       </div>
-    </div>
+    </div>,
+    container,
   );
 };
 
@@ -254,7 +295,18 @@ const GameShell: FC<GameShellProps> = ({ slug, subtitle, info, stats, toolbar, c
         </aside>
       </div>
 
-      {showHelp && <HelpOverlay title={title} info={info} onClose={closeHelp} />}
+      {showHelp && (
+        <HelpOverlay
+          title={title}
+          info={info}
+          color={color}
+          /* While fullscreen, the modal must live inside the fullscreen
+             element or it won't paint; otherwise body escapes the
+             transformed page wrapper. */
+          container={isFs && rootRef.current ? rootRef.current : document.body}
+          onClose={closeHelp}
+        />
+      )}
     </main>
   );
 };
