@@ -42,26 +42,42 @@ const Contact: FC = () => {
     // st-line-mask gets bottom padding via CSS so descenders (g, y…)
     // aren't clipped by the masks' overflow:clip.
     const split = SplitText.create(heading, {
-      type: "lines,words",
+      type: "lines,words,chars",
       mask: "lines",
       linesClass: "st-line",
+      wordsClass: "contact-word",
     });
     gsap.set(heading, { opacity: 1 });
+
+    // Each character rises with a 3D tilt and ignites in an accent colour
+    // (purple ↔ cyan, matching the swoosh gradient) before settling to white
+    // — a calmer echo of the name hero's lock-in flash.
+    const accents = ["#a855f7", "#22d3ee"];
+    gsap.set(split.chars, { transformPerspective: 500 });
 
     const tl = gsap.timeline({
       scrollTrigger: { trigger: el, start: "top 72%", once: true },
     });
-    tl.from(split.words, {
+    tl.from(split.chars, {
       yPercent: 120,
-      rotate: 3,
-      duration: 0.9,
-      ease: "power4.out",
-      stagger: 0.04,
+      rotateX: -75,
+      opacity: 0,
+      transformOrigin: "50% 100%",
+      duration: 0.7,
+      ease: "power3.out",
+      stagger: 0.022,
+    });
+    split.chars.forEach((c, i) => {
+      tl.fromTo(c,
+        { color: accents[i % accents.length] },
+        { color: "#ffffff", duration: 0.6, ease: "power2.out" },
+        0.12 + i * 0.022,
+      );
     });
     tl.fromTo(rest,
       { opacity: 0, y: 18 },
       { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.12 },
-      "-=0.55",
+      "<+0.3",
     );
 
     // The swoosh is scrubbed to scroll — it strokes in as it rises through

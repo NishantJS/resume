@@ -279,6 +279,14 @@ html {
   margin-bottom: -0.18em;
 }
 
+/* Contact heading words lift independently on hover (desktop bonus on
+   top of the per-char reveal). */
+.contact-word {
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: 50% 100%;
+}
+.contact-word:hover { transform: translateY(-0.12em) scale(1.04); }
+
 /* White pill + dark arrow chip; the arrow rotates ↗ → on hover. */
 .contact-cta {
   display: inline-flex;
