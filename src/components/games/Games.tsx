@@ -92,7 +92,7 @@ const Games = () => {
       initial={reduced ? false : "initial"}
       animate={reduced ? undefined : "animate"}
       exit={reduced ? undefined : "exit"}
-      className="warm-gradient relative min-h-screen flex justify-center items-start pt-28 pb-32"
+      className="play-gradient relative min-h-screen flex justify-center items-start pt-28 pb-32"
       aria-labelledby="games-heading"
     >
       <div ref={overlay} className="absolute inset-0 pointer-events-none" style={{ backgroundColor: "rgba(255,255,255,0)" }} aria-hidden />

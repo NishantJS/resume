@@ -12,6 +12,11 @@ const About    = lazy(() => import("../about/About"))
 const Home     = lazy(() => import("../home/Home"))
 const Project  = lazy(() => import("../project/Project"))
 const Games    = lazy(() => import("../games/Games"))
+const Apps         = lazy(() => import("../apps/Apps"))
+const AppPage      = lazy(() => import("../apps/AppPage"))
+const AppSupport   = lazy(() => import("../apps/AppSupport"))
+const AppPrivacy   = lazy(() => import("../apps/AppPrivacy"))
+const AppChangelog = lazy(() => import("../apps/AppChangelog"))
 const GamePage = lazy(() => import("../games/GamePage"))
 const NotFound = lazy(() => import("../error/NotFound"))
 
@@ -62,6 +67,11 @@ const Router = () => {
               <Route path="/work/:project" element={<Project />} />
               <Route path="/games"         element={<Games />} />
               <Route path="/games/:game"   element={<GamePage />} />
+              <Route path="/apps"                    element={<Apps />} />
+              <Route path="/apps/:app"               element={<AppPage />} />
+              <Route path="/apps/:app/support"       element={<AppSupport />} />
+              <Route path="/apps/:app/privacy"       element={<AppPrivacy />} />
+              <Route path="/apps/:app/changelog"     element={<AppChangelog />} />
               <Route path="*"              element={<NotFound />} />
             </Routes>
           </Suspense>

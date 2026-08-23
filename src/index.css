@@ -62,14 +62,36 @@ html {
   .cursor, .cursor-ring { display: none; }
 }
 
-/* ── Warm "parking-lot" gradient backdrop ────────────────────
-   A subtle version of the Parking Escape page wash, reused behind the
-   games / projects lists. Corner glows over a near-white cream base. */
+/* ── Listing backdrops ───────────────────────────────────────
+   One wash per index page so /work, /apps and /games each read as
+   their own place. Same recipe throughout: two corner glows over a
+   near-white base tinted the same hue, so the hover flood (which
+   blends each row's pastel at 60%) still shows through.
+
+   .warm-gradient is also the 404 backdrop.                        */
+
+/* /work — amber + peach on cream. */
 .warm-gradient {
   background:
     radial-gradient(ellipse at 85% -12%, rgba(249, 210, 122, 0.40) 0%, transparent 56%),
     radial-gradient(ellipse at -12% 104%, rgba(255, 181, 154, 0.34) 0%, transparent 56%),
     linear-gradient(180deg, #fffdf8 0%, #faf3e6 100%);
+}
+
+/* /apps — cyan + sky on a cool off-white. */
+.cool-gradient {
+  background:
+    radial-gradient(ellipse at 85% -12%, rgba(125, 211, 252, 0.42) 0%, transparent 56%),
+    radial-gradient(ellipse at -12% 104%, rgba(153, 246, 228, 0.36) 0%, transparent 56%),
+    linear-gradient(180deg, #fbfeff 0%, #e9f4fa 100%);
+}
+
+/* /games — violet + rose. */
+.play-gradient {
+  background:
+    radial-gradient(ellipse at 85% -12%, rgba(196, 181, 253, 0.44) 0%, transparent 56%),
+    radial-gradient(ellipse at -12% 104%, rgba(251, 182, 206, 0.34) 0%, transparent 56%),
+    linear-gradient(180deg, #fefcff 0%, #f3ecfa 100%);
 }
 
 /* Tints the project hero with its own colour instead of a flat fill. */
@@ -281,11 +303,13 @@ html {
 
 /* Contact heading words lift independently on hover (desktop bonus on
    top of the per-char reveal). */
-.contact-word {
+.contact-word,
+.ignite-word {
   transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
   transform-origin: 50% 100%;
 }
-.contact-word:hover { transform: translateY(-0.12em) scale(1.04); }
+.contact-word:hover,
+.ignite-word:hover { transform: translateY(-0.12em) scale(1.04); }
 
 /* White pill + dark arrow chip; the arrow rotates ↗ → on hover. */
 .contact-cta {
@@ -398,9 +422,9 @@ html {
   translate: 0 -2px;
 }
 
-/* ── Work / Games list rows: colour-keyed accent bar on hover ── */
-.project-row, .game-row { position: relative; }
-.project-row::before, .game-row::before {
+/* ── Work / Apps / Games list rows: colour-keyed accent bar on hover ── */
+.project-row, .game-row, .app-row { position: relative; }
+.project-row::before, .game-row::before, .app-row::before {
   content: "";
   position: absolute;
   left: -1.15rem;
@@ -412,14 +436,14 @@ html {
   background: color-mix(in srgb, var(--row, #ddd) 75%, #6b5836);
   transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.project-row:hover::before, .game-row:hover::before { height: 52%; }
+.project-row:hover::before, .game-row:hover::before, .app-row:hover::before { height: 52%; }
 
 /* Title nudges right with the accent bar; the row's trailing meta
    ("Play →" / contribution) brightens via existing group-hover. */
-.project-row h2, .game-row h2 {
+.project-row h2, .game-row h2, .app-row h2 {
   transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.project-row:hover h2, .game-row:hover h2 { transform: translateX(0.5rem); }
+.project-row:hover h2, .game-row:hover h2, .app-row:hover h2 { transform: translateX(0.5rem); }
 
 /* ── Project hero: giant outlined index watermark ──────────── */
 .proj-watermark {

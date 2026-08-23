@@ -5,8 +5,9 @@ import gsap from 'gsap';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const links = [
-  { name: "My Work", path: "/work", match: (p: string) => p === "/work" || p.startsWith("/work/"), color: "border-purple-500" },
-  { name: "Games",   path: "/games", match: (p: string) => p === "/games" || p.startsWith("/games/"), color: "border-amber-500"  },
+  { name: "My Work", path: "/work", match: (p: string) => p === "/work" || p.startsWith("/work/"), color: "border-amber-400" },
+  { name: "Apps",    path: "/apps",  match: (p: string) => p === "/apps"  || p.startsWith("/apps/"),  color: "border-cyan-400"   },
+  { name: "Games",   path: "/games", match: (p: string) => p === "/games" || p.startsWith("/games/"), color: "border-violet-400" },
 ];
 
 type HeaderProps = { active: string };
