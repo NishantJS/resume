@@ -10,12 +10,17 @@ const skillGroups: { label: string; color: string; items: string[] }[] = [
   {
     label: "Backend",
     color: "#a855f7",
-    items: ["Node.js", "NestJS", "Express", "Fastify", "Passport.js", "MongoDB", "PostgreSQL", "Sequelize", "Microservices"],
+    items: ["Node.js", "NestJS", "Express", "Fastify", "Java", "Passport.js", "MongoDB", "PostgreSQL", "Prisma", "Sequelize", "Kafka", "Microservices"],
   },
   {
     label: "Frontend",
     color: "#22d3ee",
-    items: ["React.js", "Next.js", "Redux", "MUI", "Tailwind", "GSAP", "Framer Motion", "Socket.io", "SCSS"],
+    items: ["React.js", "Next.js", "Vue.js", "Nuxt.js", "Redux", "Pinia", "MUI", "Tailwind", "GSAP", "Framer Motion", "Socket.io", "SCSS"],
+  },
+  {
+    label: "Mobile",
+    color: "#f43f5e",
+    items: ["Flutter", "Riverpod"],
   },
   {
     label: "Testing",

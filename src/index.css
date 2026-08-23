@@ -692,3 +692,24 @@ html {
     animation: none !important;
   }
 }
+
+/* ── Timeline: client row ──────────────────────────────────────
+   On a consultancy placement the employer is not the whole story —
+   the client is who the work was for, so it gets its own line with
+   the entry's accent rather than being buried in the meta string. */
+.tl-client {
+  padding: 0.4rem 0.85rem 0.4rem 0.55rem;
+  border-radius: 0.6rem;
+  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--tl-c, #a855f7) 40%, transparent);
+  background: color-mix(in srgb, var(--tl-c, #a855f7) 13%, transparent);
+}
+.tl-client-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.4rem;
+  border-radius: 0.3rem;
+  color: var(--tl-c, #a855f7);
+  background: color-mix(in srgb, var(--tl-c, #a855f7) 20%, transparent);
+}
