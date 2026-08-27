@@ -5,6 +5,7 @@ import { Skills } from "./Skills";
 import VelocityMarquee from "./VelocityMarquee";
 import StatsStrip from "./StatsStrip";
 import Contact from "./Contact";
+import Explore from "./Explore";
 import { motion, useScroll, useReducedMotion } from "motion/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -26,7 +27,7 @@ const queueRefresh = () => {
 };
 
 const PARAS = [
-  "Hello! I am a Software Developer based in Mumbai, MH, India.",
+  "Hello! I am a Senior Software Developer based in Mumbai, MH, India.",
   "I build production-grade fintech and enterprise systems — from SSE-based real-time feeds to micro-frontend architectures. I care deeply about resilience, low latency, and clean abstractions.",
   "I am currently open to new opportunities and would love to chat with you about your project — let's build something great together!",
 ];
@@ -492,9 +493,9 @@ const About = () => {
   const mainRef = useRef<HTMLElement>(null);
 
   useSeo({
-    title: "Nishant Chorge — Software Developer",
+    title: "Nishant Chorge — Senior Software Developer",
     description:
-      "Software Developer building production-grade fintech and enterprise systems — SSE real-time feeds, micro-frontends, resilient APIs. Node.js · React · Next.js · Fastify · Redis · Mumbai.",
+      "Senior Software Developer in Mumbai building production-grade fintech and enterprise systems — SSE real-time feeds, micro-frontends, resilient APIs. Currently at BCT Consulting, on the automation team for BNP Paribas. Node.js · React · Next.js · Fastify · Redis.",
     path: "/",
   });
 
@@ -614,6 +615,12 @@ const About = () => {
           ))}
         </TimelineSection>
       </section>
+
+      {/* ── Where to go next ───────────────────────────────────────
+          The three listings, at the bottom of the page the reader has
+          just finished — rather than a trip back up to the nav bar. */}
+      <SectionDivider label="Explore" />
+      <Explore />
 
       {/* ── Contact finale ─────────────────────────────────────────── */}
       <Contact />

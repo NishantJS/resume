@@ -415,6 +415,72 @@ html {
   box-shadow: 0 24px 50px -30px color-mix(in srgb, var(--tl, #a855f7) 55%, transparent);
 }
 
+/* ── About: where to go next ─────────────────────────────────
+   Numbered rows in the same rhythm as the /work index, so the end of
+   the landing page hands off to the listings rather than sending the
+   reader back up to the nav. Everything that moves on hover is a
+   transform or a colour — no padding, no width — so a latched hover on
+   a touch screen can't reflow the row. */
+.xp-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.xp-row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) 1.75rem;
+  align-items: baseline;
+  gap: 0 1rem;
+  padding: 1.6rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+}
+.xp-num {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+  transition: color 300ms ease;
+}
+.xp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: translate 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.xp-label {
+  font-family: "Geologica", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-size: clamp(1.9rem, 5.5vw, 3.1rem);
+  transition: color 300ms ease;
+}
+.xp-blurb {
+  font-size: clamp(0.85rem, 1.6vw, 0.98rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.55);
+  max-width: 46ch;
+}
+.xp-arrow {
+  justify-self: end;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.3);
+  transition: translate 380ms cubic-bezier(0.22, 1, 0.36, 1), color 300ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .xp-row:hover .xp-body { translate: 0.7rem 0; }
+  .xp-row:hover .xp-label,
+  .xp-row:hover .xp-num { color: var(--xp, #fff); }
+  .xp-row:hover .xp-arrow { translate: 0.4rem 0; color: var(--xp, #fff); }
+}
+/* Keyboard users get the same colour cue; the slide is pointer-only. */
+.xp-row:focus-visible .xp-label,
+.xp-row:focus-visible .xp-arrow { color: var(--xp, #fff); }
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-body,
+  .xp-arrow { transition: none; }
+}
+
 /* ── About: skill chips ─────────────────────────────────────── */
 .skill-chip {
   display: inline-flex;

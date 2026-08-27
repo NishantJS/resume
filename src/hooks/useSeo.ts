@@ -11,7 +11,15 @@ export interface SeoInput {
   path: string;
   /** Absolute or site-relative preview image. */
   image?: string;
+  /** Keep this route out of search results (the 404, mainly). */
+  noindex?: boolean;
 }
+
+/** Fallback share image, so a route that sets none cannot inherit the
+    previous route's. */
+const DEFAULT_IMAGE = "/og-image.png";
+const DEFAULT_ROBOTS =
+  "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 
 /** Find-or-create a <meta> by name/property and set its content. */
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
@@ -31,7 +39,7 @@ function upsertMeta(attr: "name" | "property", key: string, content: string) {
  * browser tab, history, and JS-executing crawlers; static index.html still
  * covers social scrapers that don't run JS.
  */
-export function useSeo({ title, description, path, image }: SeoInput) {
+export function useSeo({ title, description, path, image, noindex }: SeoInput) {
   useEffect(() => {
     const url = SITE + path;
     document.title = title;
@@ -45,11 +53,16 @@ export function useSeo({ title, description, path, image }: SeoInput) {
     upsertMeta("name", "twitter:title", title);
     upsertMeta("property", "og:url", url);
 
-    if (image) {
-      const abs = image.startsWith("http") ? image : SITE + image;
-      upsertMeta("property", "og:image", abs);
-      upsertMeta("name", "twitter:image", abs);
-    }
+    /* Always written, never conditionally. These tags are mutated in
+       place on a client-side route change, so anything left unset keeps
+       whatever the page before it wrote — which is how a project's
+       screenshot ends up as the preview image for the 404. */
+    const shot = image ?? DEFAULT_IMAGE;
+    const abs = shot.startsWith("http") ? shot : SITE + shot;
+    upsertMeta("property", "og:image", abs);
+    upsertMeta("name", "twitter:image", abs);
+
+    upsertMeta("name", "robots", noindex ? "noindex, follow" : DEFAULT_ROBOTS);
 
     let canon = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canon) {
@@ -58,5 +71,5 @@ export function useSeo({ title, description, path, image }: SeoInput) {
       document.head.appendChild(canon);
     }
     canon.href = url;
-  }, [title, description, path, image]);
+  }, [title, description, path, image, noindex]);
 }

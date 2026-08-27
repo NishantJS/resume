@@ -1,6 +1,16 @@
 {
-  "name": "Nishant",
+  "id": "/",
+  "name": "Nishant Chorge — Senior Software Developer",
   "short_name": "Nishant",
+  "description": "Portfolio of Nishant Chorge, a Senior Software Developer in Mumbai building production-grade fintech and enterprise systems.",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "en-IN",
+  "categories": [
+    "portfolio",
+    "developer",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

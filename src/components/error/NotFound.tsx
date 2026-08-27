@@ -7,6 +7,9 @@ const NotFound = () => {
     title: "Page not found — Nishant Chorge",
     description: "The page you're after has driven off. Head back home, or explore the work and games.",
     path: "/404",
+    // Every unmatched URL renders this, so leaving it indexable invites
+    // search engines to file an unbounded number of pages under it.
+    noindex: true,
   });
 
   return (

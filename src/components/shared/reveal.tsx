@@ -176,6 +176,51 @@ export const RevealWords: FC<{
    tween ended up owning only part of the new character list — the
    back half of a heading would sit at rest while the front half
    animated. Doing it by hand keeps split and timeline in step. */
+/* ── Split scheduler ───────────────────────────────────────────────
+   Splitting a heading replaces it with one element per character, and a
+   detail page has seven of them. Each used to reach for idle time on
+   its own, which meant they all queued in the same instant and the
+   browser ran them back to back in one slice — or, when the main thread
+   was busy, timed all seven out together. Either way it landed as one
+   block of work, and the moment it landed was exactly the moment a
+   route change was mounting the new page. That is the stall you feel
+   stepping to the next project.
+
+   One shared queue instead, drained a heading at a time and only while
+   the current idle slice has room. On a quiet thread that is still all
+   seven in one go; on a busy one they trickle across frames, in
+   document order, so the headings you reach first are ready first. */
+const splitQueue: (() => void)[] = [];
+let pumpId = 0;
+
+const pump = (deadline?: IdleDeadline) => {
+  pumpId = 0;
+  while (splitQueue.length) {
+    splitQueue.shift()!();
+    // Splitting one heading costs a few ms; stop while there is still
+    // room in the frame rather than running over the end of it.
+    if (!deadline || deadline.timeRemaining() < 6) break;
+  }
+  if (splitQueue.length) schedulePump();
+};
+
+const schedulePump = () => {
+  if (pumpId) return;
+  pumpId = window.requestIdleCallback?.(pump, { timeout: 400 })
+    ?? window.setTimeout(pump, 24);
+};
+
+/** Queues a split and returns a function that cancels it if it has not
+    run yet. */
+const queueSplit = (fn: () => void) => {
+  splitQueue.push(fn);
+  schedulePump();
+  return () => {
+    const i = splitQueue.indexOf(fn);
+    if (i >= 0) splitQueue.splice(i, 1);
+  };
+};
+
 export type IgniteOpts = {
   /** [first, second] — units alternate between them. */
   accents: [string, string];
@@ -215,12 +260,21 @@ export const useIgnite = (
     let width = 0;
     let cancelled = false;
 
-    const teardown = () => {
+    /* `defer` is for the unmount path. revert() rebuilds the heading's
+       original markup, which is pure waste when React is about to drop
+       the whole subtree anyway — and seven of those land together on a
+       route change, in the same frame as the incoming page's mount. A
+       frame later we can just look: if the node is gone, so is the
+       reason to restore it. */
+    const teardown = (defer = false) => {
       tl?.scrollTrigger?.kill();
       tl?.kill();
-      split?.revert();
+      const dying = split;
       tl = null;
       split = null;
+      if (!dying) return;
+      if (!defer) { dying.revert(); return; }
+      requestAnimationFrame(() => { if (heading.isConnected) dying.revert(); });
     };
 
     const build = () => {
@@ -305,28 +359,20 @@ export const useIgnite = (
       else fonts.ready.then(build);
     };
 
-    /* Splitting is not cheap — it replaces a heading with one element
-       per character — and a detail page has seven of these. Doing them
-       all synchronously at mount put a third of a second of work on the
-       main thread at exactly the moment the page was arriving.
-
-       Deferring each until its heading nears the viewport was worse:
-       the work simply moved into the scroll, where a stall is far more
-       obvious than one during a page transition. Idle time is the right
-       home for it — off the critical path, done well before anyone has
-       scrolled, with a short timeout so a heading is never left
-       waiting invisibly behind its own reveal. */
-    const idle = window.requestIdleCallback?.(splitNow, { timeout: 400 })
-      ?? window.setTimeout(splitNow, 60);
+    /* Off the critical path, but not all at once — see the scheduler at
+       the top of this file. Deferring each split until its heading
+       neared the viewport was tried and was worse: the work simply
+       moved into the scroll, where a stall is far more obvious than one
+       during a page transition. */
+    const dequeue = queueSplit(splitNow);
 
     ScrollTrigger.addEventListener("refreshInit", onRefresh);
 
     return () => {
       cancelled = true;
-      window.cancelIdleCallback?.(idle);
-      window.clearTimeout(idle);
+      dequeue();
       ScrollTrigger.removeEventListener("refreshInit", onRefresh);
-      teardown();
+      teardown(true);
     };
   }, { scope, dependencies: [reduced, selector, ...deps] });
 };
