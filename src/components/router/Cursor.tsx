@@ -1,4 +1,4 @@
-import { CSSProperties, FC, useRef, useEffect } from 'react';
+import { FC, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
@@ -82,20 +82,15 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
     };
 
     /* ── Link hover handlers ────────────────────────────────────────
-       Two treatments, not one.
+       Every link gets the same swell into an inverting disc — that is
+       the site's hover, and it is what makes the nav, the logo and the
+       body links read as live. A project thumbnail is painted into that
+       disc on top, and only where there is one to paint.
 
-       The big white plate exists to be a frame for a project thumbnail:
-       it is sized for an image and it fills with white so the image has
-       something to sit on. Only the /work rows carry a `data-image`,
-       though, and every other link on the site — nav, logo, footer,
-       the listings, the detail pages — was getting the frame anyway,
-       with nothing in it. An empty white disc reads as a picture that
-       failed to load, which is exactly what it looks like.
-
-       So: a link that has an image gets the frame. A link that does not
-       gets a plain swell, keeping the dot's own colour and its exclusion
-       blend — the cursor acknowledges the link without pretending to
-       show something. */
+       The imageless branch has to say `backgroundImage: none` rather
+       than simply leave the property alone. Left alone, a disc that
+       just showed a project logo keeps showing it while it travels to
+       the next link — a thumbnail on a link it does not belong to. */
     const handleEnter = (t: HTMLElement) => {
       // Home.tsx sets data-entering="true" on the work list during its
       // staggered entrance; until that clears, treat the rows as
@@ -104,24 +99,18 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
         ? t.dataset.image
         : null;
 
-      const styles: CSSProperties = src
-        ? {
-            scale: 3,
-            mixBlendMode: 'difference',
-            backgroundColor: 'white',
-            backgroundImage: `url(${src})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }
-        : {
-            scale: 1.9,
-            mixBlendMode: 'exclusion',
-            backgroundColor: '',
-            backgroundImage: 'none',
-          };
-
-      gsap.to(cursor, { duration: 0.4, ease: 'power3.out', ...styles });
-      if (ring) gsap.to(ring, { scale: src ? 0 : 0.6, duration: 0.3 });
+      gsap.to(cursor, {
+        scale: 3, duration: 0.4, ease: 'power3.out',
+        mixBlendMode: 'difference', backgroundColor: 'white',
+        ...(src
+          ? {
+              backgroundImage: `url(${src})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : { backgroundImage: 'none' }),
+      });
+      if (ring) gsap.to(ring, { scale: 0, duration: 0.3 });
     };
 
     const handleLeave = () => {
