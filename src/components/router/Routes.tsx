@@ -1,18 +1,23 @@
 import { Routes, Route, useLocation } from "react-router-dom"
-import { Suspense, useEffect, useLayoutEffect, useRef } from "react"
+import { lazy, Suspense, useEffect, useRef } from "react"
 import ScrollIntoView from "./ScrollIntoView"
-import { useLinkTransitions } from "./useLinkTransitions"
-import { notifySwap } from "./transition"
 import Header from "../header/Header"
 import Footer from "../footer/Footer"
 import Cursor from "./Cursor"
 import { ScrollProgress } from "./ScrollProgress"
 import gsap from "gsap"
 
-import {
-  About, Home, Project, Games, GamePage,
-  Apps, AppPage, AppSupport, AppPrivacy, AppChangelog, NotFound,
-} from "./lazyRoutes"
+const About        = lazy(() => import("../about/About"))
+const Home         = lazy(() => import("../home/Home"))
+const Project      = lazy(() => import("../project/Project"))
+const Games        = lazy(() => import("../games/Games"))
+const GamePage     = lazy(() => import("../games/GamePage"))
+const Apps         = lazy(() => import("../apps/Apps"))
+const AppPage      = lazy(() => import("../apps/AppPage"))
+const AppSupport   = lazy(() => import("../apps/AppSupport"))
+const AppPrivacy   = lazy(() => import("../apps/AppPrivacy"))
+const AppChangelog = lazy(() => import("../apps/AppChangelog"))
+const NotFound     = lazy(() => import("../error/NotFound"))
 
 /* ── Subtle scroll-skew on fast scrolls ───────────────────── */
 const useScrollSkew = (ref: React.RefObject<HTMLDivElement | null>) => {
@@ -45,11 +50,6 @@ const Router = () => {
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   useScrollSkew(wrapperRef)
-  useLinkTransitions()
-
-  // Lets an in-flight view transition know the new route is on screen
-  // and it is safe to take the "after" snapshot.
-  useLayoutEffect(() => { notifySwap() }, [location.pathname])
 
   return (
     <>
@@ -58,11 +58,8 @@ const Router = () => {
       <Header active={location.pathname} />
       <Cursor pathname={location.pathname} />
       <div ref={wrapperRef} style={{ willChange: "transform" }}>
-        {/* The transition animates this, not the document root, so the
-            header and footer are never part of it — they keep their own
-            compositing (the header blends in difference mode) and stay
-            put while the page changes underneath them. */}
-        <div className="page-frame">
+        {/* Keyed on the path so the CSS fade below re-runs per route. */}
+        <div className="page-enter" key={location.pathname}>
         <Suspense fallback={null}>
           <Routes location={location}>
             <Route index                 element={<About />} />

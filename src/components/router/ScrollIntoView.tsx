@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { freezeScroll } from './scrollLock';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,14 +10,10 @@ gsap.registerPlugin(ScrollTrigger);
    to that section instead.
 
    The reset is instant and runs in a layout effect, so the new page is
-   composed at the top before anything paints or measures. A smooth
-   scroll never arrived: pages here run to fifteen thousand pixels, and
-   the document collapses to the new page's height mid-flight, which
-   cancels the scroll and leaves you wherever the shorter page clamped
-   you.
-
-   Holding that position against a trackpad fling is scrollLock's job,
-   started back on the click and released on a short fixed timer.
+   composed at the top before anything paints. A smooth scroll never
+   arrived: pages here run to fifteen thousand pixels, and the document
+   collapses to the new page's height mid-flight, which cancels the
+   scroll and leaves you wherever the shorter page clamped you.
 
    The browser's own scroll restoration is turned off so back and
    forward behave like every other route change here.               */
@@ -41,14 +36,10 @@ function ScrollToAnchor() {
     document.scrollingElement?.scrollTo({ top: 0, behavior: 'instant' });
     if (!changed) return;
 
-    // Back/forward never goes through the click interceptor, so this
-    // is where those get their (brief) freeze.
-    freezeScroll();
-
-    // The incoming page's geometry only exists now, so every
-    // scroll-driven section on it is still holding start/end values
-    // measured against the page that just left.
-    const t = window.setTimeout(() => ScrollTrigger.refresh(), 520);
+    // The incoming page's geometry only exists now, so its scroll-driven
+    // sections are still holding start/end values measured against the
+    // page that just left.
+    const t = window.setTimeout(() => ScrollTrigger.refresh(), 350);
     return () => window.clearTimeout(t);
   }, [pathname, hash]);
 

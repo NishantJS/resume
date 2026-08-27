@@ -674,142 +674,29 @@ html {
 }
 .skill-marquee:hover { animation-play-state: paused; }
 
-/* ── Route loading ─────────────────────────────────────────────
-   Shown only when a route's code takes more than a moment to arrive.
-   The bar runs an indeterminate sweep rather than a real percentage —
-   there is nothing meaningful to measure, and its whole job is to say
-   the click registered. It borrows the site's three accents so it
-   reads as the same object as the scroll progress bar. */
-:root[data-loading]::after {
-  content: "";
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 2px;
-  z-index: 60;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, #a855f7, #22d3ee, #f43f5e, transparent);
-  background-size: 45% 100%;
-  background-repeat: no-repeat;
-  animation: route-loading 900ms cubic-bezier(0.5, 0, 0.5, 1) infinite;
+/* ── Page change ───────────────────────────────────────────────
+   One fade, on the container, keyed to the route.
+
+   This replaces a full View Transitions setup — snapshots, shared
+   element morphs, direction-aware curves. It looked good and measured
+   fine in isolation, but `view-transition-name` has to sit on the
+   element permanently, and on a page fifteen thousand pixels tall the
+   stacking context and containing block it forces cost far more than
+   the animation was worth. Everything it took to drive it — a click
+   interceptor on the document, a scroll lock, a custom route loader,
+   a snapshot handshake with the router — is gone with it.
+
+   A fade costs one compositor property on one element, for a quarter
+   of a second, and nothing at all once it has finished. */
+.page-enter {
+  animation: page-enter 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
-@keyframes route-loading {
-  from { background-position: -50% 0; }
-  to   { background-position: 150% 0; }
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  :root[data-loading]::after { animation: none; background-position: 50% 0; }
-}
-
-/* ── Page transitions ──────────────────────────────────────────
-   Driven from router/transition.ts. Two things happen at once.
-
-   The page crossfades — the outgoing one recedes a little and dims,
-   the incoming one rises into place. 380ms, with the incoming half
-   the faster of the two, so what you asked for is legible before what
-   you left has finished going.
-
-   It is the page frame that animates, not the document root. The
-   header and footer sit outside it and never take part: naming them
-   individually also kept them still, but a view-transition snapshot
-   composites on its own layer, which broke the difference blend the
-   header relies on to stay readable over every background.
-
-   And the title you clicked flies to where it lives on the next page.
-   That pair is named on both sides, so the browser tweens the box
-   between them and crossfades the type inside it — a listing row's
-   name lands as the hero, at hero size.                            */
-@supports (view-transition-name: none) {
-  .page-frame { view-transition-name: page; }
-
-  ::view-transition-group(root) { animation: none; }
-
-  /* The header blends in difference mode so its white text inverts
-     against whatever is under it. Once the page is lifted into a
-     transition layer there is nothing left under it to blend with, and
-     it washes out for the length of the transition — so it is captured
-     as its own snapshot instead. Each side is photographed already
-     blended against its own page, and the two crossfade. */
-  header[role="banner"] { view-transition-name: site-header; }
-  ::view-transition-group(site-header) {
-    animation-duration: 380ms;
-    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-  }
-  ::view-transition-image-pair(page) { isolation: none; }
-  ::view-transition-group(page) {
-    animation-duration: 380ms;
-    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-  }
-  ::view-transition-old(page) {
-    animation: 300ms cubic-bezier(0.4, 0, 1, 1) both vt-recede;
-  }
-  ::view-transition-new(page) {
-    animation: 380ms cubic-bezier(0.32, 0.72, 0, 1) both vt-rise;
-  }
-  @keyframes vt-recede {
-    from { opacity: 1; transform: none; }
-    to   { opacity: 0; transform: scale(0.985) translateY(-0.9rem); }
-  }
-  @keyframes vt-rise {
-    from { opacity: 0; transform: translateY(1.6rem); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* Going back out — up a level, or the header moving between
-     sections — runs the same move in reverse, so the site keeps a
-     sense of depth instead of crossfading identically whichever way
-     you go. `data-nav` is set on <html> for the length of the
-     transition by router/transition.ts. */
-  :root[data-nav="out"] ::view-transition-old(page) {
-    animation-name: vt-recede-back;
-  }
-  :root[data-nav="out"] ::view-transition-new(page) {
-    animation-name: vt-rise-back;
-  }
-  @keyframes vt-recede-back {
-    from { opacity: 1; transform: none; }
-    to   { opacity: 0; transform: scale(1.015) translateY(0.9rem); }
-  }
-  @keyframes vt-rise-back {
-    from { opacity: 0; transform: translateY(-1.4rem) scale(0.99); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* Sideways — /work to /apps, one app tab to the next — has no
-     depth to express, so it simply crossfades in place. */
-  :root[data-nav="across"] ::view-transition-old(page) {
-    animation-name: vt-fade-out;
-  }
-  :root[data-nav="across"] ::view-transition-new(page) {
-    animation-name: vt-fade-in;
-  }
-  @keyframes vt-fade-out {
-    from { opacity: 1; transform: none; }
-    to   { opacity: 0; transform: scale(0.995); }
-  }
-  @keyframes vt-fade-in {
-    from { opacity: 0; transform: scale(1.005); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* The morphing title. The group carries the box from one position
-     and size to the other; the two snapshots crossfade inside it. Both
-     are pinned to the box's top-left at their natural size rather than
-     stretched to fill it — scaling a 36px row title up to a 144px hero
-     is what would have made it soft. */
-  ::view-transition-group(page-title) {
-    animation-duration: 460ms;
-    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-    z-index: 2;
-  }
-  ::view-transition-old(page-title),
-  ::view-transition-new(page-title) {
-    animation-duration: 460ms;
-    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-    height: 100%;
-    object-fit: none;
-    object-position: top left;
-    overflow: clip;
-  }
+  .page-enter { animation: none; }
 }
 
 /* ── Prefers-reduced-motion: kill all motion ─────────────── */
@@ -819,10 +706,6 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none !important;
   }
 }
 

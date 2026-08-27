@@ -4,7 +4,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ProjectData } from "./projects.data";
 import { ArrowUpRight, inkFor } from "../shared/reveal";
-import { isMorphing } from "../router/transition";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,11 +22,6 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
     const el = ref.current;
     if (!el) return;
 
-    // Arriving as a morph, the title is already on screen and flying
-    // into position — revealing it character by character on top of
-    // that reads as a stutter, so the hero lets it land and animates
-    // everything around it instead.
-    const morphed = isMorphing();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
       el.querySelectorAll<HTMLElement>(".tw, .meta-line, .desc-col, .proj-watermark, .proj-scroll-cue")
@@ -37,14 +31,14 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
 
     // Chars are positioned below their mask BEFORE the hidden words are
     // unhidden, so nothing flashes on first paint (useGSAP = pre-paint).
+    gsap.set(el.querySelectorAll(".tc"), { yPercent: 115, rotate: 5 });
     gsap.set(el.querySelectorAll(".tw"), { opacity: 1 });
-    if (!morphed) gsap.set(el.querySelectorAll(".tc"), { yPercent: 115, rotate: 5 });
 
     const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
     tl.to(
       el.querySelectorAll<HTMLElement>(".tc"),
-      { yPercent: 0, rotate: 0, duration: morphed ? 0 : 0.9, stagger: morphed ? 0 : 0.022 },
+      { yPercent: 0, rotate: 0, duration: 0.9, stagger: 0.022 },
       0.1,
     )
       .fromTo(
@@ -114,7 +108,6 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
       {/* ── Center: giant title, char-level masked reveal ───────────── */}
       <div className="relative z-10 flex-1 flex items-center px-6 md:px-14 xl:px-20 py-12">
         <h1
-          data-morph-target
           className="proj-hero-title font-bold leading-[0.88] tracking-tight"
           style={{ fontSize: "clamp(3.5rem, 10vw, 10rem)" }}
         >

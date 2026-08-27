@@ -117,7 +117,7 @@ const Home = () => {
                     >
                       {String(index + 1).padStart(2, '0')}
                     </span>
-                    <h2 data-morph-source className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
                       {project.displayTitle ?? project.title}
                     </h2>
                   </div>
