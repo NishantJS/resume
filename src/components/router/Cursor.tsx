@@ -9,7 +9,7 @@ type CursorProps = { pathname?: string };
    now that the follow tweens live for the whole session: a blanket
    gsap.killTweensOf(cursor) would take the x/y quickTo down with the
    hover swell and the cursor would freeze mid-screen. */
-const LOOK = 'scale,backgroundColor,mixBlendMode,backgroundImage,backgroundSize,backgroundPosition';
+const LOOK = 'scale,backgroundColor,mixBlendMode';
 
 const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -81,16 +81,41 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
       }
     };
 
-    /* ── Link hover handlers ────────────────────────────────────────
-       Every link gets the same swell into an inverting disc — that is
-       the site's hover, and it is what makes the nav, the logo and the
-       body links read as live. A project thumbnail is painted into that
-       disc on top, and only where there is one to paint.
+    /* Logos already decoded and safe to paint straight onto the disc.
+       Module-level would be better still, but per-mount is enough: the
+       browser cache does the real work after the first hover. */
+    const ready = new Set<string>();
 
-       The imageless branch has to say `backgroundImage: none` rather
-       than simply leave the property alone. Left alone, a disc that
-       just showed a project logo keeps showing it while it travels to
-       the next link — a thumbnail on a link it does not belong to. */
+    /** Paint (or clear) the thumbnail. Written to `style` directly, not
+        tweened.
+
+        `background-image` is not an interpolable value, so GSAP applies
+        it at the END of the tween — a 400 ms wait before the logo
+        appears, during which the disc is a flat white plate reading as
+        a black hole under `difference` blend. The same delay applied to
+        clearing it, so a logo lingered on the next link you moved to.
+        Both symptoms, one cause: it was never a thing to animate. */
+    const paintShot = (src: string | null) => {
+      if (src) {
+        cursor.style.backgroundImage = `url(${src})`;
+        cursor.style.backgroundSize = 'cover';
+        cursor.style.backgroundPosition = 'center';
+      } else {
+        cursor.style.backgroundImage = '';
+      }
+    };
+
+    /* ── Link hover handlers ────────────────────────────────────────
+       Every link gets the inverting disc — difference blend over white,
+       which is the site's hover and what makes the nav, the logo, the
+       body links and the accent words read as live.
+
+       What changes is how big it gets. 3x is a frame: that size exists
+       to hold a project thumbnail, and it only looks deliberate when
+       there is one in it. Over a company name, a university, an Explore
+       row — anything with no image behind it — it is a large empty
+       plate. Those get 2x: the same invert, sized to the text it is
+       passing over rather than to a picture that was never coming. */
     const handleEnter = (t: HTMLElement) => {
       // Home.tsx sets data-entering="true" on the work list during its
       // staggered entrance; until that clears, treat the rows as
@@ -100,17 +125,28 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
         : null;
 
       gsap.to(cursor, {
-        scale: 3, duration: 0.4, ease: 'power3.out',
+        scale: src ? 3 : 2, duration: 0.4, ease: 'power3.out',
         mixBlendMode: 'difference', backgroundColor: 'white',
-        ...(src
-          ? {
-              backgroundImage: `url(${src})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }
-          : { backgroundImage: 'none' }),
       });
       if (ring) gsap.to(ring, { scale: 0, duration: 0.3 });
+
+      if (!src) { paintShot(null); return; }
+      if (ready.has(src)) { paintShot(src); return; }
+
+      /* First hover on a logo that isn't in the cache yet. Assigning it
+         now shows nothing — the disc just sits there white until the
+         bytes arrive, which is why it looked black and why coming back
+         a second time "fixed" it. Decode first, then paint, and only if
+         the pointer is still on the link that asked for it. */
+      paintShot(null);
+      const img = new Image();
+      img.src = src;
+      const show = () => {
+        ready.add(src);
+        if (hovered === t) paintShot(src);
+      };
+      if (img.decode) img.decode().then(show, () => {});
+      else img.onload = show;
     };
 
     const handleLeave = () => {
@@ -119,7 +155,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
         scale: 1, duration: 0.35, ease: 'power3.out',
         mixBlendMode: 'exclusion', backgroundColor: '',
       });
-      cursor.style.backgroundImage = '';
+      paintShot(null);
       if (ring) gsap.to(ring, { scale: 1, duration: 0.5 });
     };
 
@@ -162,7 +198,27 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
 
     document.addEventListener('mousemove', moveCursor, { passive: true });
 
+    /* Warm the thumbnails this page can ask for, so even the first hover
+       has something to paint. Only where the cursor exists at all — it
+       is display:none under 1024px, and there is no reason to spend a
+       phone's bandwidth on images it will never show. */
+    let warm = 0;
+    if (window.matchMedia('(min-width: 1024px)').matches) {
+      warm = window.requestIdleCallback?.(() => {
+        document.querySelectorAll<HTMLElement>('[data-image]').forEach(el => {
+          const src = el.dataset.image;
+          if (!src || ready.has(src)) return;
+          const img = new Image();
+          img.src = src;
+          const done = () => ready.add(src);
+          if (img.decode) img.decode().then(done, () => {});
+          else img.onload = done;
+        });
+      }, { timeout: 2000 }) ?? window.setTimeout(() => {}, 0);
+    }
+
     return () => {
+      window.cancelIdleCallback?.(warm);
       window.removeEventListener('resize', measure);
       document.removeEventListener('mousemove', moveCursor);
       document.removeEventListener('mouseover', onOver);

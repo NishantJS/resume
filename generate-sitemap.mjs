@@ -4,32 +4,13 @@
  * The checked-in sitemap had gone stale — it listed seven /work pages and
  * exactly one of the ten games, and had never heard of /apps at all. That
  * is the failure mode of a hand-maintained sitemap: nothing breaks when
- * you forget it, so you forget it. Reading the slugs out of the data
- * modules means shipping a project, an app or a game is enough.
- *
- * The slugs are pulled with a regex rather than by importing the modules,
- * because they are TypeScript and this runs in plain node after the build.
+ * you forget it, so you forget it.
  */
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { routes } from './scripts/route-data.mjs';
 
 const SITE = 'https://www.nishant.click';
-
-/** Every `slug: "…"` / `path: "…"` literal in a data module. */
-const literals = (file, key) =>
-  [...readFileSync(file, 'utf-8').matchAll(new RegExp(`^\\s*${key}:\\s*"([^"]+)"`, 'gm'))]
-    .map(m => m[1]);
-
-const projects = literals('src/components/project/projects.data.ts', 'path');
-const apps     = literals('src/components/apps/apps.data.ts', 'slug');
-const games    = literals('src/components/games/games.data.ts', 'slug');
-
-if (!projects.length || !apps.length || !games.length) {
-  throw new Error(
-    `Sitemap: found ${projects.length} projects, ${apps.length} apps, ${games.length} games — ` +
-    `a data module changed shape, so the sitemap would ship incomplete.`,
-  );
-}
-
+const { projects, apps, games } = routes();
 const today = new Date().toISOString().slice(0, 10);
 
 // priority is a hint about relative importance within this site only.

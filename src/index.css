@@ -281,8 +281,21 @@ html {
   text-transform: uppercase;
   white-space: nowrap;
   color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.22);
+  -webkit-text-stroke-color: rgba(255, 255, 255, 0.22);
+  -webkit-text-stroke-width: 1.5px;
   transition: -webkit-text-stroke-color 300ms ease;
+}
+/* The stroke width is a fixed 1.5px but the type is not: it clamps down
+   to 2.6rem on a phone from 6rem on a desktop, so the outline goes from
+   about 1.5% of the glyph height to nearly 3.5% of it. At that weight
+   the strokes of neighbouring letters very nearly meet, and the -0.02em
+   tracking that reads as tight-and-deliberate at 6rem closes the last
+   of the gap. Thinner outline, and let the letters breathe. */
+@media (max-width: 768px) {
+  .vm-item {
+    -webkit-text-stroke-width: 1px;
+    letter-spacing: 0.015em;
+  }
 }
 .vm-item:hover { -webkit-text-stroke-color: rgba(255, 255, 255, 0.6); }
 /* Every 8th item filled, not outlined — anchors the rhythm. */

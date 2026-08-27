@@ -118,8 +118,17 @@ const Paragraph: FC<ParagraphProps> = ({ paragraph, progress, range }) => {
         cursor += word.length + (wi < words.length - 1 ? 1 : 0);
 
         return (
-          // whitespace-nowrap keeps chars of the same word on the same line
-          <span key={wi} className="inline-block whitespace-nowrap mr-3 mt-3">
+          /* whitespace-nowrap keeps chars of the same word on the same
+             line. The accent words also carry `link`, which is what the
+             custom cursor watches — so the inverting disc swells over
+             them the way it does over a real link. The class has no
+             styles of its own; it is purely the cursor's hook. */
+          <span
+            key={wi}
+            className={isAccent
+              ? "link inline-block whitespace-nowrap mr-3 mt-3"
+              : "inline-block whitespace-nowrap mr-3 mt-3"}
+          >
             {word.split('').map((ch, ci) => (
               <span key={ci} className="relative inline-block">
                 {/* Ghost keeps the unread text faintly visible behind it */}

@@ -13,32 +13,35 @@ gsap.registerPlugin(ScrollTrigger);
    they scrolled past several screens ago. This puts them at the end of
    the road instead.
 
-   Counts are written here rather than imported. Reading them from
-   projects.data / apps.data / games.data would pull three data modules
-   — 60 kB of them — into the landing page's chunk to render three
-   numbers. Keep them in step by hand when a project ships.
+   The counts are compile-time constants, substituted by Vite from the
+   same reader that builds the sitemap (see `define` in vite.config.ts).
+   Importing projects.data / apps.data / games.data to count them at
+   runtime would pull ~60 kB of copy into the landing page's chunk to
+   render three integers; hardcoding them means they go stale the first
+   time something ships. This is neither.
 
    Accent per destination matches the nav underline for that section,
    so the colour is already familiar by the time you get here. */
+const pad = (n: number) => String(n).padStart(2, "0");
 const DESTINATIONS = [
   {
     to: "/work",
     label: "My Work",
-    count: "07",
+    count: pad(__COUNT_WORK__),
     blurb: "Fintech and enterprise systems shipped to production — real-time feeds, micro-frontends, the platforms behind them.",
     color: "#fbbf24",
   },
   {
     to: "/apps",
     label: "Apps",
-    count: "03",
+    count: pad(__COUNT_APPS__),
     blurb: "Built in Flutter, published on Google Play. Field inspections, GST invoicing, and an offline-first vault.",
     color: "#22d3ee",
   },
   {
     to: "/games",
     label: "Games",
-    count: "10",
+    count: pad(__COUNT_GAMES__),
     blurb: "Browser games built for the fun of it, playable right here — no installs, no accounts.",
     color: "#a78bfa",
   },
