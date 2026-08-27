@@ -51,8 +51,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
     };
 
     // ── Link hover handlers ──────────────────────────────────────────
-    const handleEnter = (e: Event) => {
-      const t = e.currentTarget as HTMLElement;
+    const handleEnter = (t: HTMLElement) => {
 
       // Skip data-image while the work list is still animating in.
       // Home.tsx sets data-entering="true" on the container during the
@@ -87,40 +86,51 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
       if (ring) gsap.to(ring, { scale: 1, duration: 0.5 });
     };
 
-    // ── Attach / detach helpers ──────────────────────────────────────
-    const attached = new WeakSet<Element>();
+    /* ── Link hover, by delegation ──────────────────────────────────
+       Every `a, .link` used to get its own pair of listeners, re-scanned
+       by a MutationObserver watching the whole body — and `attachAll`
+       ran a full-document querySelectorAll on every single mutation.
 
-    const attach = (el: Element) => {
-      if (attached.has(el)) return;
-      attached.add(el);
-      el.addEventListener('mouseenter', handleEnter);
-      el.addEventListener('mouseleave', handleLeave);
-      el.addEventListener('click',      handleLeave);
+       Splitting a heading into characters emits hundreds of childList
+       records, and these pages now split seven headings apiece, so each
+       one kicked off hundreds of whole-document queries. That is what
+       made the site crawl.
+
+       One pair of listeners on the document does the same job for any
+       number of links, including ones that appear later, and costs a
+       `closest` call per pointer move. */
+    let hovered: Element | null = null;
+
+    const onOver = (e: MouseEvent) => {
+      const el = (e.target as Element | null)?.closest?.('a, .link');
+      if (!el || el === hovered) return;
+      hovered = el;
+      handleEnter(el as HTMLElement);
     };
 
-    const detach = (el: Element) => {
-      el.removeEventListener('mouseenter', handleEnter);
-      el.removeEventListener('mouseleave', handleLeave);
-      el.removeEventListener('click',      handleLeave);
+    const onOut = (e: MouseEvent) => {
+      if (!hovered) return;
+      // Moving between children of the same link is not a leave.
+      const to = e.relatedTarget as Node | null;
+      if (to && hovered.contains(to)) return;
+      hovered = null;
+      handleLeave();
     };
 
-    const attachAll = () =>
-      document.querySelectorAll<Element>('a, .link').forEach(attach);
+    const onClick = () => { hovered = null; handleLeave(); };
 
-    // Attach existing links immediately
-    attachAll();
-
-    // Watch for new links added by animations (scramble, wipe, etc.)
-    const observer = new MutationObserver(() => attachAll());
-    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('mouseover', onOver);
+    document.addEventListener('mouseout', onOut);
+    document.addEventListener('click', onClick);
 
     document.addEventListener('mousemove', moveCursor);
 
     return () => {
       clearTimeout(moveDebounce);
-      observer.disconnect();
       document.removeEventListener('mousemove', moveCursor);
-      document.querySelectorAll<Element>('a, .link').forEach(detach);
+      document.removeEventListener('mouseover', onOver);
+      document.removeEventListener('mouseout', onOut);
+      document.removeEventListener('click', onClick);
     };
   }, {
     dependencies: [pathname],

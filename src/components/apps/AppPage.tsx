@@ -1,23 +1,36 @@
 import { CSSProperties, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { apps, getApp, formatDate } from "./apps.data";
 import {
   AppCloser, AppNav, CountUp, AppNotFound, AppSection, AppStatement, AppTabs,
-  inkFor, markLoaded, revealOnLoad, useSectionReveal,
+  FactsBand, FlowSteps, OverviewBand, RailSection, SectionRail, StackGroups,
+  inksFor, markLoaded, revealOnLoad, useSectionReveal,
 } from "./AppChrome";
 import AppProductHero from "./AppProductHero";
 import AppShowcase from "./AppShowcase";
 import AppGallery from "./AppGallery";
+import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
 import "./apps.css";
+
+/* Every app page has the same bands, so the rail's list is a constant —
+   and a stable reference, which is what keeps it from rebuilding its
+   observers on each render. */
+const RAIL_SECTIONS: RailSection[] = [
+  { id: "overview",  label: "Overview" },
+  { id: "features", label: "Features" },
+  { id: "how",      label: "How"      },
+  { id: "screens",  label: "Screens"  },
+  { id: "stack",    label: "Built with" },
+  { id: "listing",  label: "On Play"  },
+];
 
 /** An app's main page — the /apps equivalent of a project page. */
 const AppPage = () => {
   const { app: slug } = useParams();
   const app = getApp(slug);
   const body = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
 
   useSeo({
     title: app ? `${app.name} — ${app.tagline}` : "App not found",
@@ -30,20 +43,30 @@ const AppPage = () => {
   if (!app) return <AppNotFound />;
 
   const index = apps.indexOf(app);
-  const { ink, inkLow, inkDim, border } = inkFor(app.color);
-  const sectionProps = { border, inkLow, inkDim };
+  const inks = inksFor(app);
+  const { ink, inkLow, inkDim, border } = inks;
+
 
   return (
     <motion.main
-      initial={reduced ? false : { opacity: 0 }}
-      animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
-      exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
       className="project-gradient min-h-screen flex flex-col relative"
       style={{ ["--proj"]: app.color, color: ink } as CSSProperties}
     >
-      <div className="proj-grain" aria-hidden />
+      <Grain />
 
       <AppProductHero app={app} />
+
+      {/* What it is, in four words — same strip the project pages open
+          with, before any of the numbers. */}
+      <FactsBand
+        facts={[
+          ["Platform", app.role],
+          ["Status", app.status === "live" ? "On Google Play" : app.status === "beta" ? "In beta" : "Coming soon"],
+          ["Version", app.release.version],
+          ["Requires", app.release.minAndroid],
+        ]}
+        inks={inks}
+      />
 
       {/* Trust strip — the numbers, straight under the fold. */}
       <dl className="app-trust" style={{ borderTop: `1px solid ${border}`, borderBottom: `1px solid ${border}` }}>
@@ -64,17 +87,41 @@ const AppPage = () => {
         <AppTabs app={app} tab="" border={border} inkLow={inkLow} />
       </div>
 
-      {/* One claim, one screenshot proving it. */}
-      <AppShowcase app={app} ink={ink} inkLow={inkLow} inkDim={inkDim} border={border} />
-
+      {/* Everything from here down reveals as it scrolls in. */}
       <div ref={body}>
+        {/* ── What it is ───────────────────────────────────────── */}
+        <AppSection
+          id="overview"
+          kicker="Overview"
+          title="What it is, and who it's for."
+          inks={inks}
+        >
+          <OverviewBand
+            paragraphs={[app.blurb, app.hero.sub]}
+            /* The strip under the hero already carries platform,
+               status, version and requirements — this column takes the
+               reach-and-recency side so the two don't say the same
+               thing twice. */
+            facts={[
+              ["Last updated", formatDate(app.release.updated)],
+              ["Installs", app.release.installs],
+              ["Rating", `${app.release.rating} ★`],
+            ]}
+            inks={inks}
+            link={{ href: app.release.playUrl, label: "Google Play" }}
+          />
+        </AppSection>
+
+        {/* One claim, one screenshot proving it. */}
+        <AppShowcase app={app} ink={ink} inkLow={inkLow} inkDim={inkDim} border={border} />
+
         {/* ── Everything else it does ─────────────────────────── */}
         <AppSection
           id="features"
           kicker="Features"
           title="And the rest of it."
           intro={`Every screen in ${app.name} earns its place. No dashboards nobody opens.`}
-          {...sectionProps}
+          inks={inks}
         >
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {app.features.filter(f => !f.featured).map(f => (
@@ -101,26 +148,34 @@ const AppPage = () => {
           </ul>
         </AppSection>
 
-        <AppStatement text={app.tagline} meta={`${app.name} · ${app.role}`} border={border} inkDim={inkDim} />
+        <AppStatement text={app.tagline} meta={`${app.name} · ${app.role}`} inks={inks} />
 
         {/* ── How it works ────────────────────────────────────── */}
-        <AppSection id="how" kicker="How it works" title="Three steps, start to finish." {...sectionProps}>
-          <ol className="grid gap-10 md:gap-8 md:grid-cols-3">
-            {app.steps.map((st, i) => (
-              <li key={st.title} className="app-reveal app-step group">
-                <span className="app-step-num mono" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
-                <h3 className="mt-5 text-lg md:text-xl font-semibold tracking-tight">{st.title}</h3>
-                <p className="mt-3 text-base leading-relaxed" style={{ color: inkLow }}>{st.body}</p>
-              </li>
-            ))}
-          </ol>
+        <AppSection
+          id="how"
+          kicker="How it works"
+          title={app.steps.length === 3 ? "Three steps, start to finish." : "Start to finish."}
+          inks={inks}
+        >
+          <FlowSteps steps={app.steps} inks={inks} resetKey={app.slug} />
         </AppSection>
 
         {/* ── Every screen ────────────────────────────────────── */}
         <AppGallery app={app} ink={ink} inkLow={inkLow} inkDim={inkDim} border={border} />
 
+        {/* ── What it's built on ──────────────────────────────── */}
+        <AppSection
+          id="stack"
+          kicker="Built with"
+          title="What it runs on."
+          intro={`Everything ${app.name} is built on, grouped by what each piece does.`}
+          inks={inks}
+        >
+          <StackGroups groups={app.stack} inks={inks} />
+        </AppSection>
+
         {/* ── Store facts ─────────────────────────────────────── */}
-        <AppSection id="listing" kicker="On Google Play" {...sectionProps}>
+        <AppSection id="listing" kicker="On Google Play" inks={inks}>
           <dl className="app-reveal mono flex flex-wrap gap-x-10 gap-y-5 text-xs">
             {([
               ["Version", app.release.version],
@@ -139,9 +194,11 @@ const AppPage = () => {
         </AppSection>
       </div>
 
-      <AppCloser app={app} ink={ink} inkLow={inkLow} inkDim={inkDim} border={border} />
+      <AppCloser app={app} inks={inks} />
 
       <AppNav index={index} border={border} />
+
+      <SectionRail sections={RAIL_SECTIONS} accent={inks.accent} ink={ink} />
     </motion.main>
   );
 };

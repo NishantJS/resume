@@ -100,7 +100,6 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
               <li key={link.path}>
                 <Link
                   to={link.path}
-                  viewTransition
                   className={`link nav-link border-b-2 py-1.5 px-0.5 sm:py-2 sm:px-1 whitespace-nowrap ${isActive ? link.color : 'border-transparent'}`}
                   aria-current={isActive ? 'page' : undefined}
                 >

@@ -11,12 +11,6 @@ import "./apps.css";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-const pageVariants = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
-  exit:    { opacity: 0, y: -8,  transition: { duration: 0.3,  ease: [0.55, 0, 1, 0.45] as [number, number, number, number] } },
-};
-
 /* Parallax drift per row — skipped when reduced motion is preferred. */
 const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
   const ref = useRef<HTMLLIElement>(null);
@@ -29,8 +23,6 @@ const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const Apps = () => {
   const container = useRef<HTMLDivElement>(null);
-  const overlay = useRef<HTMLDivElement>(null);
-  const { contextSafe } = useGSAP();
   const reduced = useReducedMotion();
 
   useSeo({
@@ -78,27 +70,13 @@ const Apps = () => {
 
   // Hover blends the app's accent at ~60% so the warm gradient still
   // shows through underneath, exactly as /work and /games do.
-  const handleMouseEnter = contextSafe((hex: string) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    gsap.to(overlay.current, { backgroundColor: `rgba(${r},${g},${b},0.6)`, duration: 0.4, ease: "power3.out" });
-  });
-  const handleMouseLeave = contextSafe(() => {
-    gsap.to(overlay.current, { backgroundColor: "rgba(255,255,255,0)", duration: 0.4, ease: "power3.out" });
-  });
 
   return (
     <motion.main
       ref={container}
-      variants={reduced ? undefined : pageVariants}
-      initial={reduced ? false : "initial"}
-      animate={reduced ? undefined : "animate"}
-      exit={reduced ? undefined : "exit"}
       className="cool-gradient relative min-h-screen flex justify-center items-start pt-28 pb-32"
       aria-labelledby="apps-heading"
     >
-      <div ref={overlay} className="absolute inset-0 pointer-events-none" style={{ backgroundColor: "rgba(255,255,255,0)" }} aria-hidden />
       <div className="relative z-10 w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12">
         <header className="mb-10 md:mb-14">
           <p className="mono text-xs uppercase tracking-[0.2em] text-zinc-600">/ apps</p>
@@ -119,11 +97,8 @@ const Apps = () => {
               <div
                 className="app-row app-row--ruled py-7 md:py-9 xl:py-10 group"
                 style={{ ["--row" as string]: app.color } as React.CSSProperties}
-                onMouseEnter={() => handleMouseEnter(app.color)}
-                onMouseLeave={handleMouseLeave}
               >
                 <Link
-                  viewTransition
                   to={`/apps/${app.slug}`}
                   className="block link"
                   aria-label={`View ${app.name}`}
@@ -137,7 +112,7 @@ const Apps = () => {
                       >
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
+                      <h2 data-morph-source className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
                         {app.name}
                       </h2>
                     </div>

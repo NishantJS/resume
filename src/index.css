@@ -370,7 +370,13 @@ html {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(180deg, #a855f7, #22d3ee);
+  /* Painted from the section's own dot colours at runtime; this is only
+     the fallback for a single-entry section. */
+  background: currentColor;
+  /* --tl-fill runs 0 → 1 as the section scrubs past. Clipping keeps the
+     gradient at full height so each segment shows only the two colours
+     it actually runs between. */
+  clip-path: inset(0 0 calc((1 - var(--tl-fill, 0)) * 100%) 0);
 }
 .tl-dot {
   position: absolute;
@@ -549,9 +555,11 @@ html {
   letter-spacing: 0.16em;
   padding: 0.22rem 0.55rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(6px);
-  color: rgba(0, 0, 0, 0.55);
+  /* A blur behind every caption in a sixteen-shot rail is a backdrop
+     filter per shot, re-evaluated as the rail scrolls. Opaque enough
+     to read on its own. */
+  background: rgba(255, 255, 255, 0.86);
+  color: rgba(0, 0, 0, 0.6);
   opacity: 0;
   transition: opacity 300ms ease;
 }
@@ -591,8 +599,14 @@ html {
 .proj-nav-card--next:hover .proj-nav-arrow { transform: translateX(6px); }
 
 /* ── Project page: film grain ──────────────────────────────── */
+/* Fixed, not absolute. Stretched over the whole document this was a
+   fifteen-thousand-pixel blended layer that the compositor re-blended
+   on every scroll — measured at 27ms a frame on its own, half the
+   budget. Pinned to the viewport it covers exactly what you can see,
+   costs almost nothing, and looks the same: grain is a texture on the
+   screen, not something that should scroll with the content. */
 .proj-grain {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 5;
   pointer-events: none;
@@ -606,7 +620,6 @@ html {
    expensive on phone GPUs — drop them below the tablet breakpoint. */
 @media (max-width: 768px) {
   .proj-grain { display: none; }
-  .proj-shot-caption { backdrop-filter: none; }
 }
 
 /* ── Page-transition overlay (legacy class, kept for safety) */
@@ -637,10 +650,19 @@ html {
     0 0 120px rgba(34, 211, 238, 0.06);
 }
 /* Characters start invisible — revealed by the scramble entrance */
-.name-glow .char {
-  will-change: color, text-shadow, transform;
-  opacity: 0;
+.name-glow .char { opacity: 0; }
+
+/* ── Word-mask reveal (RevealWords)  ────────────────────────────
+   Inline-block masks so a heading still wraps as a paragraph; a
+   real space between them gives the line a break opportunity. */
+.rw-mask {
+  display: inline-block;
+  vertical-align: bottom;
+  overflow: hidden;
+  padding-bottom: 0.09em;
+  margin-bottom: -0.09em;
 }
+.rw-word { display: inline-block; }
 
 /* ── Skills marquee ─────────────────────────────────────── */
 @keyframes marquee-scroll {
@@ -652,30 +674,141 @@ html {
 }
 .skill-marquee:hover { animation-play-state: paused; }
 
-/* ── Native View Transitions (progressive enhancement) ─────
-   The incoming page sweeps up like a sheet (rounded leading edge)
-   while the outgoing page recedes and dims underneath it. */
+/* ── Route loading ─────────────────────────────────────────────
+   Shown only when a route's code takes more than a moment to arrive.
+   The bar runs an indeterminate sweep rather than a real percentage —
+   there is nothing meaningful to measure, and its whole job is to say
+   the click registered. It borrows the site's three accents so it
+   reads as the same object as the scroll progress bar. */
+:root[data-loading]::after {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, #a855f7, #22d3ee, #f43f5e, transparent);
+  background-size: 45% 100%;
+  background-repeat: no-repeat;
+  animation: route-loading 900ms cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+@keyframes route-loading {
+  from { background-position: -50% 0; }
+  to   { background-position: 150% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-loading]::after { animation: none; background-position: 50% 0; }
+}
+
+/* ── Page transitions ──────────────────────────────────────────
+   Driven from router/transition.ts. Two things happen at once.
+
+   The page crossfades — the outgoing one recedes a little and dims,
+   the incoming one rises into place. 380ms, with the incoming half
+   the faster of the two, so what you asked for is legible before what
+   you left has finished going.
+
+   It is the page frame that animates, not the document root. The
+   header and footer sit outside it and never take part: naming them
+   individually also kept them still, but a view-transition snapshot
+   composites on its own layer, which broke the difference blend the
+   header relies on to stay readable over every background.
+
+   And the title you clicked flies to where it lives on the next page.
+   That pair is named on both sides, so the browser tweens the box
+   between them and crossfades the type inside it — a listing row's
+   name lands as the hero, at hero size.                            */
 @supports (view-transition-name: none) {
-  ::view-transition-image-pair(root) { isolation: none; }
-  ::view-transition-old(root) {
-    animation: 520ms cubic-bezier(0.4, 0, 0.2, 1) both vt-recede;
+  .page-frame { view-transition-name: page; }
+
+  ::view-transition-group(root) { animation: none; }
+
+  /* The header blends in difference mode so its white text inverts
+     against whatever is under it. Once the page is lifted into a
+     transition layer there is nothing left under it to blend with, and
+     it washes out for the length of the transition — so it is captured
+     as its own snapshot instead. Each side is photographed already
+     blended against its own page, and the two crossfade. */
+  header[role="banner"] { view-transition-name: site-header; }
+  ::view-transition-group(site-header) {
+    animation-duration: 380ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
   }
-  ::view-transition-new(root) {
-    animation: 520ms cubic-bezier(0.65, 0, 0.35, 1) both vt-sweep-up;
+  ::view-transition-image-pair(page) { isolation: none; }
+  ::view-transition-group(page) {
+    animation-duration: 380ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  ::view-transition-old(page) {
+    animation: 300ms cubic-bezier(0.4, 0, 1, 1) both vt-recede;
+  }
+  ::view-transition-new(page) {
+    animation: 380ms cubic-bezier(0.32, 0.72, 0, 1) both vt-rise;
   }
   @keyframes vt-recede {
-    from { opacity: 1; transform: none; filter: none; }
-    to   { opacity: 0.45; transform: translateY(-7vh) scale(0.94); filter: brightness(0.55); }
+    from { opacity: 1; transform: none; }
+    to   { opacity: 0; transform: scale(0.985) translateY(-0.9rem); }
   }
-  @keyframes vt-sweep-up {
-    from {
-      clip-path: inset(100% 0 0 0 round 2.5rem 2.5rem 0 0);
-      transform: translateY(7vh);
-    }
-    to {
-      clip-path: inset(0 0 0 0 round 0);
-      transform: none;
-    }
+  @keyframes vt-rise {
+    from { opacity: 0; transform: translateY(1.6rem); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Going back out — up a level, or the header moving between
+     sections — runs the same move in reverse, so the site keeps a
+     sense of depth instead of crossfading identically whichever way
+     you go. `data-nav` is set on <html> for the length of the
+     transition by router/transition.ts. */
+  :root[data-nav="out"] ::view-transition-old(page) {
+    animation-name: vt-recede-back;
+  }
+  :root[data-nav="out"] ::view-transition-new(page) {
+    animation-name: vt-rise-back;
+  }
+  @keyframes vt-recede-back {
+    from { opacity: 1; transform: none; }
+    to   { opacity: 0; transform: scale(1.015) translateY(0.9rem); }
+  }
+  @keyframes vt-rise-back {
+    from { opacity: 0; transform: translateY(-1.4rem) scale(0.99); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Sideways — /work to /apps, one app tab to the next — has no
+     depth to express, so it simply crossfades in place. */
+  :root[data-nav="across"] ::view-transition-old(page) {
+    animation-name: vt-fade-out;
+  }
+  :root[data-nav="across"] ::view-transition-new(page) {
+    animation-name: vt-fade-in;
+  }
+  @keyframes vt-fade-out {
+    from { opacity: 1; transform: none; }
+    to   { opacity: 0; transform: scale(0.995); }
+  }
+  @keyframes vt-fade-in {
+    from { opacity: 0; transform: scale(1.005); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* The morphing title. The group carries the box from one position
+     and size to the other; the two snapshots crossfade inside it. Both
+     are pinned to the box's top-left at their natural size rather than
+     stretched to fill it — scaling a 36px row title up to a 144px hero
+     is what would have made it soft. */
+  ::view-transition-group(page-title) {
+    animation-duration: 460ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 2;
+  }
+  ::view-transition-old(page-title),
+  ::view-transition-new(page-title) {
+    animation-duration: 460ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    height: 100%;
+    object-fit: none;
+    object-position: top left;
+    overflow: clip;
   }
 }
 
@@ -692,6 +825,17 @@ html {
     animation: none !important;
   }
 }
+
+/* ── Timeline: employer / client links ─────────────────────────
+   The names link out to LinkedIn but must not read as links — same
+   colour, same weight, no underline. The affordance is the cursor:
+   `.link` is what the custom cursor watches, so it swells on
+   approach, and a touch of opacity confirms the hover. */
+.tl-org-link {
+  color: inherit;
+  transition: opacity 260ms ease;
+}
+.tl-org-link:hover { opacity: 0.72; }
 
 /* ── Timeline: client row ──────────────────────────────────────
    On a consultancy placement the employer is not the whole story —

@@ -1,9 +1,10 @@
 import { CSSProperties, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { apps, ChangeKind, getApp, formatDate } from "./apps.data";
-import { AppNav, AppNotFound, AppSection, AppTabs, CountUp, inkFor, useSectionReveal } from "./AppChrome";
+import { AppNav, AppNotFound, AppSection, AppTabs, CountUp, inksFor, useSectionReveal } from "./AppChrome";
 import AppHero from "./AppHero";
+import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
 import "./apps.css";
 
@@ -22,7 +23,6 @@ const AppChangelog = () => {
   const { app: slug } = useParams();
   const app = getApp(slug);
   const body = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
   const [filter, setFilter] = useState<ChangeKind | "all">("all");
 
   useSeo({
@@ -48,8 +48,9 @@ const AppChangelog = () => {
   if (!app) return <AppNotFound />;
 
   const index = apps.indexOf(app);
-  const { ink, inkLow, inkDim, border } = inkFor(app.color);
-  const sectionProps = { border, inkLow, inkDim };
+  const inks = inksFor(app);
+  const { ink, inkLow, inkDim, border } = inks;
+  
 
   const totals = app.changelog.reduce(
     (acc, r) => { r.changes.forEach(c => { acc[c.kind] += 1; }); return acc; },
@@ -58,13 +59,10 @@ const AppChangelog = () => {
 
   return (
     <motion.main
-      initial={reduced ? false : { opacity: 0 }}
-      animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
-      exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
       className="project-gradient min-h-screen flex flex-col relative"
       style={{ ["--proj"]: app.color, color: ink } as CSSProperties}
     >
-      <div className="proj-grain" aria-hidden />
+      <Grain />
 
       <AppHero
         app={app}
@@ -95,7 +93,7 @@ const AppChangelog = () => {
       </div>
 
       <div ref={body}>
-        <AppSection kicker="Releases" {...sectionProps}>
+        <AppSection id="releases" kicker="Releases" inks={inks}>
           <div className="mono flex flex-wrap gap-x-6 gap-y-2 text-xs uppercase tracking-[0.18em] mb-12" role="group" aria-label="Filter changes by type">
             {FILTERS.map(f => {
               const on = filter === f.key;

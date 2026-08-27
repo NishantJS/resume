@@ -66,7 +66,7 @@ const AppProductHero: FC<{ app: AppMeta }> = ({ app }) => {
         {/* ── Pitch column ─────────────────────────────────── */}
         <div className="app-hero-copy">
           <p className="app-hero-line mono opacity-0 text-xs uppercase tracking-[0.22em]" style={{ color: inkDim }}>
-            {app.name} · {app.role}
+            <span data-morph-target>{app.name}</span> · {app.role}
           </p>
 
           <MaskedTitle text={app.hero.headline} className="app-hero-title" flow />

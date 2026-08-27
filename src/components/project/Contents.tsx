@@ -1,15 +1,13 @@
 import { FC, useRef, useState, useEffect } from "react";
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, useReducedMotion } from "motion/react";
-import { ProjectData } from "../home/Home";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import gsap from "gsap";
+import { ProjectData } from "./projects.data";
+import { inkFor, isLight } from "../shared/reveal";
+
+gsap.registerPlugin(ScrollTrigger);
 
 type Props = { project: ProjectData };
-
-function isLight(hex: string): boolean {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55;
-}
 
 /** Tracks a max-width media query (re-evaluates on resize). */
 function useIsMobile(bp = 768): boolean {
@@ -61,6 +59,17 @@ const Contents: FC<Props> = ({ project }) => {
     return () => window.removeEventListener("resize", measure);
   }, [project.title, total, isMobile]);
 
+  // The rail's scroll-space grows as images arrive, which moves every
+  // section below it down the page. GSAP measured those sections before
+  // the growth, so without a refresh their triggers fire at the wrong
+  // scroll positions — or never. Deferred a frame so the new height is
+  // laid out before anything re-measures.
+  useEffect(() => {
+    if (!scrollDist) return;
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(id);
+  }, [scrollDist]);
+
   const { scrollYProgress } = useScroll({
     target: outerRef,
     offset: ["start start", "end end"],
@@ -76,10 +85,8 @@ const Contents: FC<Props> = ({ project }) => {
   if (!total) return null;
 
   const title = project.displayTitle ?? project.title;
-  const light = isLight(project.color);
-  const inkLow = light ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)";
-  const border = light ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)";
-  const barInk = light ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.85)";
+  const { inkDim: inkLow, border } = inkFor(project.color);
+  const barInk = isLight(project.color) ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.85)";
   const images = Array.from({ length: total }, (_, i) => i + 1);
   // WebP (~80 % smaller) with the original PNG as fallback. The filename
   // contains a space, which is a delimiter in srcset syntax — encode it or

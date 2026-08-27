@@ -1,9 +1,10 @@
 import { CSSProperties, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { apps, getApp, formatDate } from "./apps.data";
-import { AppNav, AppNotFound, AppSection, AppTabs, inkFor, useSectionReveal } from "./AppChrome";
+import { AppNav, AppNotFound, AppSection, AppTabs, inksFor, useSectionReveal } from "./AppChrome";
 import AppHero from "./AppHero";
+import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
 import "./apps.css";
 
@@ -28,7 +29,6 @@ const AppPrivacy = () => {
   const { app: slug } = useParams();
   const app = getApp(slug);
   const body = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
 
   useSeo({
     title: app ? `${app.name} privacy policy` : "App not found",
@@ -43,18 +43,16 @@ const AppPrivacy = () => {
   if (!app) return <AppNotFound />;
 
   const index = apps.indexOf(app);
-  const { ink, inkLow, inkDim, border } = inkFor(app.color);
+  const inks = inksFor(app);
+  const { ink, inkLow, inkDim, border } = inks;
   const { privacy, support, name } = app;
 
   return (
     <motion.main
-      initial={reduced ? false : { opacity: 0 }}
-      animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
-      exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
       className="project-gradient min-h-screen flex flex-col relative"
       style={{ ["--proj"]: app.color, color: ink } as CSSProperties}
     >
-      <div className="proj-grain" aria-hidden />
+      <Grain />
 
       <AppHero
         app={app}
@@ -75,7 +73,7 @@ const AppPrivacy = () => {
       </div>
 
       <div ref={body}>
-        <AppSection kicker="The policy" border={border} inkLow={inkLow} inkDim={inkDim}>
+        <AppSection id="policy" kicker="The policy" inks={inks}>
           <div className="grid gap-12 lg:grid-cols-[190px_1fr] lg:gap-16">
             {/* Contents rail — sticky on desktop, a plain list on mobile. */}
             <nav className="lg:sticky lg:top-24 lg:self-start" aria-label="Policy contents">

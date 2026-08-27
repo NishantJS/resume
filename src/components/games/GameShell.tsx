@@ -249,7 +249,7 @@ const GameShell: FC<GameShellProps> = ({ slug, subtitle, info, stats, toolbar, c
 
       <div className="game-topbar">
         <div className="game-titlewrap">
-          <Link to="/games" viewTransition className="game-back mono"><span aria-hidden>←</span> Games</Link>
+          <Link to="/games" className="game-back mono"><span aria-hidden>←</span> Games</Link>
           <h1 className="game-title">{title}</h1>
           {subtitle != null && <p className="game-subtitle mono">{subtitle}</p>}
         </div>

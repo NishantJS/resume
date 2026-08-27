@@ -6,110 +6,9 @@ import { SplitText } from 'gsap/SplitText';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from 'motion/react';
 import { useSeo } from '../../hooks/useSeo';
+import { projects } from '../project/projects.data';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
-
-export interface ProjectData {
-  title: string;
-  displayTitle?: string;
-  color: string;
-  contribution: string;
-  path: string;
-  description: string;
-  images: number;
-  href?: string;
-  skills: string[];
-}
-
-export const projects: ProjectData[] = [
-
-  {
-    title: "mStockReferEarn",
-    displayTitle: "m.Stock Refer & Earn",
-    color: "#fde68a",
-    contribution: "Backend & Frontend",
-    path: "/work/mstock-refer-earn/",
-    description:
-      "Migrated the legacy .NET Refer & Earn platform to Next.js + Fastify with SSE-based real-time feeds via Redis Streams, L1/L2/L3 caching, circuit breakers, and idempotent APIs.",
-    images: 0,
-    href: "https://refer.mstock.com/",
-    skills: ["Next.js", "Fastify", "Node.js", "TypeScript", "Redis Streams", "SSE", "Opossum", "L1/L2/L3 Caching", "ETag + Cache-Control", "MySQL"],
-  },
-  {
-    title: "AdvisoryBasket",
-    displayTitle: "Advisory Basket",
-    color: "#bbf7d0",
-    contribution: "Backend (Fastify + NestJS)",
-    path: "/work/advisory-basket/",
-    description:
-      "Smallcase-style stock advisory backend with event-driven Redis Streams cache invalidation, circuit breakers, L1/L2/L3 caching, and high-concurrency API patterns.",
-    images: 0,
-    href: "https://www.mstock.com/advisory/",
-    skills: ["Fastify", "NestJS", "Node.js", "TypeScript", "Redis Streams", "MySQL", "Opossum", "Microservices", "Event-Driven Cache Invalidation"],
-  },
-  {
-    title: "Qollabb",
-    color: "#eebcff",
-    contribution: "Backend & Frontend",
-    path: "/work/qollabb/",
-    description:
-      "Multi-role job portal (employer, mentor, student, educator) with real-time WebSocket chat, and a full employer dashboard built in React.",
-    images: 16,
-    href: "https://qollabb.com",
-    skills: ["React.js", "Node.js", "PostgreSQL", "Express.js", "Sequelize", "WebSockets", "JWT", "Passport.js", "AWS EC2 & S3", "Nginx", "TypeScript"],
-  },
-  {
-    title: "OneSociety",
-    color: "#ffcab2",
-    contribution: "Monorepo & Micro-Frontend",
-    path: "/work/onesociety/",
-    description:
-      "Society management platform on a Nx monorepo with micro-frontend architecture. Built a dynamic form & table library (RJSF + MUI DataGrid) and implemented RBAC across the platform.",
-    images: 7,
-    href: "https://society.cubeone.in",
-    skills: ["Next.js", "React.js", "TypeScript", "Nx Monorepo", "Micro-Frontend", "RJSF", "MUI DataGrid", "RBAC", "Express.js"],
-  },
-  {
-    title: "ConsultmyAstro",
-    displayTitle: "Consult my Astro",
-    color: "#EFE8D3",
-    contribution: "Backend & Frontend",
-    path: "/work/consultmyastro/",
-    description:
-      "Real-time chat and call platform for astrologers. Built the Socket.io chat module, payment & wallet system with refund support, and contributed extensively to the frontend.",
-    images: 11,
-    href: "https://consultmyastro.com",
-    skills: ["Node.js", "Express.js", "Socket.io", "PostgreSQL", "Sequelize", "JWT", "Bcrypt", "React.js", "Payment & Wallet System"],
-  },
-  {
-    title: "OneDashboard",
-    displayTitle: "One Dashboard",
-    color: "#c2e9fb",
-    contribution: "Backend & Frontend",
-    path: "/work/onedashboard/",
-    description:
-      "SSO dashboard unifying access to multiple apps via Next.js + Supabase + Keycloak with SAML auth, RBAC user permissions, and Kong Gateway for API routing.",
-    skills: ["Next.js", "Supabase", "Keycloak", "Kong Gateway", "SAML", "RBAC", "Redis", "TypeScript", "Material-UI"],
-    images: 5,
-  },
-  {
-    title: "Buddy",
-    color: "#f2ee99",
-    contribution: "Full-Stack",
-    path: "/work/buddy/",
-    description:
-      "MERN e-commerce app with Passport + JWT auth, file uploads via Multer, and cloud hosting on AWS EC2 with S3 for storage.",
-    images: 13,
-    href: "https://github.com/NishantJS/Buddy-Backend",
-    skills: ["React.js", "Node.js", "MongoDB", "Express.js", "JWT", "Passport.js", "Multer", "AWS EC2 & S3", "Bcrypt"],
-  }
-];
-
-const pageVariants = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } },
-  exit:    { opacity: 0, y: -8,  transition: { duration: 0.3,  ease: [0.55, 0, 1, 0.45] as [number, number, number, number] } },
-};
 
 /* Parallax drift per row — skipped when reduced motion is preferred */
 const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -127,8 +26,6 @@ const ParallaxRow: FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const Home = () => {
   const container = useRef<HTMLDivElement>(null);
-  const overlay = useRef<HTMLDivElement>(null);
-  const { contextSafe } = useGSAP();
   const reduced = useReducedMotion();
 
   useSeo({
@@ -179,27 +76,13 @@ const Home = () => {
 
   // Hover — blend the project's accent at ~60 % so the warm gradient shows
   // through underneath (parse the hex to an rgba so opacity can be controlled).
-  const handleMouseEnter = contextSafe((hex: string) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    gsap.to(overlay.current, { backgroundColor: `rgba(${r},${g},${b},0.6)`, duration: 0.4, ease: "power3.out" });
-  });
 
-  const handleMouseLeave = contextSafe(() => {
-    gsap.to(overlay.current, { backgroundColor: "rgba(255,255,255,0)", duration: 0.4, ease: "power3.out" });
-  });
 
   return (
     <motion.main
       ref={container}
-      variants={reduced ? undefined : pageVariants}
-      initial={reduced ? false : "initial"}
-      animate={reduced ? undefined : "animate"}
-      exit={reduced ? undefined : "exit"}
       className="warm-gradient relative min-h-screen flex justify-center items-start pt-28 pb-32"
     >
-      <div ref={overlay} className="absolute inset-0 pointer-events-none transition-none" style={{ backgroundColor: "rgba(255,255,255,0)" }} aria-hidden />
       <div className="relative z-10 w-full max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl px-6 xl:px-12">
         <header className="mb-10 md:mb-14">
           <p className="mono text-xs uppercase tracking-[0.2em] text-zinc-500">/ work</p>
@@ -218,11 +101,8 @@ const Home = () => {
             <div
               className="project-row py-7 md:py-9 xl:py-10 group"
               style={{ ["--row" as string]: project.color } as React.CSSProperties}
-              onMouseEnter={() => handleMouseEnter(project.color)}
-              onMouseLeave={handleMouseLeave}
             >
               <Link
-                viewTransition
                 to={project.path}
                 className="block link"
                 data-image={`/project/${project.title}/logo.webp`}
@@ -237,7 +117,7 @@ const Home = () => {
                     >
                       {String(index + 1).padStart(2, '0')}
                     </span>
-                    <h2 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
+                    <h2 data-morph-source className="text-xl sm:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl font-semibold tracking-tight leading-tight">
                       {project.displayTitle ?? project.title}
                     </h2>
                   </div>

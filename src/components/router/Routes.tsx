@@ -1,24 +1,18 @@
 import { Routes, Route, useLocation } from "react-router-dom"
-import { lazy, Suspense, useEffect, useRef } from "react"
+import { Suspense, useEffect, useLayoutEffect, useRef } from "react"
 import ScrollIntoView from "./ScrollIntoView"
+import { useLinkTransitions } from "./useLinkTransitions"
+import { notifySwap } from "./transition"
 import Header from "../header/Header"
 import Footer from "../footer/Footer"
 import Cursor from "./Cursor"
-import { AnimatePresence } from "motion/react"
 import { ScrollProgress } from "./ScrollProgress"
 import gsap from "gsap"
 
-const About    = lazy(() => import("../about/About"))
-const Home     = lazy(() => import("../home/Home"))
-const Project  = lazy(() => import("../project/Project"))
-const Games    = lazy(() => import("../games/Games"))
-const Apps         = lazy(() => import("../apps/Apps"))
-const AppPage      = lazy(() => import("../apps/AppPage"))
-const AppSupport   = lazy(() => import("../apps/AppSupport"))
-const AppPrivacy   = lazy(() => import("../apps/AppPrivacy"))
-const AppChangelog = lazy(() => import("../apps/AppChangelog"))
-const GamePage = lazy(() => import("../games/GamePage"))
-const NotFound = lazy(() => import("../error/NotFound"))
+import {
+  About, Home, Project, Games, GamePage,
+  Apps, AppPage, AppSupport, AppPrivacy, AppChangelog, NotFound,
+} from "./lazyRoutes"
 
 /* ── Subtle scroll-skew on fast scrolls ───────────────────── */
 const useScrollSkew = (ref: React.RefObject<HTMLDivElement | null>) => {
@@ -51,6 +45,11 @@ const Router = () => {
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   useScrollSkew(wrapperRef)
+  useLinkTransitions()
+
+  // Lets an in-flight view transition know the new route is on screen
+  // and it is safe to take the "after" snapshot.
+  useLayoutEffect(() => { notifySwap() }, [location.pathname])
 
   return (
     <>
@@ -59,23 +58,27 @@ const Router = () => {
       <Header active={location.pathname} />
       <Cursor pathname={location.pathname} />
       <div ref={wrapperRef} style={{ willChange: "transform" }}>
-        <AnimatePresence mode="wait" initial={false}>
-          <Suspense fallback={null}>
-            <Routes location={location} key={location.pathname}>
-              <Route index                 element={<About />} />
-              <Route path="/work"          element={<Home />} />
-              <Route path="/work/:project" element={<Project />} />
-              <Route path="/games"         element={<Games />} />
-              <Route path="/games/:game"   element={<GamePage />} />
-              <Route path="/apps"                    element={<Apps />} />
-              <Route path="/apps/:app"               element={<AppPage />} />
-              <Route path="/apps/:app/support"       element={<AppSupport />} />
-              <Route path="/apps/:app/privacy"       element={<AppPrivacy />} />
-              <Route path="/apps/:app/changelog"     element={<AppChangelog />} />
-              <Route path="*"              element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AnimatePresence>
+        {/* The transition animates this, not the document root, so the
+            header and footer are never part of it — they keep their own
+            compositing (the header blends in difference mode) and stay
+            put while the page changes underneath them. */}
+        <div className="page-frame">
+        <Suspense fallback={null}>
+          <Routes location={location}>
+            <Route index                 element={<About />} />
+            <Route path="/work"          element={<Home />} />
+            <Route path="/work/:project" element={<Project />} />
+            <Route path="/games"         element={<Games />} />
+            <Route path="/games/:game"   element={<GamePage />} />
+            <Route path="/apps"                    element={<Apps />} />
+            <Route path="/apps/:app"               element={<AppPage />} />
+            <Route path="/apps/:app/support"       element={<AppSupport />} />
+            <Route path="/apps/:app/privacy"       element={<AppPrivacy />} />
+            <Route path="/apps/:app/changelog"     element={<AppChangelog />} />
+            <Route path="*"              element={<NotFound />} />
+          </Routes>
+        </Suspense>
+        </div>
       </div>
       <Footer active={location.pathname} />
     </>

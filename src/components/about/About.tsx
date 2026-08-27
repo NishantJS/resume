@@ -13,12 +13,6 @@ import { useSeo } from "../../hooks/useSeo";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.4 } },
-  exit:    { opacity: 0, transition: { duration: 0.25 } },
-};
-
 const PARAS = [
   "Hello! I am a Software Developer based in Mumbai, MH, India.",
   "I build production-grade fintech and enterprise systems — from SSE-based real-time feeds to micro-frontend architectures. I care deeply about resilience, low latency, and clean abstractions.",
@@ -26,25 +20,47 @@ const PARAS = [
 ];
 const RANGES: [number, number][] = [[0, 0.33], [0.34, 0.67], [0.68, 1]];
 
+/* ── Timeline palette ──────────────────────────────────────────────
+   One hue family per section, so the three read as different kinds of
+   thing, with even hue steps inside each so consecutive entries — and
+   the gradient the progress line draws between them — stay distinct.
+   Every value is a Tailwind 400, which holds lightness and chroma
+   roughly constant across the whole set: hue carries the meaning and
+   no single dot shouts over its neighbours on the near-black page.
+
+     Experience   violet 258° → indigo 239° → sky 199° → teal 172°
+                  the site's own cool spine, oldest role coolest
+     Recognition  amber 43° → rose 351°
+                  warm, and near-complementary to that spine
+     Education    lime 82° → emerald 160°
+                  the arc left between the other two
+
+   The previous set repeated rose across Experience and Recognition and
+   gave Education two ambers a single step apart, which read as one
+   colour. */
 const EXPERIENCE = [
   {
     period: "Jul 2026 – Present",
     role: "Senior Software Developer",
     company: "BCT Consulting",
+    companyUrl: "https://in.linkedin.com/company/bct-consulting-private-limited",
     client: "BNP Paribas",
+    clientUrl: "https://www.linkedin.com/company/bnp-paribas",
     sub: "Automation team · Full-time · On-site",
     location: "Thane, Maharashtra, India",
-    color: "#818cf8",
+    color: "#a78bfa",
     bullets: [],
   },
   {
     period: "Sep 2025 – Jun 2026",
     role: "Software Developer",
     company: "FinQuest Consulting Services",
+    companyUrl: "https://www.linkedin.com/company/finquest-consulting-services-official",
     client: "Mirae Asset Capital Markets",
+    clientUrl: "https://in.linkedin.com/company/mstockbymiraeasset",
     sub: "Martech department · Full-time · On-site",
     location: "Mumbai, Maharashtra, India",
-    color: "#a855f7",
+    color: "#818cf8",
     bullets: [
       "Revamped the mStock Refer & Earn platform from legacy .NET to a modern stack (Next.js + Fastify), improving speed and scalability",
       "Built a real-time referral feed using SSE + Redis Streams, reducing delays from ~5s polling to ~1s updates",
@@ -57,10 +73,11 @@ const EXPERIENCE = [
     period: "Apr 2023 – Aug 2025",
     role: "Software Developer",
     company: "Futurescape Technology Private Limited",
+    companyUrl: "https://in.linkedin.com/company/futurescape-technologies",
     client: null,
     sub: "Full-time · On-site",
     location: "Navi Mumbai, Maharashtra, India",
-    color: "#22d3ee",
+    color: "#38bdf8",
     bullets: [
       "Built a dynamic form & table system (Nx + Next.js) powering complex, configurable workflows",
       "Designed micro-frontend architecture for modular and scalable feature delivery",
@@ -72,10 +89,11 @@ const EXPERIENCE = [
     period: "Aug 2022 – Mar 2023",
     role: "Software Developer",
     company: "Pinsout Innovation",
+    companyUrl: "https://in.linkedin.com/company/pinsoutinnovation",
     client: null,
     sub: "Full-time · On-site",
     location: "Noida, Uttar Pradesh, India",
-    color: "#f43f5e",
+    color: "#2dd4bf",
     bullets: [
       "Developed backend APIs for a job portal covering multiple user roles",
       "Built real-time chat using WebSockets",
@@ -92,17 +110,19 @@ const RECOGNITION = [
     period: "May 2025",
     title: "3rd place — ReactJam",
     org: "ReactJam Spring 2025",
+    orgUrl: null,
     sub: "Global game jam for React developers",
     href: "https://reactjam.com/winners",
-    color: "#10b981",
+    color: "#fbbf24",
   },
   {
     period: "Oct 2022",
     title: "Intern of the Month",
     org: "Pinsout Innovation",
+    orgUrl: "https://in.linkedin.com/company/pinsoutinnovation",
     sub: null,
     href: null,
-    color: "#f43f5e",
+    color: "#fb7185",
   },
 ];
 
@@ -111,15 +131,17 @@ const EDUCATION = [
     period: "Aug 2021 – May 2023",
     degree: "Master of Computer Applications (MCA)",
     institution: "Lovely Professional University",
+    institutionUrl: "https://www.linkedin.com/company/lovely-professional-university",
     score: "8.8 CGPA",
-    color: "#f59e0b",
+    color: "#a3e635",
   },
   {
     period: "Aug 2018 – May 2021",
     degree: "Bachelor of Computer Applications (BCA)",
     institution: "Lovely Professional University",
+    institutionUrl: "https://www.linkedin.com/company/lovely-professional-university",
     score: "7.2 CGPA",
-    color: "#fbbf24",
+    color: "#34d399",
   },
 ];
 
@@ -191,38 +213,80 @@ const TimelineSection: FC<{ children: React.ReactNode }> = ({ children }) => {
       const top = centre(dots[0]);
       track.style.top = `${top}px`;
       track.style.bottom = "auto";
-      track.style.height = `${Math.max(centre(dots[dots.length - 1]) - top, 0)}px`;
+      const height = Math.max(centre(dots[dots.length - 1]) - top, 0);
+      track.style.height = `${height}px`;
+      paintProgress(height, top, base);
+    };
+
+    /* The line is coloured by the dots it runs between, with a stop at
+       each dot's own position along the rail — so the stretch between
+       two entries is a blend of exactly those two colours, and the line
+       arrives at each dot already carrying that dot's accent.
+
+       The reveal is a clip, not a scaleY. Scaling squashed the whole
+       gradient into whatever fraction was visible, so the very first
+       inch of line showed every colour in the section at once instead
+       of the first pair. Clipping leaves the gradient painted at full
+       height and just uncovers it. */
+    const paintProgress = (height: number, top: number, base: number) => {
+      if (!progress) return;
+      const first = dots[0];
+      if (!first) return;
+      if (dots.length < 2 || !height) {
+        progress.style.background = getComputedStyle(first).backgroundColor;
+        return;
+      }
+      const stops = Array.from(dots, d => {
+        const r = d.getBoundingClientRect();
+        const at = (r.top + r.height / 2 - base - top) / height;
+        const pct = Math.round(Math.min(Math.max(at, 0), 1) * 1000) / 10;
+        return `${getComputedStyle(d).backgroundColor} ${pct}%`;
+      });
+      progress.style.background = `linear-gradient(180deg, ${stops.join(", ")})`;
     };
 
     layoutTrack();
     ScrollTrigger.addEventListener("refreshInit", layoutTrack);
 
     if (reduced) {
-      gsap.set(progress, { scaleY: 1 });
+      gsap.set(progress, { "--tl-fill": 1 });
       dots.forEach(d => d.classList.add("on"));
       return () => ScrollTrigger.removeEventListener("refreshInit", layoutTrack);
     }
 
-    // One scrubbed tween drives the gradient line AND the dots: a dot
-    // lights up the moment the line's rendered edge reaches it, and goes
-    // dark again when you scroll back above it. Reading the rendered
-    // scaleY (not scroll progress) keeps dots in lockstep with the
-    // scrub-smoothed line.
+    /* One scrubbed tween drives the gradient line AND the dots: a dot
+       lights up the moment the line's rendered edge reaches it, and goes
+       dark again when you scroll back above it. Reading the rendered
+       scaleY (not scroll progress) keeps dots in lockstep with the
+       scrub-smoothed line.
+
+       The scrub runs on the track, from its top hitting mid-screen to
+       its bottom hitting mid-screen — and the track spans first dot to
+       last, so every dot lights exactly as it crosses the middle of the
+       viewport. Driven off the section instead, the mapping depended on
+       how tall that section's cards happened to be: short entries lit
+       early, long ones were still dark well past centre. */
     gsap.fromTo(progress,
-      { scaleY: 0, transformOrigin: "top center" },
+      { "--tl-fill": 0 },
       {
-        scaleY: 1,
+        "--tl-fill": 1,
         ease: "none",
         onUpdate() {
           if (!track || !progress) return;
           const r = track.getBoundingClientRect();
-          const lit = r.top + r.height * Number(gsap.getProperty(progress, "scaleY"));
+          const lit = r.top + r.height * Number(gsap.getProperty(progress, "--tl-fill"));
           dots.forEach(dot => {
             const d = dot.getBoundingClientRect();
             dot.classList.toggle("on", d.top + d.height / 2 <= lit + 1);
           });
         },
-        scrollTrigger: { trigger: el, start: "top 78%", end: "bottom 55%", scrub: 0.6 },
+        scrollTrigger: {
+          trigger: track,
+          start: "top center",
+          end: "bottom center",
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+        },
       },
     );
 
@@ -251,7 +315,13 @@ const TimelineCard: FC<{
   client?: string | null;
   /** When set, the title becomes an outbound link. */
   href?: string | null;
-}> = ({ color, period, title, org, sub, meta, bullets, client, href }) => {
+  /** LinkedIn pages for the employer and, on a placement, the client.
+      These read exactly as they did before — same colour, same weight,
+      no underline. The affordance is the cursor: `.link` is what the
+      custom cursor watches for, so it swells over them. */
+  orgHref?: string | null;
+  clientHref?: string | null;
+}> = ({ color, period, title, org, sub, meta, bullets, client, href, orgHref, clientHref }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
@@ -308,7 +378,19 @@ const TimelineCard: FC<{
             </a>
           ) : title}
         </p>
-        <p className="tl-text mono text-base md:text-lg mt-1 font-medium" style={{ color }}>{org}</p>
+        <p className="tl-text mono text-base md:text-lg mt-1 font-medium" style={{ color }}>
+          {orgHref ? (
+            <a
+              href={orgHref}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="link tl-org-link"
+              aria-label={`${org} on LinkedIn`}
+            >
+              {org}
+            </a>
+          ) : org}
+        </p>
         {client && (
           <p className="tl-text mt-2.5">
             <span
@@ -316,7 +398,17 @@ const TimelineCard: FC<{
               style={{ ["--tl-c" as string]: color } as React.CSSProperties}
             >
               <span className="tl-client-label">Client</span>
-              {client}
+              {clientHref ? (
+                <a
+                  href={clientHref}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="link tl-org-link"
+                  aria-label={`${client} on LinkedIn`}
+                >
+                  {client}
+                </a>
+              ) : client}
             </span>
           </p>
         )}
@@ -371,10 +463,6 @@ const About = () => {
 
   return (
     <motion.main
-      variants={reduced ? undefined : pageVariants}
-      initial={reduced ? false : "initial"}
-      animate={reduced ? undefined : "animate"}
-      exit={reduced ? undefined : "exit"}
       className="bg-black text-white relative overflow-x-hidden"
       id="about"
       ref={mainRef}
@@ -424,6 +512,8 @@ const About = () => {
               client={exp.client}
               meta={exp.location}
               bullets={exp.bullets}
+              orgHref={exp.companyUrl}
+              clientHref={exp.clientUrl}
             />
           ))}
         </TimelineSection>
@@ -442,6 +532,7 @@ const About = () => {
               org={item.org}
               sub={item.sub}
               href={item.href}
+              orgHref={item.orgUrl}
             />
           ))}
         </TimelineSection>
@@ -459,6 +550,7 @@ const About = () => {
               title={edu.degree}
               org={edu.institution}
               meta={edu.score}
+              orgHref={edu.institutionUrl}
             />
           ))}
         </TimelineSection>

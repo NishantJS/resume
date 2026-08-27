@@ -11,9 +11,6 @@ const NotFound = () => {
 
   return (
   <motion.div
-    initial={{ opacity: 0, y: -30 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -30 }}
     className="warm-gradient relative flex flex-col items-center justify-center min-h-screen gap-4 px-6 text-center overflow-hidden"
   >
     <span
@@ -35,21 +32,18 @@ const NotFound = () => {
     <div className="flex gap-3 mt-4 mono text-sm relative">
       <Link
         to="/"
-        viewTransition
         className="link px-5 py-2.5 rounded-full bg-zinc-900 text-amber-50 hover:opacity-85 transition-opacity"
       >
         ← Home
       </Link>
       <Link
         to="/work"
-        viewTransition
         className="link px-5 py-2.5 rounded-full border border-black/15 hover:bg-black/5 transition-colors"
       >
         View Work
       </Link>
       <Link
         to="/games"
-        viewTransition
         className="link px-5 py-2.5 rounded-full border border-black/15 hover:bg-black/5 transition-colors"
       >
         Play a Game

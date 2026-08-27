@@ -1,16 +1,15 @@
+import { CSSProperties, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { projects } from "../home/Home";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { projects, getProject } from "./projects.data";
 import AboutSection from "./About";
 import Contents from "./Contents";
+import { ProjFacts, ProjCloser } from "./ProjectChrome";
+import { Inks, RailSection, SectionRail, Statement } from "../shared/DetailChrome";
+import { Overview, Stats, Highlights, Flow, Challenges, Stack } from "./Details";
+import { inkFor, isLight, useRevealBatch } from "../shared/reveal";
+import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
-
-function isLight(hex: string): boolean {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55;
-}
 
 const NavProject = ({ index = 0, direction = "next" }: { index: number; direction: "prev" | "next" }) => {
   const project = direction === "prev"
@@ -19,10 +18,9 @@ const NavProject = ({ index = 0, direction = "next" }: { index: number; directio
   const isNext = direction === "next";
   return (
     <Link
-      viewTransition
       to={project.path}
       className={`link proj-nav-card group ${isNext ? "proj-nav-card--next" : ""}`}
-      style={{ ["--target" as string]: project.color } as React.CSSProperties}
+      style={{ ["--target"]: project.color } as CSSProperties}
     >
       <span className="mono text-[0.62rem] uppercase tracking-[0.28em] opacity-45 group-hover:opacity-80 transition-opacity">
         {isNext ? "Next project" : "Previous project"}
@@ -56,12 +54,11 @@ const SkillsMarquee = ({ skills, ink, border }: { skills: string[]; ink: string;
 
 const Project = () => {
   const { pathname } = useLocation();
-  // Match ignoring a trailing slash so /work/qollabb and /work/qollabb/ both
-  // resolve to the right project (and get the right title / canonical).
-  const norm = (s: string) => s.replace(/\/+$/, "");
-  const project = projects.find(p => norm(p.path) === norm(pathname)) ?? projects[0];
+  // Falls back to the first project so an unknown /work/* still renders
+  // something rather than blanking.
+  const project = getProject(pathname) ?? projects[0];
   const index   = projects.indexOf(project);
-  const reduced = useReducedMotion();
+  const body    = useRef<HTMLDivElement>(null);
 
   const projTitle = project.displayTitle ?? project.title;
   useSeo({
@@ -71,36 +68,79 @@ const Project = () => {
     image: `/project/${project.title}/logo.webp`,
   });
 
-  const light  = isLight(project.color);
-  const ink    = light ? "#111111" : "#ffffff";
-  const border = light ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)";
+  // Every `.dt-reveal` below the hero rises as it scrolls into view.
+  useRevealBatch(body, ".dt-reveal", [project.path]);
+
+  const { ink, inkLow, inkDim, border } = inkFor(project.color);
+  const inks: Inks = {
+    ink, inkLow, inkDim, border,
+    accent:  project.accent  ?? ink,
+    accent2: project.accent2 ?? project.accent ?? ink,
+    panel:   isLight(project.color) ? "rgba(255,255,255,0.42)" : "rgba(255,255,255,0.07)",
+  };
+
+  // Only bands with data get a marker, so a thin project doesn't get a
+  // rail pointing at sections that aren't there. Memoised because the
+  // rail rebuilds its IntersectionObserver whenever this list changes.
+  const railSections: RailSection[] = useMemo(() => [
+    ...(project.overview?.length   ? [{ id: "overview", label: "Overview" }] : []),
+    ...(project.highlights?.length ? [{ id: "build",    label: "Build"    }] : []),
+    ...(project.images             ? [{ id: "screens",  label: "Screens"  }] : []),
+    ...(project.flow?.length       ? [{ id: "flow",     label: "Flow"     }] : []),
+    ...(project.challenges?.length ? [{ id: "notes",    label: "Notes"    }] : []),
+    { id: "stack", label: "Stack" },
+  ], [project]);
 
   return (
     <motion.main
-      initial={reduced ? false : { opacity: 0 }}
-      animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
-      exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
       className="project-gradient min-h-screen flex flex-col relative"
-      style={{ ["--proj" as string]: project.color, color: ink } as React.CSSProperties}
+      style={{ ["--proj"]: project.color, color: ink } as CSSProperties}
     >
-      {/* Film grain over the whole page for texture. */}
-      <div className="proj-grain" aria-hidden />
+      <Grain />
 
       <AboutSection project={project} index={index} total={projects.length} />
 
+      <ProjFacts project={project} inks={inks} />
+
       <SkillsMarquee skills={project.skills} ink={ink} border={border} />
 
-      <Contents project={project} />
+      <div ref={body}>
+        <Overview   project={project} inks={inks} />
+        <Stats      project={project} inks={inks} />
+        <Highlights project={project} inks={inks} />
+
+        {project.statement && (
+          <Statement
+            text={project.statement}
+            meta={`${projTitle} · ${project.contribution}`}
+            inks={inks}
+          />
+        )}
+
+        {project.images > 0 && (
+          <div id="screens" className="scroll-mt-24">
+            <Contents project={project} />
+          </div>
+        )}
+
+        <Flow       project={project} inks={inks} />
+        <Challenges project={project} inks={inks} />
+        <Stack      project={project} inks={inks} />
+      </div>
+
+      <ProjCloser project={project} inks={inks} />
 
       {/* Prev / Next navigation */}
       <nav
         className="proj-nav grid md:grid-cols-2 border-t"
-        style={{ borderColor: border, ["--nav-border" as string]: border } as React.CSSProperties}
+        style={{ borderColor: border, ["--nav-border"]: border } as CSSProperties}
         aria-label="Project navigation"
       >
         <NavProject index={index} direction="prev" />
         <NavProject index={index} direction="next" />
       </nav>
+
+      <SectionRail sections={railSections} accent={inks.accent} ink={ink} />
     </motion.main>
   );
 };

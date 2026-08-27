@@ -1,12 +1,13 @@
 import { CSSProperties, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { apps, getApp, formatDate } from "./apps.data";
 import {
-  AppNav, AppNotFound, AppSection, AppTabs, ArrowUpRight, inkFor, supportMailto,
+  Accordion, AppNav, AppNotFound, AppSection, AppTabs, ArrowUpRight, inksFor, supportMailto,
   useSectionReveal,
 } from "./AppChrome";
 import AppHero from "./AppHero";
+import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
 import "./apps.css";
 
@@ -21,7 +22,6 @@ const AppSupport = () => {
   const { app: slug } = useParams();
   const app = getApp(slug);
   const body = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
   const [copied, setCopied] = useState(false);
 
   useSeo({
@@ -37,8 +37,9 @@ const AppSupport = () => {
   if (!app) return <AppNotFound />;
 
   const index = apps.indexOf(app);
-  const { ink, inkLow, inkDim, border } = inkFor(app.color);
-  const sectionProps = { border, inkLow, inkDim };
+  const inks = inksFor(app);
+  const { ink, inkLow, inkDim, border } = inks;
+  
   const { support } = app;
 
   const mailto = supportMailto(app);
@@ -58,13 +59,10 @@ const AppSupport = () => {
 
   return (
     <motion.main
-      initial={reduced ? false : { opacity: 0 }}
-      animate={reduced ? undefined : { opacity: 1, transition: { duration: 0.25 } }}
-      exit={reduced ? undefined : { opacity: 0, transition: { duration: 0.25 } }}
       className="project-gradient min-h-screen flex flex-col relative"
       style={{ ["--proj"]: app.color, color: ink } as CSSProperties}
     >
-      <div className="proj-grain" aria-hidden />
+      <Grain />
 
       <AppHero
         app={app}
@@ -90,7 +88,7 @@ const AppSupport = () => {
 
       <div ref={body}>
         {/* ── Contact ─────────────────────────────────────────── */}
-        <AppSection id="contact" kicker="Contact" title="Reach a person." {...sectionProps}>
+        <AppSection id="contact" kicker="Contact" title="Reach a person." inks={inks}>
           <div className="grid gap-10 md:grid-cols-[1.4fr_1fr] md:gap-16">
             <div className="app-reveal">
               <p className="mono text-[0.65rem] uppercase tracking-[0.18em]" style={{ color: inkDim }}>
@@ -131,10 +129,10 @@ const AppSupport = () => {
 
           <p className="app-reveal mono mt-10 flex flex-wrap gap-x-6 gap-y-2 text-xs" style={{ color: inkDim }}>
             <span>Running v{app.release.version}, updated {formatDate(app.release.updated)}.</span>
-            <Link to={`/apps/${app.slug}/changelog`} viewTransition className="link underline underline-offset-4 hover:opacity-70 transition-opacity">
+            <Link to={`/apps/${app.slug}/changelog`} className="link underline underline-offset-4 hover:opacity-70 transition-opacity">
               What changed?
             </Link>
-            <Link to={`/apps/${app.slug}/privacy`} viewTransition className="link underline underline-offset-4 hover:opacity-70 transition-opacity">
+            <Link to={`/apps/${app.slug}/privacy`} className="link underline underline-offset-4 hover:opacity-70 transition-opacity">
               Data and privacy
             </Link>
           </p>
@@ -146,42 +144,20 @@ const AppSupport = () => {
           kicker="FAQ"
           title="Common questions."
           intro="The things people write in about most often."
-          {...sectionProps}
+          inks={inks}
         >
-          <div style={{ borderColor: border }}>
+          <div style={{ ["--dt-border"]: border, ["--dt-accent"]: inks.accent } as CSSProperties}>
             {app.faqs.map(f => (
-              <details key={f.q} className="app-reveal app-faq" style={{ borderColor: border }}>
-                <summary>
-                  <span className="text-lg md:text-xl font-medium tracking-tight pr-4">{f.q}</span>
-                  <span className="app-faq-sign" aria-hidden>+</span>
-                </summary>
-                <div className="app-faq-body">
-                  <p className="text-base leading-relaxed max-w-3xl" style={{ color: inkLow }}>{f.a}</p>
-                </div>
-              </details>
+              <Accordion
+                key={f.q}
+                className="dt-reveal dt-faq"
+                inkLow={inkLow}
+                summary={<span className="dt-faq-q">{f.q}</span>}
+              >
+                {f.a}
+              </Accordion>
             ))}
           </div>
-        </AppSection>
-
-        {/* ── Features ────────────────────────────────────────── */}
-        <AppSection
-          id="features"
-          kicker="Features"
-          title="Everything in the app."
-          intro="The complete list, so you can check what the app does before you write in."
-          {...sectionProps}
-        >
-          <ul style={{ borderColor: border }}>
-            {app.features.map((f, i) => (
-              <li key={f.title} className="app-reveal app-feature" style={{ borderColor: border }}>
-                <span className="app-feature-num mono" style={{ color: inkLow }} aria-hidden>
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="text-lg md:text-xl font-semibold tracking-tight">{f.title}</h3>
-                <p className="text-base leading-relaxed" style={{ color: inkLow }}>{f.body}</p>
-              </li>
-            ))}
-          </ul>
         </AppSection>
 
         {/* ── Refunds ─────────────────────────────────────────── */}
@@ -189,7 +165,7 @@ const AppSupport = () => {
           id="refunds"
           kicker="Billing"
           title="Refunds and cancellation."
-          {...sectionProps}
+          inks={inks}
         >
           <p className="app-reveal text-base leading-relaxed max-w-3xl" style={{ color: inkLow }}>
             Every purchase goes through Google Play, so Play's refund window applies. Inside 48 hours

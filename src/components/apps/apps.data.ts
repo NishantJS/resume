@@ -91,6 +91,9 @@ export interface AppMeta {
   screenCaptions: string[];
 
   features: Feature[];
+  /** What it's built on, grouped by what each piece is for — the
+      /work pages' stack band, on the product side. */
+  stack: { group: string; items: string[] }[];
   /** Numbered "how it works" steps on the app page. */
   steps: { title: string; body: string }[];
   faqs: Faq[];
@@ -174,6 +177,12 @@ export const apps: AppMeta[] = [
       { title: "Offline-first sync", body: "Inspections are stored on-device and sync when a connection returns. No signal in the basement yard is not a problem.", shot: 4 },
       { title: "On-glass signatures", body: "Capture the inspector's and the customer's signature directly on the screen, timestamped and embedded in the PDF.", shot: 1 },
       { title: "Report export", body: "Generate a branded PDF or CSV per inspection, or export a batch for the whole shift. Share by email, Drive or WhatsApp.", shot: 5, featured: true },
+    ],
+    stack: [
+      { group: "App", items: ["Kotlin", "Jetpack Compose", "Material 3"] },
+      { group: "On device", items: ["Room", "WorkManager", "CameraX", "DataStore"] },
+      { group: "Sync & backend", items: ["Ktor client", "REST", "Conflict-free sync"] },
+      { group: "Output", items: ["PDF generation", "Signature capture"] },
     ],
     steps: [
       { title: "Pick a template", body: "Choose the checklist that matches the unit — or start from a blank one and save it as a template for next time." },
@@ -298,6 +307,12 @@ export const apps: AppMeta[] = [
       { title: "Recurring invoices", body: "Set a retainer to bill monthly and InvoiceKaro raises and sends it on schedule, with the right invoice number.", shot: 5 },
       { title: "Payment reminders", body: "Polite nudges go out on day 3, 7 and 15 past due. Mark an invoice paid and the reminders stop immediately.", shot: 4 },
       { title: "Reports for filing", body: "Export a GSTR-1 ready summary, a receivables ageing report or a plain CSV your accountant will not complain about.", shot: 1, featured: true },
+    ],
+    stack: [
+      { group: "App", items: ["Flutter", "Dart", "Riverpod"] },
+      { group: "On device", items: ["Drift (SQLite)", "Shared preferences"] },
+      { group: "Documents", items: ["PDF generation", "GST tax engine", "Share intents"] },
+      { group: "Store", items: ["Google Play Billing", "Firebase Crashlytics"] },
     ],
     steps: [
       { title: "Set up once", body: "Add your business name, GSTIN, logo and bank details. This becomes the header of every invoice you send." },
@@ -424,6 +439,12 @@ export const apps: AppMeta[] = [
       { title: "More than passwords", body: "Store cards, identity documents, licence keys, secure notes and file attachments in the same encrypted store.", shot: 4, featured: true },
       { title: "Encrypted export", body: "Back up to an encrypted archive you control. Move it to any drive, restore on any device, no cloud in the middle.", shot: 5 },
       { title: "Panic controls", body: "Auto-lock on a timer, block screenshots, hide entry previews from the recents screen, and wipe after N failed attempts.", shot: 1 },
+    ],
+    stack: [
+      { group: "App", items: ["Kotlin", "Jetpack Compose"] },
+      { group: "Cryptography", items: ["AES-256-GCM", "Argon2id", "Android Keystore"] },
+      { group: "On device", items: ["SQLCipher", "Autofill Service", "BiometricPrompt"] },
+      { group: "Backup", items: ["Encrypted archive", "Local-only export"] },
     ],
     steps: [
       { title: "Set a master password", body: "Pick one strong password. It is the only thing that unlocks the vault — and the only thing that cannot be reset." },
