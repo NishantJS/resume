@@ -150,10 +150,18 @@ export function useSkewEffect(ref: React.RefObject<HTMLHeadingElement | null>) {
     };
     measureAll();
 
-    // quickTo keeps one tween per axis alive instead of building a new
-    // one on every pointer frame.
-    const rotYTo = gsap.quickTo(name, 'rotateY', { duration: 0.7, ease: 'power2.out' });
-    const rotXTo = gsap.quickTo(name, 'rotateX', { duration: 0.7, ease: 'power2.out' });
+    /* quickTo keeps one tween per axis alive instead of building a new
+       one on every pointer frame.
+
+       The names have to be GSAP's own rotationX/rotationY, not the CSS
+       rotateX/rotateY spellings. Those two are only aliases: CSSPlugin
+       registers the PropTween under the canonical name, while quickTo's
+       resetTo() looks it up by the exact string it was handed. The
+       lookup misses, the tween is re-initialised to force the property
+       into existence, and GSAP warns "rotateX not eligible for reset"
+       -- once per pointer frame, forever. */
+    const rotYTo = gsap.quickTo(name, 'rotationY', { duration: 0.7, ease: 'power2.out' });
+    const rotXTo = gsap.quickTo(name, 'rotationX', { duration: 0.7, ease: 'power2.out' });
 
     const strength = chars.map(() => 0);   // eased, what is on screen
     const target   = chars.map(() => 0);   // where the cursor says it should go
@@ -214,10 +222,11 @@ export function useSkewEffect(ref: React.RefObject<HTMLHeadingElement | null>) {
       if (i >= 0) { lastCol[i] = ''; lastShad[i] = ''; }
     };
 
-    // The elastic settle and the quickTo tilt both drive rotateX/rotateY,
-    // so whichever is not wanted has to go. The old code got this for
-    // free from `overwrite: 'auto'` on a tween it rebuilt every frame;
-    // with one long-lived tween per axis the handoff is explicit.
+    // The elastic settle and the quickTo tilt both drive the same two
+    // rotation properties, so whichever is not wanted has to go. The
+    // old code got this for free from `overwrite: 'auto'` on a tween it
+    // rebuilt every frame; with one long-lived tween per axis the
+    // handoff is explicit.
     let rest: gsap.core.Tween | null = null;
 
     const onMove = (e: MouseEvent) => {
@@ -237,7 +246,7 @@ export function useSkewEffect(ref: React.RefObject<HTMLHeadingElement | null>) {
     };
 
     const onLeave = () => {
-      rest = gsap.to(name, { rotateY: 0, rotateX: 0, duration: 1.1, ease: 'elastic.out(1, 0.45)' });
+      rest = gsap.to(name, { rotationY: 0, rotationX: 0, duration: 1.1, ease: 'elastic.out(1, 0.45)' });
       if (spotlight) {
         target.fill(0);
         schedule();
