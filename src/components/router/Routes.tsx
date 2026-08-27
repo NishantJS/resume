@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom"
-import { lazy, Suspense, useEffect, useRef } from "react"
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react"
 import ScrollIntoView from "./ScrollIntoView"
 import Header from "../header/Header"
 import Footer from "../footer/Footer"
@@ -45,11 +45,33 @@ const useScrollSkew = (ref: React.RefObject<HTMLDivElement | null>) => {
   }, [ref])
 }
 
+/* ── Document canvas ───────────────────────────────────────────────
+   index.html paints the body black so the first load of the dark
+   landing page has nothing to flash against. Every other page is
+   light, though, and the enter animation starts from transparent — so
+   for the first frames of every navigation that black canvas was the
+   only thing on screen.
+
+   Matching it to the page that is arriving means those frames show the
+   incoming page's own base tone instead, which is not a flash at all. */
+const canvasFor = (pathname: string) => {
+  const p = pathname.replace(/\/+$/, "") || "/"
+  if (p === "/") return "#0a0a0a"                    // the landing page is black
+  if (p.startsWith("/apps")) return "#f4fafd"         // cool-gradient base
+  if (p.startsWith("/games")) return "#fbf8fe"        // play-gradient base
+  return "#fdf8ee"                                    // warm — /work and the 404
+}
+
 const Router = () => {
   const location   = useLocation()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   useScrollSkew(wrapperRef)
+
+  // Before paint, so the incoming page never fades in over the wrong colour.
+  useLayoutEffect(() => {
+    document.body.style.background = canvasFor(location.pathname)
+  }, [location.pathname])
 
   return (
     <>
