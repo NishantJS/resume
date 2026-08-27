@@ -28,7 +28,7 @@ const Apps = () => {
   useSeo({
     title: "Apps — Nishant Chorge",
     description:
-      "Android apps built and published by Nishant Chorge — PDI Pro for field inspections, InvoiceKaro for GST billing, and Vault, an offline zero-knowledge password manager.",
+      "Android apps built in Flutter and published by Nishant Chorge — PDI Pro for field inspections, InvoiceKaro for GST billing, and Vault, an offline zero-knowledge password manager.",
     path: "/apps",
   });
 

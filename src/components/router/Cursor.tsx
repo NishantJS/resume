@@ -81,30 +81,47 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
       }
     };
 
-    // ── Link hover handlers ──────────────────────────────────────────
+    /* ── Link hover handlers ────────────────────────────────────────
+       Two treatments, not one.
+
+       The big white plate exists to be a frame for a project thumbnail:
+       it is sized for an image and it fills with white so the image has
+       something to sit on. Only the /work rows carry a `data-image`,
+       though, and every other link on the site — nav, logo, footer,
+       the listings, the detail pages — was getting the frame anyway,
+       with nothing in it. An empty white disc reads as a picture that
+       failed to load, which is exactly what it looks like.
+
+       So: a link that has an image gets the frame. A link that does not
+       gets a plain swell, keeping the dot's own colour and its exclusion
+       blend — the cursor acknowledges the link without pretending to
+       show something. */
     const handleEnter = (t: HTMLElement) => {
+      // Home.tsx sets data-entering="true" on the work list during its
+      // staggered entrance; until that clears, treat the rows as
+      // imageless rather than flashing thumbnails at a moving target.
+      const src = t.dataset.image && !document.querySelector('[data-entering]')
+        ? t.dataset.image
+        : null;
 
-      // Skip data-image while the work list is still animating in.
-      // Home.tsx sets data-entering="true" on the container during the
-      // staggered entrance and removes it when the last row finishes.
-      let styles: CSSProperties = {};
-      if (t.dataset.image) {
-        const entering = !!document.querySelector('[data-entering]');
-        if (!entering) {
-          styles = {
-            backgroundImage:    `url(${t.dataset.image})`,
-            backgroundSize:     'cover',
+      const styles: CSSProperties = src
+        ? {
+            scale: 3,
+            mixBlendMode: 'difference',
+            backgroundColor: 'white',
+            backgroundImage: `url(${src})`,
+            backgroundSize: 'cover',
             backgroundPosition: 'center',
+          }
+        : {
+            scale: 1.9,
+            mixBlendMode: 'exclusion',
+            backgroundColor: '',
+            backgroundImage: 'none',
           };
-        }
-      }
 
-      gsap.to(cursor, {
-        scale: 3, duration: 0.4, ease: 'power3.out',
-        mixBlendMode: 'difference', backgroundColor: 'white',
-        ...styles,
-      });
-      if (ring) gsap.to(ring, { scale: 0, duration: 0.3 });
+      gsap.to(cursor, { duration: 0.4, ease: 'power3.out', ...styles });
+      if (ring) gsap.to(ring, { scale: src ? 0 : 0.6, duration: 0.3 });
     };
 
     const handleLeave = () => {

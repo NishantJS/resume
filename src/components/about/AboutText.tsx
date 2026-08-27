@@ -3,7 +3,7 @@ import { FC, useCallback, useEffect, useRef } from 'react';
 
 // Words rendered in a distinctive accent colour once revealed
 const ACCENT = new Set([
-  'software', 'developer', 'fintech', 'enterprise', 'real-time',
+  'senior', 'software', 'developer', 'fintech', 'enterprise', 'real-time',
   'micro-frontend', 'resilience', 'latency', 'opportunities', 'project',
   'systems', 'production-grade', 'mumbai',
 ]);

@@ -32,14 +32,14 @@ const DESTINATIONS = [
     to: "/apps",
     label: "Apps",
     count: "03",
-    blurb: "Published on Google Play. Field inspections, invoicing, and an offline-first vault.",
+    blurb: "Built in Flutter, published on Google Play. Field inspections, GST invoicing, and an offline-first vault.",
     color: "#22d3ee",
   },
   {
     to: "/games",
     label: "Games",
     count: "10",
-    blurb: "Browser games built for the fun of it, playable right here. One of them placed third at ReactJam.",
+    blurb: "Browser games built for the fun of it, playable right here — no installs, no accounts.",
     color: "#a78bfa",
   },
 ];

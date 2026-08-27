@@ -70,7 +70,7 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
           <span className="footer-link-label">GitHub</span>
           <span className="footer-link-icon" aria-hidden>↗</span>
         </a>
-        <a href="/Nishant Chorge Software Developer.pdf" target="_blank" rel="noreferrer noopener" download className="footer-link" aria-label="Resume — download PDF">
+        <a href="/Nishant Chorge Senior Software Developer.pdf" target="_blank" rel="noreferrer noopener" download className="footer-link" aria-label="Resume — download PDF">
           <span className="footer-link-label">Resume</span>
           <span className="footer-link-icon" aria-hidden>↓</span>
         </a>

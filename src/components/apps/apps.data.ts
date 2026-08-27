@@ -145,7 +145,7 @@ export const apps: AppMeta[] = [
     color: "#c2e9fb",
     glow: "#5cc8f5",
     glow2: "#6366f1",
-    role: "Android · Kotlin",
+    role: "Android · Flutter",
     status: "live",
     release: {
       version: "2.4.0",
@@ -179,9 +179,9 @@ export const apps: AppMeta[] = [
       { title: "Report export", body: "Generate a branded PDF or CSV per inspection, or export a batch for the whole shift. Share by email, Drive or WhatsApp.", shot: 5, featured: true },
     ],
     stack: [
-      { group: "App", items: ["Kotlin", "Jetpack Compose", "Material 3"] },
-      { group: "On device", items: ["Room", "WorkManager", "CameraX", "DataStore"] },
-      { group: "Sync & backend", items: ["Ktor client", "REST", "Conflict-free sync"] },
+      { group: "App", items: ["Flutter", "Dart", "Riverpod", "Material 3"] },
+      { group: "On device", items: ["Drift (SQLite)", "Background sync", "Camera capture", "Shared preferences"] },
+      { group: "Sync & backend", items: ["REST", "Conflict-free sync"] },
       { group: "Output", items: ["PDF generation", "Signature capture"] },
     ],
     steps: [
@@ -407,7 +407,7 @@ export const apps: AppMeta[] = [
     color: "#ddd6fe",
     glow: "#a78bfa",
     glow2: "#f472b6",
-    role: "Android · Kotlin",
+    role: "Android · Flutter",
     status: "live",
     release: {
       version: "1.8.0",
@@ -441,9 +441,9 @@ export const apps: AppMeta[] = [
       { title: "Panic controls", body: "Auto-lock on a timer, block screenshots, hide entry previews from the recents screen, and wipe after N failed attempts.", shot: 1 },
     ],
     stack: [
-      { group: "App", items: ["Kotlin", "Jetpack Compose"] },
+      { group: "App", items: ["Flutter", "Dart", "Riverpod"] },
       { group: "Cryptography", items: ["AES-256-GCM", "Argon2id", "Android Keystore"] },
-      { group: "On device", items: ["SQLCipher", "Autofill Service", "BiometricPrompt"] },
+      { group: "On device", items: ["SQLCipher", "Autofill Service", "Biometric unlock"] },
       { group: "Backup", items: ["Encrypted archive", "Local-only export"] },
     ],
     steps: [
