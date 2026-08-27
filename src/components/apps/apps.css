@@ -224,19 +224,27 @@
   box-shadow: 0 34px 70px rgba(0, 0, 0, 0.26);
 }
 
-/* Mobile: a snap row, so five phone shots don't become five screens
-   of vertical scrolling. */
-.app-shot-swipe {
+/* Mobile: a vertical stack, the same shape the project pages use, so a
+   phone reader meets one kind of gallery across the site. Each shot is
+   capped to a share of the viewport rather than run full-bleed —
+   nothing forces a 9:19.5 export to be a screen tall, and five of them
+   at full width would be five screens of scrolling on their own. */
+.app-shot-stack {
   display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  padding: 0 1.5rem 1.25rem;
-  -webkit-overflow-scrolling: touch;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  padding: 0 1.5rem 3rem;
 }
-.app-shot-item--swipe { scroll-snap-align: center; }
-.app-shot--swipe img { height: 60vh; max-height: 500px; width: auto; }
+.app-shot-item--stacked {
+  align-items: center;
+  max-width: 100%;
+}
+.app-shot--stacked img {
+  height: min(64vh, 520px);
+  width: auto;
+  max-width: 100%;
+}
 
 .app-shot-caption {
   font-size: 0.68rem;

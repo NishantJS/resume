@@ -70,6 +70,11 @@ export const useRevealBatch = (
       once: true,
       start: "top 92%",
       onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, stagger: 0.08, duration: 0.7, ease: "power3.out" }),
+      // A fast scroll can put a dozen items over the line in one frame.
+      // Batching them into one tween per 120 ms keeps that a stagger
+      // rather than a dozen tweens starting together.
+      batchMax: 8,
+      interval: 0.12,
     });
   }, { scope, dependencies: [reduced, selector, ...deps] });
 };
@@ -246,7 +251,15 @@ export const useIgnite = (
           trigger: heading,
           start,
           end,
-          scrub: scrub ? 0.6 : false,
+          /* `scrub` is a smoothing time, not a delay: the playhead
+             eases to wherever the scroll put it, on GSAP's ticker
+             rather than on scroll events — which fire in bursts, and
+             more coarsely than the display refreshes. At 0.6 a fast
+             scroll dragged the playhead through a hundred characters in
+             two or three steps, which reads as a stutter and then a
+             heading that is already finished. Longer, and the same
+             scroll still plays the whole reveal, in its own time. */
+          scrub: scrub ? 1.2 : false,
           once: !scrub,
           invalidateOnRefresh: true,
         },

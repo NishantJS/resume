@@ -23,7 +23,10 @@ const Intro: FC = () => {
       yPercent: -7,
       opacity: 0.25,
       ease: "none",
-      scrollTrigger: { trigger: el, start: "top top", end: "bottom 25%", scrub: true },
+      // A number rather than `true`: this fades and scales the whole
+      // name block, so tying it straight to scroll events made it step
+      // rather than glide. Smoothed, it runs on the ticker.
+      scrollTrigger: { trigger: el, start: "top top", end: "bottom 25%", scrub: 0.8 },
     });
   }, { scope: ref, dependencies: [reduced] });
 

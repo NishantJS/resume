@@ -219,8 +219,16 @@
   background: var(--dt-accent, currentColor);
   transition: height 340ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.dt-feature:hover { padding-left: 0.7rem; }
-.dt-feature:hover::after { height: 1.6rem; }
+/* Hover only where hover is real. `padding-left` narrows the content
+   box, which re-wraps the title and changes the row's height — fine as a
+   pointer affordance, but on a touch screen `:hover` latches after a tap
+   and stays latched until you tap something else, so the list was
+   re-flowing under the reader's thumb. */
+@media (hover: hover) and (pointer: fine) {
+  .dt-feature:hover { padding-left: 0.7rem; }
+  .dt-feature:hover::after { height: 1.6rem; }
+  .dt-feature:hover .dt-feature-num { opacity: 1; color: var(--dt-accent, currentColor); }
+}
 .dt-feature-num {
   font-variant-numeric: tabular-nums;
   font-size: 0.7rem;
@@ -229,7 +237,6 @@
   opacity: 0.7;
   transition: opacity 300ms ease, color 300ms ease;
 }
-.dt-feature:hover .dt-feature-num { opacity: 1; color: var(--dt-accent, currentColor); }
 .dt-feature-title {
   font-size: clamp(1.05rem, 1.9vw, 1.25rem);
   font-weight: 500;
@@ -376,7 +383,11 @@
   cursor: pointer;
   transition: padding-left 340ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.dt-faq-summary:hover { padding-left: 0.55rem; }
+/* Same reasoning as .dt-feature above: a latched hover on a touch
+   screen would shift the question text sideways for good. */
+@media (hover: hover) and (pointer: fine) {
+  .dt-faq-summary:hover { padding-left: 0.55rem; }
+}
 .dt-faq-q {
   font-size: clamp(1rem, 1.7vw, 1.18rem);
   font-weight: 500;

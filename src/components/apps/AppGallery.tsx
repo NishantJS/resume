@@ -32,7 +32,7 @@ function useIsMobile(bp = 768): boolean {
 const Shot: FC<{
   app: AppMeta;
   n: number;
-  variant: "rail" | "swipe";
+  variant: "rail" | "stacked";
   inkLow: string;
   inkDim: string;
   border: string;
@@ -60,8 +60,8 @@ type Props = { app: AppMeta; ink: string; inkLow: string; inkDim: string; border
 
 /** Phone screenshots for an app. Same scroll-driven rail as the project
     gallery, but portrait shots so more of them fit across the viewport.
-    On mobile it degrades to a swipeable snap row rather than a tall
-    stack — five full-height phone shots stacked is a lot of scrolling. */
+    On mobile it degrades to the same vertical stack the project pages
+    use, with each shot held to a share of the viewport height. */
 const AppGallery: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
   const total = app.screens || 0;
   const reduced = useReducedMotion();
@@ -122,19 +122,30 @@ const AppGallery: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
     </div>
   );
 
-  /* ── Mobile: horizontal snap row ─────────────────────────────── */
+  /* ── Mobile: vertical stack, each shot rises in as it scrolls in ─
+     The same shape the project pages use on mobile, so a phone reader
+     meets one kind of gallery across the site rather than a swipe row
+     here and a stack there. Portrait phone exports are tall, so each
+     shot is held to a fraction of the viewport instead of running the
+     full width — five full-bleed 9:19.5 shots would be five screens of
+     scrolling on their own. */
   if (isMobile) {
     return (
       <div id="screens">
         {Label}
-        <div className="app-shot-swipe gallery-track">
+        <div className="app-shot-stack">
           {shots.map(n => (
-            <Shot key={n} app={app} n={n} variant="swipe" inkLow={inkLow} inkDim={inkDim} border={border} />
+            <motion.div
+              key={n}
+              initial={reduced ? false : { opacity: 0, y: 36 }}
+              whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Shot app={app} n={n} variant="stacked" inkLow={inkLow} inkDim={inkDim} border={border} />
+            </motion.div>
           ))}
         </div>
-        <p className="mono px-6 pb-10 text-[0.68rem] uppercase tracking-[0.18em]" style={{ color: inkDim }} aria-hidden>
-          Swipe for more →
-        </p>
       </div>
     );
   }

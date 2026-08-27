@@ -5,6 +5,12 @@ import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 type CursorProps = { pathname?: string };
 
+/* Properties the hover/route tweens own. Killing tweens by name matters
+   now that the follow tweens live for the whole session: a blanket
+   gsap.killTweensOf(cursor) would take the x/y quickTo down with the
+   hover swell and the cursor would freeze mid-screen. */
+const LOOK = 'scale,backgroundColor,mixBlendMode,backgroundImage,backgroundSize,backgroundPosition';
+
 const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const ringRef   = useRef<HTMLDivElement>(null);
@@ -16,7 +22,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
     const cursor = cursorRef.current;
     const ring   = ringRef.current;
     if (!cursor) return;
-    gsap.killTweensOf(cursor);
+    gsap.killTweensOf(cursor, LOOK);
     gsap.to(cursor, { scale: 1, mixBlendMode: 'exclusion', backgroundColor: '', duration: 0.2 });
     cursor.style.backgroundImage = '';
     if (ring) gsap.to(ring, { scale: 1, duration: 0.2 });
@@ -27,27 +33,52 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
     const ring   = ringRef.current;
     if (!cursor) return;
 
-    // ── Cursor movement ──────────────────────────────────────────────
-    let moveDebounce: number;
-    const moveCursor = (e: MouseEvent) => {
-      clearTimeout(moveDebounce);
-      moveDebounce = window.setTimeout(() => {
-        const x  = e.clientX - cursor.clientWidth  / 2;
-        const y  = e.clientY - cursor.clientHeight / 2;
-        const cx = Math.max(0, Math.min(x, window.innerWidth  - cursor.clientWidth));
-        const cy = Math.max(0, Math.min(y, window.innerHeight - cursor.clientHeight));
-        gsap.to(cursor, { left: cx, top: cy, duration: 0.2, ease: 'power4' });
+    /* ── Cursor movement ──────────────────────────────────────────
+       `left` and `top` used to carry the follow. Both are layout
+       properties: every frame of every mouse move put the cursor
+       through layout → paint → composite, on an element that also
+       blends against everything under it. Transforms skip straight to
+       the compositor, so the same motion costs a matrix upload.
 
-        if (ring && !reduced) {
-          const rx = e.clientX - ring.clientWidth  / 2;
-          const ry = e.clientY - ring.clientHeight / 2;
-          gsap.to(ring, {
-            left: Math.max(0, Math.min(rx, window.innerWidth  - ring.clientWidth)),
-            top:  Math.max(0, Math.min(ry, window.innerHeight - ring.clientHeight)),
-            duration: 0.5, ease: 'power4',
-          });
-        }
-      }, 3);
+       The old 3 ms setTimeout debounce is gone too. It fired a fresh
+       gsap.to() per mouse event — a new tween object, vars parse and
+       all, hundreds of times a second — while adding a frame of lag
+       for its trouble. quickTo keeps ONE tween per axis alive for the
+       life of the component and just re-points it, which is what it
+       exists for. Coalescing to the frame is rAF's job, and GSAP's
+       ticker already does it. */
+    const half = { c: cursor.clientWidth / 2, r: (ring?.clientWidth ?? 0) / 2 };
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+
+    // Measured on resize, not on every pointer frame: clientWidth and
+    // innerWidth are both layout reads, and reading layout in a mouse
+    // handler is what forces a synchronous reflow mid-scroll.
+    const measure = () => {
+      vw = window.innerWidth;
+      vh = window.innerHeight;
+      half.c = cursor.clientWidth / 2;
+      half.r = (ring?.clientWidth ?? 0) / 2;
+    };
+    window.addEventListener('resize', measure, { passive: true });
+
+    const xTo = gsap.quickTo(cursor, 'x', { duration: 0.2, ease: 'power4' });
+    const yTo = gsap.quickTo(cursor, 'y', { duration: 0.2, ease: 'power4' });
+    const rxTo = ring ? gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power4' }) : null;
+    const ryTo = ring ? gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power4' }) : null;
+
+    const moveCursor = (e: MouseEvent) => {
+      // Self-heals if the setup measurement landed before layout.
+      if (!half.c) measure();
+      const x = e.clientX - half.c;
+      const y = e.clientY - half.c;
+      xTo(Math.max(0, Math.min(x, vw - half.c * 2)));
+      yTo(Math.max(0, Math.min(y, vh - half.c * 2)));
+
+      if (rxTo && ryTo && !reduced) {
+        rxTo(Math.max(0, Math.min(e.clientX - half.r, vw - half.r * 2)));
+        ryTo(Math.max(0, Math.min(e.clientY - half.r, vh - half.r * 2)));
+      }
     };
 
     // ── Link hover handlers ──────────────────────────────────────────
@@ -77,7 +108,7 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
     };
 
     const handleLeave = () => {
-      gsap.killTweensOf(cursor);
+      gsap.killTweensOf(cursor, LOOK);
       gsap.to(cursor, {
         scale: 1, duration: 0.35, ease: 'power3.out',
         mixBlendMode: 'exclusion', backgroundColor: '',
@@ -123,10 +154,10 @@ const Cursor: FC<CursorProps> = ({ pathname = "" }) => {
     document.addEventListener('mouseout', onOut);
     document.addEventListener('click', onClick);
 
-    document.addEventListener('mousemove', moveCursor);
+    document.addEventListener('mousemove', moveCursor, { passive: true });
 
     return () => {
-      clearTimeout(moveDebounce);
+      window.removeEventListener('resize', measure);
       document.removeEventListener('mousemove', moveCursor);
       document.removeEventListener('mouseover', onOver);
       document.removeEventListener('mouseout', onOut);

@@ -301,13 +301,19 @@ export const FlowSteps: FC<{
     const mm = gsap.matchMedia(ref);
 
     const build = (horizontal: boolean) => () => {
+      // Read every dot, then write every class. Toggling `is-on` on a
+      // step invalidates layout for the ones after it, so measuring in
+      // the same pass forced a synchronous reflow per step on every
+      // scrub frame.
       const paint = () => {
         const r = track.getBoundingClientRect();
         const p = Number(gsap.getProperty(fill, "--dt-fill"));
         const edge = horizontal ? r.left + r.width * p : r.top + r.height * p;
-        dots.forEach((dot, i) => {
+        const centres = dots.map(dot => {
           const b = dot.getBoundingClientRect();
-          const centre = horizontal ? b.left + b.width / 2 : b.top + b.height / 2;
+          return horizontal ? b.left + b.width / 2 : b.top + b.height / 2;
+        });
+        centres.forEach((centre, i) => {
           items[i]?.classList.toggle("is-on", centre <= edge + 2);
         });
       };
@@ -324,7 +330,10 @@ export const FlowSteps: FC<{
           trigger: el,
           start: horizontal ? "top 80%" : "top 78%",
           end: horizontal ? "+=60%" : "bottom 62%",
-          scrub: 0.7,
+          // Same reasoning as the About timeline: enough smoothing that
+          // a flick past the section still draws the rule and lights
+          // the steps in order instead of snapping to the end.
+          scrub: 1.2,
           invalidateOnRefresh: true,
           // Scrubbing back past the start leaves the tween parked at 0
           // without a final onUpdate, so the last dot could stay lit.

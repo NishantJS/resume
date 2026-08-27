@@ -62,6 +62,15 @@ html {
   .cursor, .cursor-ring { display: none; }
 }
 
+/* Both followers are driven by `transform` now, not by `left`/`top`, so
+   they need an origin to translate away from — without these they would
+   sit at their static position at the end of the body. */
+.cursor, .cursor-ring {
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+
 /* ── Listing backdrops ───────────────────────────────────────
    One wash per index page so /work, /apps and /games each read as
    their own place. Same recipe throughout: two corner glows over a
@@ -418,7 +427,12 @@ html {
   font-size: clamp(0.78rem, 1.5vw, 0.95rem);
   line-height: 1.2;
   white-space: nowrap;
-  will-change: transform;
+  /* No `will-change` here. There are forty-one of these, and a standing
+     hint promoted every one of them to its own compositor layer for the
+     whole life of the page — forty-one layers held so a hover could
+     nudge a chip two pixels. The entrance flip is the only part that
+     benefits, so Skills.tsx raises the hint just for that and drops it
+     when the tween lands. */
   transition: border-color 250ms ease, background 250ms ease, color 250ms ease, translate 250ms ease;
 }
 .skill-chip:hover {
@@ -636,12 +650,31 @@ html {
 }
 .orb-pulse { animation: orb-pulse 9s ease-in-out infinite; }
 
-/* ── Cursor ring glow ────────────────────────────────────── */
+/* ── Cursor ring glow ──────────────────────────────────────
+   The glow used to animate `box-shadow` spread directly on the ring,
+   which repaints the element every frame — forever, on an element that
+   is also being moved every frame. Same look, but the shadow is now
+   painted once at full size on a pseudo-element and the pulse runs on
+   `opacity` and `transform`, which the compositor handles without ever
+   touching paint. */
 @keyframes cursor-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
-  50%       { box-shadow: 0 0 0 5px rgba(168, 85, 247, 0.12); }
+  0%, 100% { opacity: 0;   transform: scale(0.94); }
+  50%      { opacity: 1;   transform: scale(1); }
 }
-.cursor-ring { animation: cursor-glow 2.5s ease-in-out infinite; }
+.cursor-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 5px rgba(168, 85, 247, 0.12);
+  opacity: 0;
+  will-change: opacity, transform;
+  animation: cursor-glow 2.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring::after { animation: none; }
+}
 
 /* ── Name heading glow (base ambient) ───────────────────── */
 .name-glow {

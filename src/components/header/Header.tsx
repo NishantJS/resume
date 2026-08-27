@@ -52,24 +52,57 @@ const Header: FC<HeaderProps> = ({ active = "/" }) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, { scope: headerRef });
 
-  // Magnetic NC logo
+  /* Magnetic NC logo.
+
+     The rect used to be read inside the move handler, and a fresh
+     gsap.to() built for each event — a pointer that reports at 1000 Hz
+     turned that into a thousand layout reads and a thousand tween
+     objects a second, all to move one small element. The measurement
+     only changes when the page moves under the cursor, so it is taken
+     on enter and re-taken if the page scrolls or resizes; quickTo keeps
+     one tween per axis for the drift. */
   useEffect(() => {
     const nc = ncRef.current;
     if (!nc || reduced) return;
-    const onMove = (e: MouseEvent) => {
+
+    const xTo = gsap.quickTo(nc, 'x', { duration: 0.3, ease: 'power2.out' });
+    const yTo = gsap.quickTo(nc, 'y', { duration: 0.3, ease: 'power2.out' });
+
+    let cx = 0, cy = 0, stale = true;
+    let settle: gsap.core.Tween | null = null;
+
+    // The rect already includes the drift GSAP has applied, so the
+    // current x/y is subtracted back out to recover the resting centre.
+    const measure = () => {
       const r = nc.getBoundingClientRect();
-      gsap.to(nc, {
-        x: (e.clientX - r.left - r.width  / 2) * 0.3,
-        y: (e.clientY - r.top  - r.height / 2) * 0.3,
-        duration: 0.3, ease: 'power2.out',
-      });
+      cx = r.left + r.width  / 2 - (gsap.getProperty(nc, 'x') as number);
+      cy = r.top  + r.height / 2 - (gsap.getProperty(nc, 'y') as number);
+      stale = false;
     };
-    const onLeave = () => gsap.to(nc, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' });
+    const invalidate = () => { stale = true; };
+
+    const onEnter = () => { settle?.kill(); settle = null; measure(); };
+    const onMove = (e: MouseEvent) => {
+      if (stale) measure();
+      xTo((e.clientX - cx) * 0.3);
+      yTo((e.clientY - cy) * 0.3);
+    };
+    const onLeave = () => {
+      settle = gsap.to(nc, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' });
+    };
+
+    nc.addEventListener('mouseenter', onEnter);
     nc.addEventListener('mousemove', onMove);
     nc.addEventListener('mouseleave', onLeave);
+    window.addEventListener('scroll', invalidate, { passive: true });
+    window.addEventListener('resize', invalidate, { passive: true });
     return () => {
+      nc.removeEventListener('mouseenter', onEnter);
       nc.removeEventListener('mousemove', onMove);
       nc.removeEventListener('mouseleave', onLeave);
+      window.removeEventListener('scroll', invalidate);
+      window.removeEventListener('resize', invalidate);
+      settle?.kill();
     };
   }, [reduced]);
 

@@ -13,6 +13,18 @@ import { useSeo } from "../../hooks/useSeo";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* Several sections can discover a stale measurement in the same frame —
+   fonts swapping in re-wraps every card on the page at once. One
+   coalesced refresh per frame instead of one per section. */
+let refreshQueued = 0;
+const queueRefresh = () => {
+  if (refreshQueued) return;
+  refreshQueued = requestAnimationFrame(() => {
+    refreshQueued = 0;
+    ScrollTrigger.refresh();
+  });
+};
+
 const PARAS = [
   "Hello! I am a Software Developer based in Mumbai, MH, India.",
   "I build production-grade fintech and enterprise systems — from SSE-based real-time feeds to micro-frontend architectures. I care deeply about resilience, low latency, and clean abstractions.",
@@ -248,10 +260,36 @@ const TimelineSection: FC<{ children: React.ReactNode }> = ({ children }) => {
     layoutTrack();
     ScrollTrigger.addEventListener("refreshInit", layoutTrack);
 
+    /* The rail is measured from where the dots are, so anything that
+       moves them leaves it wrong — and the classic one is the webfont.
+       The first measurement happens against the fallback face; when
+       Rubik swaps in, every card re-wraps, the last dot moves up, and
+       the rail keeps the length it had — which is the stray tail of
+       line past the final circle.
+
+       A refresh re-runs layoutTrack (it is registered on refreshInit
+       above) and then lets ScrollTrigger re-measure the scrub range
+       against the corrected geometry, so the dots keep lighting at the
+       right moment. The observer covers the same class of problem from
+       any other source: a resize, a late image, a re-wrap. */
+    let lastHeight = el.getBoundingClientRect().height;
+    const ro = new ResizeObserver(() => {
+      const h = el.getBoundingClientRect().height;
+      if (Math.abs(h - lastHeight) < 1) return;
+      lastHeight = h;
+      queueRefresh();
+    });
+    ro.observe(el);
+
+    document.fonts?.ready.then(queueRefresh);
+
     if (reduced) {
       gsap.set(progress, { "--tl-fill": 1 });
       dots.forEach(d => d.classList.add("on"));
-      return () => ScrollTrigger.removeEventListener("refreshInit", layoutTrack);
+      return () => {
+        ro.disconnect();
+        ScrollTrigger.removeEventListener("refreshInit", layoutTrack);
+      };
     }
 
     /* One scrubbed tween drives the gradient line AND the dots: a dot
@@ -275,22 +313,43 @@ const TimelineSection: FC<{ children: React.ReactNode }> = ({ children }) => {
           if (!track || !progress) return;
           const r = track.getBoundingClientRect();
           const lit = r.top + r.height * Number(gsap.getProperty(progress, "--tl-fill"));
-          dots.forEach(dot => {
-            const d = dot.getBoundingClientRect();
-            dot.classList.toggle("on", d.top + d.height / 2 <= lit + 1);
-          });
+          /* Every dot is measured before any class is touched. Reading a
+             rect after a class change on a sibling forces the browser to
+             flush layout there and then, so the interleaved version paid
+             one synchronous reflow per dot on every scrub frame — the
+             whole section re-laid-out eight times per frame while you
+             scrolled past it. The centres are invariant under `.on`
+             anyway (it scales the dot about its own centre), so one read
+             pass up front is exact, not an approximation. */
+          const centres = dots.length
+            ? Array.from(dots, d => {
+                const b = d.getBoundingClientRect();
+                return b.top + b.height / 2;
+              })
+            : [];
+          dots.forEach((dot, i) => dot.classList.toggle("on", centres[i] <= lit + 1));
         },
         scrollTrigger: {
           trigger: track,
           start: "top center",
           end: "bottom center",
-          scrub: 0.6,
+          /* Generous smoothing on purpose. `scrub` is not a delay — it
+             is how long the playhead takes to ease to wherever the
+             scroll has put it, running on GSAP's own ticker rather than
+             on scroll events. At 0.6 a flick through the section
+             arrived as two or three jumps: the line snapped down and
+             every dot lit at once. At 1.4 the same flick still draws
+             the whole rail, just over its own second and a half. */
+          scrub: 1.4,
           invalidateOnRefresh: true,
         },
       },
     );
 
-    return () => ScrollTrigger.removeEventListener("refreshInit", layoutTrack);
+    return () => {
+      ro.disconnect();
+      ScrollTrigger.removeEventListener("refreshInit", layoutTrack);
+    };
   }, { scope: ref, dependencies: [reduced] });
 
   return (

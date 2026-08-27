@@ -56,6 +56,11 @@ const SkillRow = ({ group }: { group: typeof skillGroups[0] }) => {
     const tl = gsap.timeline({
       scrollTrigger: { trigger: el, start: "top 88%", once: true },
       defaults: { ease: "power3.out" },
+      // The chips are the only thing on the page that needs a layer per
+      // chip, and only while they are flipping in. Held permanently in
+      // CSS it was forty-one layers standing by for a hover.
+      onStart: () => chips.forEach(c => { c.style.willChange = "transform, opacity"; }),
+      onComplete: () => chips.forEach(c => { c.style.willChange = "auto"; }),
     });
     tl.to(label, { opacity: 1, x: 0, duration: 0.5 })
       .to(chips, { opacity: 1, y: 0, rotateX: 0, duration: 0.55, stagger: 0.035 }, "-=0.3");
