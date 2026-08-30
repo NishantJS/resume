@@ -6,6 +6,7 @@ import { AppNav, AppNotFound, AppSection, AppTabs, inksFor, useSectionReveal } f
 import AppHero from "./AppHero";
 import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
+import { CONTACT } from "../../contact.data";
 import "./apps.css";
 
 /* Section ids double as the contents rail. Keep in sync with the
@@ -191,6 +192,11 @@ const AppPrivacy = () => {
                   affected users and the relevant authority within 72 hours of becoming aware of it, as
                   required under applicable law.
                 </p>
+                <p>
+                  Found a vulnerability, or someone misusing {name}? Report it to{" "}
+                  <a href={`mailto:${CONTACT.abuse}`}>{CONTACT.abuse}</a>. We will acknowledge the report
+                  within 72 hours and will not pursue action against good-faith research.
+                </p>
               </section>
 
               <section id="retention" className="app-reveal">
@@ -221,8 +227,8 @@ const AppPrivacy = () => {
                 <p>
                   In-app, use <em>Settings → Account → Export data</em> or <em>Delete account</em>.
                   Deletion is immediate and irreversible. You can also email{" "}
-                  <a href={`mailto:${support.email}`}>{support.email}</a> and we will action the request
-                  within 30 days.
+                  <a href={`mailto:${CONTACT.privacy}`}>{CONTACT.privacy}</a> from the address on the
+                  account and we will action the request within 30 days.
                 </p>
               </section>
 
@@ -231,7 +237,8 @@ const AppPrivacy = () => {
                 <p>
                   {name} is not directed at children under 13 (or under 16 in the EEA), and we do not
                   knowingly collect their personal data. If you believe a child has given us information,
-                  write to us and we will delete it.
+                  write to <a href={`mailto:${CONTACT.privacy}`}>{CONTACT.privacy}</a> and we will delete
+                  it.
                 </p>
               </section>
 
@@ -247,9 +254,27 @@ const AppPrivacy = () => {
 
               <section id="contact" className="app-reveal">
                 <h2 style={{ color: ink }}>10. Contact</h2>
-                <p>Questions about this policy, or about the data we hold, go to the same place as everything else:</p>
+                <p>
+                  Questions about this policy, or about the data we hold, reach a person at the desk
+                  below. Anything that doesn't fit one of them can go to support and we will route it.
+                </p>
                 <ul>
-                  <li>Email — <a href={`mailto:${support.email}`}>{support.email}</a></li>
+                  <li>
+                    Privacy, data requests and this policy —{" "}
+                    <a href={`mailto:${CONTACT.privacy}`}>{CONTACT.privacy}</a>
+                  </li>
+                  <li>
+                    Legal notices and takedowns —{" "}
+                    <a href={`mailto:${CONTACT.legal}`}>{CONTACT.legal}</a>
+                  </li>
+                  <li>
+                    Security reports and misuse —{" "}
+                    <a href={`mailto:${CONTACT.abuse}`}>{CONTACT.abuse}</a>
+                  </li>
+                  <li>
+                    Everything else about {name} —{" "}
+                    <a href={`mailto:${support.email}`}>{support.email}</a>
+                  </li>
                   <li>Phone — {support.phone} ({support.hours})</li>
                   <li>Post — {support.address}</li>
                 </ul>

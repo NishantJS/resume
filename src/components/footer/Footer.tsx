@@ -2,6 +2,7 @@ import { FC, useRef } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from 'gsap';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { CONTACT } from '../../contact.data';
 
 type FooterProps = { active: string };
 
@@ -76,7 +77,7 @@ const Footer: FC<FooterProps> = ({ active = "" }) => {
         </a>
       </div>
       <div className="flex flex-col items-end gap-0.5 text-right pointer-events-auto">
-        <a href="mailto:itsnishantchorge@gmail.com" target="_blank" rel="noreferrer noopener" className="footer-link footer-link--right">
+        <a href={`mailto:${CONTACT.hello}`} target="_blank" rel="noreferrer noopener" className="footer-link footer-link--right">
           <span className="footer-link-icon" aria-hidden>↗</span>
           <span className="footer-link-label">Email</span>
         </a>

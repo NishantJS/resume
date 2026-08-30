@@ -1,3 +1,5 @@
+import { CONTACT } from "../../contact.data";
+
 /* ── Play Store app catalogue ──────────────────────────────────
    One entry per shipped Android app. Everything the /apps routes
    render — landing, support, privacy, changelog — is driven from
@@ -122,10 +124,11 @@ export interface AppMeta {
 
 /* ─────────────────────────────────────────────────────────────── */
 
-/** Support desk. `email` is the address people write to; `cc` is kept
-    in copy so nothing is missed while the desk address is new. */
-const SUPPORT_EMAIL = "support@nishant.click";
-const SUPPORT_CC    = "itsnishantchorge@gmail.com";
+/** Support desk. `email` is the address people write to; `cc` is the
+    general inbox, kept in copy so nothing is missed while the desk
+    address is new. Both live in `contact.data` with the other desks. */
+const SUPPORT_EMAIL = CONTACT.support;
+const SUPPORT_CC    = CONTACT.hello;
 
 /** Boilerplate every policy repeats — merged into each app below. */
 const commonProcessors = [

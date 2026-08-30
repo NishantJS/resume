@@ -7,10 +7,11 @@ import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { CONTACT } from "../../contact.data";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, DrawSVGPlugin, Physics2DPlugin);
 
-const EMAIL = "itsnishantchorge@gmail.com";
+const EMAIL = CONTACT.hello;
 const CONFETTI = ["#a855f7", "#22d3ee", "#f43f5e", "#f59e0b", "#10b981", "#818cf8"];
 
 /**

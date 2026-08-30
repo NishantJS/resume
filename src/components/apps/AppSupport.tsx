@@ -9,6 +9,7 @@ import {
 import AppHero from "./AppHero";
 import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
+import { CONTACT } from "../../contact.data";
 import "./apps.css";
 
 const JUMPS = [
@@ -125,6 +126,34 @@ const AppSupport = () => {
                 </div>
               ))}
             </dl>
+          </div>
+
+          {/* Not every message is a bug report. Naming the desks keeps a
+              refund from queueing behind a crash, and gives the policy
+              pages a real address to point at. */}
+          <div className="app-reveal mt-14 border-t pt-8" style={{ borderColor: border }}>
+            <p className="mono text-[0.65rem] uppercase tracking-[0.18em]" style={{ color: inkDim }}>
+              Other desks
+            </p>
+            <ul className="mono mt-5 grid gap-x-10 gap-y-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
+              {([
+                ["Billing and refunds", CONTACT.billing],
+                ["Feature requests", CONTACT.feedback],
+                ["Data and privacy", CONTACT.privacy],
+                ["Security and abuse", CONTACT.abuse],
+                ["Legal notices", CONTACT.legal],
+              ] as const).map(([label, address]) => (
+                <li key={address}>
+                  <p className="text-[0.65rem] uppercase tracking-[0.18em]" style={{ color: inkDim }}>{label}</p>
+                  <a
+                    href={`mailto:${address}`}
+                    className="link mt-1.5 inline-block break-all underline underline-offset-4 hover:opacity-70 transition-opacity"
+                  >
+                    {address}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <p className="app-reveal mono mt-10 flex flex-wrap gap-x-6 gap-y-2 text-xs" style={{ color: inkDim }}>
