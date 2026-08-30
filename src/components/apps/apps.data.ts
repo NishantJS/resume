@@ -206,7 +206,7 @@ export const apps: AppMeta[] = [
       phone: "+91 62839 25737",
       hours: "Mon–Fri, 10:00–19:00 IST",
       responseTime: "Within 24 business hours",
-      address: "Pune, Maharashtra, India",
+      address: "Mumbai, Maharashtra, India",
     },
     privacy: {
       effective: "2026-08-01",
@@ -336,7 +336,7 @@ export const apps: AppMeta[] = [
       phone: "+91 62839 25737",
       hours: "Mon–Sat, 10:00–19:00 IST",
       responseTime: "Within 24 business hours",
-      address: "Pune, Maharashtra, India",
+      address: "Mumbai, Maharashtra, India",
     },
     privacy: {
       effective: "2026-08-01",
@@ -468,7 +468,7 @@ export const apps: AppMeta[] = [
       phone: "+91 62839 25737",
       hours: "Mon–Fri, 10:00–19:00 IST",
       responseTime: "Within 24 business hours",
-      address: "Pune, Maharashtra, India",
+      address: "Mumbai, Maharashtra, India",
     },
     privacy: {
       effective: "2026-08-01",
