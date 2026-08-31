@@ -283,6 +283,13 @@ export const FlowSteps: FC<{
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
+  /* The horizontal rail gives each step a column, which works at the
+     four a project page walks through. A nine-step sequence would get
+     a ninth of the width each — a column too narrow for a sentence. So
+     past four, it stays the vertical timeline at every width, which is
+     the right shape for a long sequence anyway. */
+  const stack = steps.length > 4;
+
   useGSAP(() => {
     const el = ref.current;
     if (!el) return;
@@ -342,21 +349,26 @@ export const FlowSteps: FC<{
       });
     };
 
-    mm.add("(min-width: 900px)", build(true));
-    mm.add("(max-width: 899px)", build(false));
+    if (stack) {
+      // Stacked at every width, so there is one orientation to scrub.
+      build(false)();
+    } else {
+      mm.add("(min-width: 900px)", build(true));
+      mm.add("(max-width: 899px)", build(false));
+    }
 
     return () => mm.revert();
-  }, { scope: ref, dependencies: [reduced, resetKey] });
+  }, { scope: ref, dependencies: [reduced, resetKey, stack] });
 
   return (
     <div
       ref={ref}
-      className="dt-flow"
+      className={`dt-flow${stack ? " dt-flow--stack" : ""}`}
       style={{
         ["--dt-border"]: border,
         ["--dt-accent"]: accent,
         ["--dt-accent2"]: accent2,
-        ["--dt-flow-cols"]: steps.length,
+        ...(stack ? {} : { ["--dt-flow-cols"]: steps.length }),
       } as CSSProperties}
     >
       <div className="dt-flow-track" aria-hidden><div className="dt-flow-fill" /></div>

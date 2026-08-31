@@ -7,6 +7,7 @@ import { SplitText } from "gsap/SplitText";
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "motion/react";
 import { games } from "./games.data";
 import { useSeo } from "../../hooks/useSeo";
+import { STATIC_SEO } from "../../seo.static";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -27,12 +28,7 @@ const Games = () => {
   const container = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useSeo({
-    title: "Games — Nishant Chorge",
-    description:
-      "Ten little browser games built from scratch by Nishant Chorge — Parking Escape, 2048, Snake, Block Breaker, Memory, Simon, Lights Out, Sliding Puzzle and more. No installs, plays instantly.",
-    path: "/games",
-  });
+  useSeo(STATIC_SEO.games);
 
   // Heading: SplitText masked char reveal. Rows reveal as they enter view.
   useGSAP(() => {

@@ -2,6 +2,7 @@ import { CSSProperties, FC, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { AppMeta, PolicyBlock, PolicyDoc, apps, getApp, formatDate } from "./apps.data";
+import { appSeo } from "./apps.seo";
 import { AppNav, AppNotFound, AppSection, AppTabs, Inks, inksFor, useSectionReveal } from "./AppChrome";
 import AppHero from "./AppHero";
 import RichText from "./RichText";
@@ -311,15 +312,11 @@ const AppPrivacy = () => {
   const body = useRef<HTMLDivElement>(null);
   const doc = app?.policy;
 
+  const meta = app && appSeo(app, "privacy");
   useSeo({
-    title: app
-      ? app.seo?.privacy?.title ?? `${app.name} privacy policy`
-      : "App not found",
-    description: app
-      ? app.seo?.privacy?.description
-        ?? `How ${app.name} handles your data: what is collected, why, who it is shared with, how long it is kept, and how to have it deleted.`
-      : undefined,
-    path: `/apps/${slug ?? ""}/privacy`,
+    title: meta?.title ?? "App not found",
+    description: meta?.description,
+    path: meta?.path ?? `/apps/${slug ?? ""}/privacy`,
   });
 
   useSectionReveal(body, [slug]);

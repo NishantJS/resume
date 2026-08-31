@@ -731,8 +731,14 @@ export const apps: AppMeta[] = [
          the second intro paragraph, where RichText can render it. */
       lede: "Your business data never leaves your phone. The app has no account, no server, and no internet permission. We could not read your invoices if we wanted to — there is nothing on our side to read.",
       intro: [
+        {
+          kind: "callout",
+          title: "InvoiceKaro collects nothing.",
+          text: [
+            "Your business data never leaves your phone. The app has no account, no server, and no internet permission. We could not read your invoices if we wanted to — there is nothing on our side to read.",
+          ],
+        },
         { kind: "p", text: "InvoiceKaro is a GST invoicing app for Indian freelancers, shopkeepers and small businesses. This policy explains what the app does with your information." },
-        { kind: "p", text: "**The short version:** your business data never leaves your phone. The app has no account, no server, and no internet permission. We could not read your invoices if we wanted to — there is nothing on our side to read." },
       ],
       sections: [
         {
@@ -765,15 +771,18 @@ export const apps: AppMeta[] = [
           id: "stores", label: "What it stores", heading: "3. What the app stores on your device",
           blocks: [
             { kind: "p", text: "Everything you enter is written to a private database inside the app's own storage, readable only by this app on this phone:" },
-            { kind: "ul", items: [
-              "**Your business** — name, address, GSTIN, PAN, phone, email, website, bank account details, UPI id, logo and signature image, invoice numbering series.",
-              "**Your customers and suppliers** — names, phone numbers, email addresses, billing and shipping addresses, GSTINs, credit terms and agreed prices.",
-              "**Your catalogue** — items and services, prices, HSN/SAC codes, tax rates, units, barcodes, stock levels, batches and storage locations.",
-              "**Your documents** — invoices, proforma invoices, quotes, estimates, credit and debit notes, delivery challans, payment receipts and purchase bills, along with their line items and tax break-ups.",
-              "**Your money** — payments received and made, expenses, and what is outstanding.",
-              "**Your automation** — repeating invoice schedules and payment reminder wording.",
-              "**Your settings** — language, theme, and which optional features you have switched on.",
-            ] },
+            { kind: "table",
+              head: ["What", "What it holds", "Where"],
+              rows: [
+                ["Your business", "Name, address, GSTIN, PAN, phone, email, website, bank account details, UPI id, logo and signature image, invoice numbering series.", "On your phone"],
+                ["Your customers and suppliers", "Names, phone numbers, email addresses, billing and shipping addresses, GSTINs, credit terms and agreed prices.", "On your phone"],
+                ["Your catalogue", "Items and services, prices, HSN/SAC codes, tax rates, units, barcodes, stock levels, batches and storage locations.", "On your phone"],
+                ["Your documents", "Invoices, proforma invoices, quotes, estimates, credit and debit notes, delivery challans, payment receipts and purchase bills, along with their line items and tax break-ups.", "On your phone"],
+                ["Your money", "Payments received and made, expenses, and what is outstanding.", "On your phone"],
+                ["Your automation", "Repeating invoice schedules and payment reminder wording.", "On your phone"],
+                ["Your settings", "Language, theme, and which optional features you have switched on.", "On your phone"],
+              ],
+            },
             { kind: "p", text: "None of this is transmitted anywhere. It exists in one place: your phone." },
           ],
         },

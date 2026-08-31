@@ -2,6 +2,7 @@ import { CSSProperties, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { apps, ChangeKind, getApp, formatDate } from "./apps.data";
+import { appSeo } from "./apps.seo";
 import { AppNav, AppNotFound, AppSection, AppTabs, CountUp, inksFor, useSectionReveal } from "./AppChrome";
 import AppHero from "./AppHero";
 import { Grain } from "../shared/Grain";
@@ -25,15 +26,11 @@ const AppChangelog = () => {
   const body = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<ChangeKind | "all">("all");
 
+  const meta = app && appSeo(app, "changelog");
   useSeo({
-    title: app
-      ? app.seo?.changelog?.title ?? `${app.name} changelog — what's new`
-      : "App not found",
-    description: app
-      ? app.seo?.changelog?.description
-        ?? `Release notes for ${app.name}, newest first — new features, improvements and fixes in every version up to ${app.release.version}.`
-      : undefined,
-    path: `/apps/${slug ?? ""}/changelog`,
+    title: meta?.title ?? "App not found",
+    description: meta?.description,
+    path: meta?.path ?? `/apps/${slug ?? ""}/changelog`,
   });
 
   // A release with no change of the selected type drops out entirely

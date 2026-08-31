@@ -13,11 +13,44 @@ const Project      = lazy(() => import("../project/Project"))
 const Games        = lazy(() => import("../games/Games"))
 const GamePage     = lazy(() => import("../games/GamePage"))
 const Apps         = lazy(() => import("../apps/Apps"))
-const AppPage      = lazy(() => import("../apps/AppPage"))
-const AppSupport   = lazy(() => import("../apps/AppSupport"))
-const AppPrivacy   = lazy(() => import("../apps/AppPrivacy"))
-const AppChangelog = lazy(() => import("../apps/AppChangelog"))
+
+/* An app is four pages that link to each other from a tab rail, so the
+   next one is nearly always one of the other three. Each is its own
+   lazy chunk, and the `key` below drops the outgoing page before the
+   incoming chunk has arrived — which is the blank frame you saw moving
+   between them. Fetching the siblings while the first one is being read
+   means the tab is a render, not a round trip. */
+const appChunks = [
+  () => import("../apps/AppPage"),
+  () => import("../apps/AppSupport"),
+  () => import("../apps/AppPrivacy"),
+  () => import("../apps/AppChangelog"),
+]
+const AppPage      = lazy(appChunks[0])
+const AppSupport   = lazy(appChunks[1])
+const AppPrivacy   = lazy(appChunks[2])
+const AppChangelog = lazy(appChunks[3])
 const NotFound     = lazy(() => import("../error/NotFound"))
+
+/** Warms the other three app chunks once the browser is idle. */
+const usePrefetchAppChunks = (onAppRoute: boolean) => {
+  useEffect(() => {
+    if (!onAppRoute) return
+    let cancelled = false
+    const run = () => { if (!cancelled) appChunks.forEach(load => { void load() }) }
+    // requestIdleCallback is unsupported in Safari <17; the timeout is
+    // the same idea with a worse guess at when idle is.
+    const idle = typeof window.requestIdleCallback === "function"
+    const id = idle
+      ? window.requestIdleCallback(run, { timeout: 2000 })
+      : window.setTimeout(run, 400)
+    return () => {
+      cancelled = true
+      if (idle) window.cancelIdleCallback(id)
+      else window.clearTimeout(id)
+    }
+  }, [onAppRoute])
+}
 
 /* ── Subtle scroll-skew on fast scrolls ───────────────────────────
    Driven by the scroll event, not by a standing rAF loop.
@@ -115,6 +148,15 @@ const useScrollSkew = (ref: React.RefObject<HTMLDivElement | null>) => {
 const canvasFor = (pathname: string) => {
   const p = pathname.replace(/\/+$/, "") || "/"
   if (p === "/") return "#0a0a0a"                    // the landing page is black
+
+  /* An app's four pages are washed in that app's own colour, not the
+     index's cool grey — so the canvas under them has to be too, or the
+     240ms enter fade reveals a near-white page underneath a pale green
+     one. 35% is where .project-gradient's lightest stop sits. */
+  const app = /^\/apps\/([^/]+)/.exec(p)?.[1]
+  const tint = app && __APP_TINTS__[app]
+  if (tint) return `color-mix(in srgb, ${tint} 35%, white)`
+
   if (p.startsWith("/apps")) return "#f4fafd"         // cool-gradient base
   if (p.startsWith("/games")) return "#fbf8fe"        // play-gradient base
   return "#fdf8ee"                                    // warm — /work and the 404
@@ -125,6 +167,7 @@ const Router = () => {
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   useScrollSkew(wrapperRef)
+  usePrefetchAppChunks(location.pathname.startsWith("/apps/"))
 
   // Before paint, so the incoming page never fades in over the wrong colour.
   useLayoutEffect(() => {

@@ -2,6 +2,7 @@ import { lazy, Suspense, FC } from "react";
 import { useParams, Link } from "react-router-dom";
 import { games } from "./games.data";
 import { useSeo } from "../../hooks/useSeo";
+import { gameSeo } from "./games.seo";
 
 /**
  * Each game is split into its own lazy chunk so the heavy game code is
@@ -49,11 +50,7 @@ const GamePage = () => {
 
   useSeo(
     meta
-      ? {
-          title: `Play ${meta.title} — Nishant Chorge`,
-          description: meta.description,
-          path: `/games/${slug}`,
-        }
+      ? gameSeo(meta)
       : {
           title: "Game not found — Nishant Chorge",
           description: "That game doesn't exist. Browse the full set of browser games by Nishant Chorge.",

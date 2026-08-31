@@ -22,6 +22,13 @@ export function routes() {
   const apps     = literals('src/components/apps/apps.data.ts', 'slug');
   const games    = literals('src/components/games/games.data.ts', 'slug');
 
+  /* Each app's card colour, in the same order as its slug — the two are
+     read from the same objects, so position pairs them. The router uses
+     these to paint the document canvas the tone of the page that is
+     arriving, which is what stops a navigation flashing white. */
+  const colors = literals('src/components/apps/apps.data.ts', 'color');
+  const appColors = Object.fromEntries(apps.map((slug, i) => [slug, colors[i]]));
+
   // A data module that changed shape would silently yield an empty list,
   // which ships a sitemap missing whole sections and an Explore row
   // reading "00". Fail the build instead.
@@ -31,5 +38,11 @@ export function routes() {
       `${games.length} games — a data module changed shape.`,
     );
   }
-  return { projects, apps, games };
+  if (colors.length !== apps.length) {
+    throw new Error(
+      `Route data: ${apps.length} app slugs but ${colors.length} colours — ` +
+      `an app entry is missing one, and the pairing above is by position.`,
+    );
+  }
+  return { projects, apps, games, appColors };
 }

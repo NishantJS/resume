@@ -1,16 +1,10 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useSeo } from '../../hooks/useSeo';
+import { STATIC_SEO } from '../../seo.static';
 
 const NotFound = () => {
-  useSeo({
-    title: "Page not found — Nishant Chorge",
-    description: "The page you're after has driven off. Head back home, or explore the work and games.",
-    path: "/404",
-    // Every unmatched URL renders this, so leaving it indexable invites
-    // search engines to file an unbounded number of pages under it.
-    noindex: true,
-  });
+  useSeo(STATIC_SEO.notFound);
 
   return (
   <motion.div

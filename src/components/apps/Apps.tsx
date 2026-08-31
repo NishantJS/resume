@@ -7,6 +7,7 @@ import { SplitText } from "gsap/SplitText";
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "motion/react";
 import { apps } from "./apps.data";
 import { useSeo } from "../../hooks/useSeo";
+import { STATIC_SEO } from "../../seo.static";
 import "./apps.css";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -25,12 +26,7 @@ const Apps = () => {
   const container = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  useSeo({
-    title: "Apps — Nishant Chorge",
-    description:
-      "Apps built in Flutter by Nishant Chorge — PDI Pro, a guided pre-delivery car inspection for Indian buyers, and InvoiceKaro, offline GST invoicing. Both work fully offline, with no account and no server.",
-    path: "/apps",
-  });
+  useSeo(STATIC_SEO.apps);
 
   // Heading: SplitText masked char reveal. Rows reveal as they enter view.
   useGSAP(() => {

@@ -2,6 +2,7 @@ import { CSSProperties, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { apps, getApp, formatDate } from "./apps.data";
+import { appSeo } from "./apps.seo";
 import {
   AppCloser, AppNav, CountUp, AppNotFound, AppSection, AppStatement, AppTabs,
   FactsBand, FlowSteps, OverviewBand, RailSection, SectionRail, StackGroups,
@@ -32,12 +33,11 @@ const AppPage = () => {
   const app = getApp(slug);
   const body = useRef<HTMLDivElement>(null);
 
+  const meta = app && appSeo(app, "overview");
   useSeo({
-    title: app
-      ? app.seo?.overview?.title ?? `${app.name} — ${app.tagline}`
-      : "App not found",
-    description: app?.seo?.overview?.description ?? app?.blurb,
-    path: `/apps/${slug ?? ""}`,
+    title: meta?.title ?? "App not found",
+    description: meta?.description,
+    path: meta?.path ?? `/apps/${slug ?? ""}`,
   });
 
   useSectionReveal(body, [slug]);

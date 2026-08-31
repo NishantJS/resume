@@ -2,6 +2,7 @@ import { CSSProperties, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { apps, getApp, formatDate } from "./apps.data";
+import { appSeo } from "./apps.seo";
 import {
   Accordion, AppNav, AppNotFound, AppSection, AppTabs, ArrowUpRight, inksFor, supportMailto,
   useSectionReveal,
@@ -26,15 +27,11 @@ const AppSupport = () => {
   const body = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
+  const meta = app && appSeo(app, "support");
   useSeo({
-    title: app
-      ? app.seo?.support?.title ?? `${app.name} support — help, FAQ and contact`
-      : "App not found",
-    description: app
-      ? app.seo?.support?.description
-        ?? `Get help with ${app.name}: answers to common questions, the full feature list, and how to reach support directly.`
-      : undefined,
-    path: `/apps/${slug ?? ""}/support`,
+    title: meta?.title ?? "App not found",
+    description: meta?.description,
+    path: meta?.path ?? `/apps/${slug ?? ""}/support`,
   });
 
   useSectionReveal(body, [slug]);

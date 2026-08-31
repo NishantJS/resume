@@ -10,6 +10,7 @@ import { Overview, Stats, Highlights, Flow, Challenges, Stack } from "./Details"
 import { inkFor, isLight, useRevealBatch } from "../shared/reveal";
 import { Grain } from "../shared/Grain";
 import { useSeo } from "../../hooks/useSeo";
+import { projectSeo } from "./projects.seo";
 
 const NavProject = ({ index = 0, direction = "next" }: { index: number; direction: "prev" | "next" }) => {
   const project = direction === "prev"
@@ -61,12 +62,7 @@ const Project = () => {
   const body    = useRef<HTMLDivElement>(null);
 
   const projTitle = project.displayTitle ?? project.title;
-  useSeo({
-    title: `${projTitle} — Nishant Chorge`,
-    description: project.description,
-    path: project.path,
-    image: `/project/${project.title}/logo.webp`,
-  });
+  useSeo(projectSeo(project));
 
   // Every `.dt-reveal` below the hero rises as it scrolls into view.
   useRevealBatch(body, ".dt-reveal", [project.path]);

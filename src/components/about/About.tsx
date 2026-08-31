@@ -11,6 +11,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useSeo } from "../../hooks/useSeo";
+import { STATIC_SEO } from "../../seo.static";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -492,12 +493,7 @@ const About = () => {
   const reduced = useReducedMotion();
   const mainRef = useRef<HTMLElement>(null);
 
-  useSeo({
-    title: "Nishant Chorge — Senior Software Developer",
-    description:
-      "Senior Software Developer in Mumbai building production-grade fintech and enterprise systems — SSE real-time feeds, micro-frontends, resilient APIs. Currently at BCT Consulting, on the automation team for BNP Paribas. Node.js · React · Next.js · Fastify · Redis.",
-    path: "/",
-  });
+  useSeo(STATIC_SEO.home);
 
   useEffect(() => {
     const html = document.documentElement;
