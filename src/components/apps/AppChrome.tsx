@@ -180,11 +180,7 @@ export const AppTabs: FC<{ app: AppMeta; tab: string; border: string; inkLow: st
 
 /* ── Prev / next app ───────────────────────────────────────────────
    Straight reuse of the project page's footer cards.                 */
-const NavApp: FC<{ index: number; direction: "prev" | "next" }> = ({ index, direction }) => {
-  const app = direction === "prev"
-    ? apps[index ? index - 1 : apps.length - 1]
-    : apps[index < apps.length - 1 ? index + 1 : 0];
-  const isNext = direction === "next";
+const NavApp: FC<{ app: AppMeta; label: string; isNext: boolean }> = ({ app, label, isNext }) => {
   return (
     <Link
       to={`/apps/${app.slug}`}
@@ -192,7 +188,7 @@ const NavApp: FC<{ index: number; direction: "prev" | "next" }> = ({ index, dire
       style={{ ["--target"]: app.color } as CSSProperties}
     >
       <span className="mono text-[0.62rem] uppercase tracking-[0.28em] opacity-45 group-hover:opacity-80 transition-opacity">
-        {isNext ? "Next app" : "Previous app"}
+        {label}
       </span>
       <span className="proj-nav-title">
         <span className="proj-nav-arrow" aria-hidden>{isNext ? "→" : "←"}</span>
@@ -203,16 +199,31 @@ const NavApp: FC<{ index: number; direction: "prev" | "next" }> = ({ index, dire
   );
 };
 
-export const AppNav: FC<{ index: number; border: string }> = ({ index, border }) => (
-  <nav
-    className="proj-nav grid md:grid-cols-2 border-t"
-    style={{ borderColor: border, ["--nav-border"]: border } as CSSProperties}
-    aria-label="App navigation"
-  >
-    <NavApp index={index} direction="prev" />
-    <NavApp index={index} direction="next" />
-  </nav>
-);
+export const AppNav: FC<{ index: number; border: string }> = ({ index, border }) => {
+  const prev = apps[index ? index - 1 : apps.length - 1];
+  const next = apps[index < apps.length - 1 ? index + 1 : 0];
+  /* With only two apps in the catalogue, "previous" and "next" are the
+     same page — so it gets one card that says what it is instead of two
+     that point the same way. */
+  const single = prev === next;
+
+  return (
+    <nav
+      className={`proj-nav grid border-t${single ? "" : " md:grid-cols-2"}`}
+      style={{ borderColor: border, ["--nav-border"]: border } as CSSProperties}
+      aria-label="App navigation"
+    >
+      {single ? (
+        <NavApp app={next} label="The other app" isNext />
+      ) : (
+        <>
+          <NavApp app={prev} label="Previous app" isNext={false} />
+          <NavApp app={next} label="Next app" isNext />
+        </>
+      )}
+    </nav>
+  );
+};
 
 /** Builds the support mailto: subject, cc and a form-style body.
     Every field we would otherwise have to write back and ask for is
@@ -246,27 +257,60 @@ export const supportMailto = (app: AppMeta) => {
     + `&body=${encodeURIComponent(body)}`;
 };
 
+/* An app awaiting review has no listing to link to, so the button says
+   where it is going instead. The Play mark only belongs on it while Play
+   is the only place it is going. */
+export const storesFor = (app: AppMeta) => app.release.stores ?? ["Google Play"];
+export const onlyPlay = (app: AppMeta) => {
+  const s = storesFor(app);
+  return s.length === 1 && s[0] === "Google Play";
+};
+export const comingSoonLabel = (app: AppMeta) => {
+  const s = storesFor(app);
+  return s.length === 1 ? `Coming to ${s[0]}` : "Coming to the app stores";
+};
+
 /** Closing call to action. A product page should never end on a
     footnote; this is the second, larger ask. The reveal itself is the
     shared one — the same characters-ignite-and-cool treatment the
     project pages close on. */
 export const AppCloser: FC<{ app: AppMeta; inks: Inks }> = ({ app, inks }) => (
   <Closer
-    kicker={`Get ${app.name}`}
+    kicker={app.release.playUrl ? `Get ${app.name}` : app.name}
     text={app.closer}
     inks={inks}
-    footnote={`Free to install · ${app.release.installs} installs · ${app.release.rating} ★ · ${app.release.minAndroid}`}
+    /* A listing that went live yesterday has no install count and no
+       rating yet, so every part is optional and the line is built from
+       whichever ones exist. */
+    footnote={[
+      app.release.playUrl ? "Free to install" : "Free",
+      app.release.installs && `${app.release.installs} installs`,
+      app.release.rating && `${app.release.rating} ★`,
+      app.release.minAndroid,
+      !app.release.playUrl && app.release.size,
+    ].filter(Boolean).join(" · ")}
   >
-    <a
-      href={app.release.playUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="link app-cta app-cta--solid app-cta--lg mono"
-      style={{ ["--btn-ink"]: inks.ink, ["--btn-fill"]: app.color, ["--btn-border"]: inks.border } as CSSProperties}
-    >
-      <PlayIcon />
-      Get it on Google Play
-    </a>
+    {app.release.playUrl ? (
+      <a
+        href={app.release.playUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="link app-cta app-cta--solid app-cta--lg mono"
+        style={{ ["--btn-ink"]: inks.ink, ["--btn-fill"]: app.color, ["--btn-border"]: inks.border } as CSSProperties}
+      >
+        <PlayIcon />
+        Get it on Google Play
+      </a>
+    ) : (
+      <span
+        className="app-cta app-cta--solid app-cta--lg app-cta--inert mono"
+        style={{ ["--btn-ink"]: inks.ink, ["--btn-fill"]: app.color, ["--btn-border"]: inks.border } as CSSProperties}
+        aria-disabled="true"
+      >
+        {onlyPlay(app) && <PlayIcon />}
+        {comingSoonLabel(app)}
+      </span>
+    )}
   </Closer>
 );
 

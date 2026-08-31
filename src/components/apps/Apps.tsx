@@ -28,7 +28,7 @@ const Apps = () => {
   useSeo({
     title: "Apps — Nishant Chorge",
     description:
-      "Android apps built in Flutter and published by Nishant Chorge — PDI Pro for field inspections, InvoiceKaro for GST billing, and Vault, an offline zero-knowledge password manager.",
+      "Apps built in Flutter by Nishant Chorge — PDI Pro, a guided pre-delivery car inspection for Indian buyers, and InvoiceKaro, offline GST invoicing. Both work fully offline, with no account and no server.",
     path: "/apps",
   });
 
@@ -84,10 +84,10 @@ const Apps = () => {
             id="apps-heading"
             className="mt-2 text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-semibold tracking-tight opacity-0"
           >
-            Apps I've shipped to the Play Store.
+            Apps I've built, start to finish.
           </h1>
           <p className="mono text-sm xl:text-base text-zinc-600 mt-3 max-w-2xl">
-            Small, focused Android tools — each with its own support desk, changelog and privacy policy.
+            Small, focused mobile tools — each with its own support desk, changelog and privacy policy.
           </p>
         </header>
 
@@ -136,11 +136,14 @@ const Apps = () => {
                       {(app.status === "live"
                         ? [
                             `v${app.release.version}`,
-                            `${app.release.installs} installs`,
-                            `${app.release.rating} ★`,
+                            /* A new listing has neither yet — an
+                               "undefined installs" chip is worse than
+                               no chip. */
+                            app.release.installs && `${app.release.installs} installs`,
+                            app.release.rating && `${app.release.rating} ★`,
                             app.release.minAndroid,
                             app.release.size,
-                          ]
+                          ].filter((f): f is string => Boolean(f))
                         : [app.status === "beta" ? "Open beta" : "Coming soon"]
                       ).map(fact => (
                         <span

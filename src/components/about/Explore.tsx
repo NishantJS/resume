@@ -35,7 +35,7 @@ const DESTINATIONS = [
     to: "/apps",
     label: "Apps",
     count: pad(__COUNT_APPS__),
-    blurb: "Built in Flutter, published on Google Play. Field inspections, GST invoicing, and an offline-first vault.",
+    blurb: "Built in Flutter, offline by design. A guided car inspection for delivery day, and GST invoicing that never leaves the phone.",
     color: "#22d3ee",
   },
   {

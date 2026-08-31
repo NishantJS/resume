@@ -23,7 +23,7 @@ const RAIL_SECTIONS: RailSection[] = [
   { id: "how",      label: "How"      },
   { id: "screens",  label: "Screens"  },
   { id: "stack",    label: "Built with" },
-  { id: "listing",  label: "On Play"  },
+  { id: "listing",  label: "Listing"   },
 ];
 
 /** An app's main page — the /apps equivalent of a project page. */
@@ -33,8 +33,10 @@ const AppPage = () => {
   const body = useRef<HTMLDivElement>(null);
 
   useSeo({
-    title: app ? `${app.name} — ${app.tagline}` : "App not found",
-    description: app?.blurb,
+    title: app
+      ? app.seo?.overview?.title ?? `${app.name} — ${app.tagline}`
+      : "App not found",
+    description: app?.seo?.overview?.description ?? app?.blurb,
     path: `/apps/${slug ?? ""}`,
   });
 
@@ -104,11 +106,11 @@ const AppPage = () => {
                thing twice. */
             facts={[
               ["Last updated", formatDate(app.release.updated)],
-              ["Installs", app.release.installs],
-              ["Rating", `${app.release.rating} ★`],
+              ...(app.release.installs ? [["Installs", app.release.installs] as [string, string]] : []),
+              ...(app.release.rating ? [["Rating", `${app.release.rating} ★`] as [string, string]] : []),
             ]}
             inks={inks}
-            link={{ href: app.release.playUrl, label: "Google Play" }}
+            link={app.release.playUrl ? { href: app.release.playUrl, label: "Google Play" } : undefined}
           />
         </AppSection>
 
@@ -175,15 +177,18 @@ const AppPage = () => {
         </AppSection>
 
         {/* ── Store facts ─────────────────────────────────────── */}
-        <AppSection id="listing" kicker="On Google Play" inks={inks}>
+        <AppSection id="listing" kicker={app.release.playUrl ? "On Google Play" : "The build"} inks={inks}>
           <dl className="app-reveal mono flex flex-wrap gap-x-10 gap-y-5 text-xs">
             {([
               ["Version", app.release.version],
               ["Updated", formatDate(app.release.updated)],
-              ["Size", app.release.size],
+              ...(app.release.size ? [["Size", app.release.size] as const] : []),
               ["Requires", app.release.minAndroid],
-              ["Installs", app.release.installs],
-              ["Rating", `${app.release.rating} ★`],
+              /* Installs and rating are things a live listing produces.
+                 An unpublished app has neither, and inventing them is
+                 exactly the kind of claim a Play review catches. */
+              ...(app.release.installs ? [["Installs", app.release.installs] as const] : []),
+              ...(app.release.rating ? [["Rating", `${app.release.rating} ★`] as const] : []),
             ] as const).map(([k, v]) => (
               <div key={k}>
                 <dt className="uppercase tracking-[0.16em]" style={{ color: inkDim }}>{k}</dt>
@@ -191,6 +196,39 @@ const AppPage = () => {
               </div>
             ))}
           </dl>
+
+          {!app.release.playUrl && (
+            <p className="app-reveal mono mt-8 text-xs" style={{ color: inkDim }}>
+              Not in the stores yet — there is no install count or rating to show until the
+              listing goes live.
+            </p>
+          )}
+
+          {/* An app that routes its own mail says so here, rather than
+              making a reader find the support page to learn that a wrong
+              specification and a broken build go to different places. */}
+          {app.overviewFooter && (
+            <div className="app-reveal mt-12 border-t pt-8" style={{ borderColor: border }}>
+              <ul className="mono grid gap-x-10 gap-y-5 text-xs sm:grid-cols-2 lg:grid-cols-3">
+                {app.overviewFooter.contacts.map(({ label, address }) => (
+                  <li key={address}>
+                    <p className="uppercase tracking-[0.16em]" style={{ color: inkDim }}>{label}</p>
+                    <a
+                      href={`mailto:${address}`}
+                      className="link mt-1.5 inline-block break-all text-sm underline underline-offset-4 hover:opacity-70 transition-opacity"
+                    >
+                      {address}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              {app.overviewFooter.note && (
+                <p className="mono mt-8 max-w-2xl text-xs leading-relaxed" style={{ color: inkDim }}>
+                  {app.overviewFooter.note}
+                </p>
+              )}
+            </div>
+          )}
         </AppSection>
       </div>
 

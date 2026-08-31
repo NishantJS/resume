@@ -26,9 +26,12 @@ const AppChangelog = () => {
   const [filter, setFilter] = useState<ChangeKind | "all">("all");
 
   useSeo({
-    title: app ? `${app.name} changelog — what's new` : "App not found",
+    title: app
+      ? app.seo?.changelog?.title ?? `${app.name} changelog — what's new`
+      : "App not found",
     description: app
-      ? `Release notes for ${app.name}, newest first — new features, improvements and fixes in every version up to ${app.release.version}.`
+      ? app.seo?.changelog?.description
+        ?? `Release notes for ${app.name}, newest first — new features, improvements and fixes in every version up to ${app.release.version}.`
       : undefined,
     path: `/apps/${slug ?? ""}/changelog`,
   });
@@ -70,7 +73,11 @@ const AppChangelog = () => {
         total={apps.length}
         title="Changelog"
         meta={`${app.name} / Changelog`}
-        lead={`Every release since launch, newest first. Version ${app.release.version} shipped ${formatDate(app.release.updated)}.`}
+        lead={
+          app.changelog.length > 1
+            ? `Every release since launch, newest first. Version ${app.release.version} shipped ${formatDate(app.release.updated)}.`
+            : `Version ${app.release.version}, ${formatDate(app.release.updated)}. Every later release will be listed here, newest first.`
+        }
         compact
       >
         <dl className="mono mt-8 flex flex-wrap gap-x-10 gap-y-4 text-xs">
@@ -156,10 +163,12 @@ const AppChangelog = () => {
             <p className="mono text-sm" style={{ color: inkLow }}>No {filter} changes in the history yet.</p>
           )}
 
-          <p className="mono mt-4 text-xs" style={{ color: inkDim }}>
-            Older builds are no longer distributed. Google Play always serves the latest release
-            compatible with your device.
-          </p>
+          {app.release.playUrl && (
+            <p className="mono mt-4 text-xs" style={{ color: inkDim }}>
+              Older builds are no longer distributed. Google Play always serves the latest release
+              compatible with your device.
+            </p>
+          )}
         </AppSection>
       </div>
 

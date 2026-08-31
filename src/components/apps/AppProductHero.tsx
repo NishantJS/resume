@@ -3,7 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AppMeta } from "./apps.data";
-import { MaskedTitle, PlayIcon, inkFor, markLoaded, revealOnLoad } from "./AppChrome";
+import { MaskedTitle, PlayIcon, comingSoonLabel, inkFor, markLoaded, onlyPlay, revealOnLoad } from "./AppChrome";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -55,6 +55,7 @@ const AppProductHero: FC<{ app: AppMeta }> = ({ app }) => {
   }, { scope: ref, dependencies: [app.slug] });
 
   const btnVars = { ["--btn-ink"]: ink, ["--btn-fill"]: app.color, ["--btn-border"]: border } as CSSProperties;
+  const live = Boolean(app.release.playUrl);
 
   return (
     <section
@@ -75,30 +76,54 @@ const AppProductHero: FC<{ app: AppMeta }> = ({ app }) => {
             {app.hero.sub}
           </p>
 
-          {/* Proof before the ask. */}
+          {/* Proof before the ask — or, before there is a listing to
+              prove anything, the facts that do exist. */}
           <div className="app-hero-line opacity-0 mono mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 font-semibold">
-              <span aria-hidden>★</span>
-              {app.release.rating}
-              <span className="font-normal" style={{ color: inkDim }}>on Google Play</span>
-            </span>
-            <span style={{ color: border }} aria-hidden>|</span>
-            <span style={{ color: inkLow }}>{app.release.installs} installs</span>
-            <span style={{ color: border }} aria-hidden>|</span>
-            <span style={{ color: inkLow }}>{app.release.size}</span>
+            {app.release.rating ? (
+              <span className="inline-flex items-center gap-1.5 font-semibold">
+                <span aria-hidden>★</span>
+                {app.release.rating}
+                <span className="font-normal" style={{ color: inkDim }}>on Google Play</span>
+              </span>
+            ) : (
+              <span style={{ color: inkLow }}>
+                v{app.release.version} · {app.release.minAndroid}
+              </span>
+            )}
+            {app.release.installs && (
+              <>
+                <span style={{ color: border }} aria-hidden>|</span>
+                <span style={{ color: inkLow }}>{app.release.installs} installs</span>
+              </>
+            )}
+            {app.release.size && (
+              <>
+                <span style={{ color: border }} aria-hidden>|</span>
+                <span style={{ color: inkLow }}>{app.release.size}</span>
+              </>
+            )}
           </div>
 
           <div className="app-hero-line opacity-0 mt-8 flex flex-wrap items-center gap-3">
-            <a
-              href={app.release.playUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link app-cta app-cta--solid mono"
-              style={btnVars}
-            >
-              <PlayIcon />
-              Get it on Google Play
-            </a>
+            {live ? (
+              <a
+                href={app.release.playUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link app-cta app-cta--solid mono"
+                style={btnVars}
+              >
+                <PlayIcon />
+                Get it on Google Play
+              </a>
+            ) : (
+              /* A button to a listing that does not exist is a dead link,
+                 so it is disabled rather than hopeful. */
+              <span className="app-cta app-cta--solid app-cta--inert mono" style={btnVars} aria-disabled="true">
+                {onlyPlay(app) && <PlayIcon />}
+                {comingSoonLabel(app)}
+              </span>
+            )}
             <a href="#screens" className="link app-cta app-cta--ghost mono" style={btnVars}>
               See it in action
               <span className="app-cta-arrow" aria-hidden>→</span>

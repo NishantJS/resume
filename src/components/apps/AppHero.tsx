@@ -75,7 +75,7 @@ const AppHero: FC<Props> = ({ app, index, total, title, meta, lead, compact, cta
             {lead}
           </p>
 
-          {cta && (
+          {cta && app.release.playUrl && (
             <div className="flex flex-col items-start gap-4 shrink-0">
               <a
                 href={app.release.playUrl}

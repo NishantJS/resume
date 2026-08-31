@@ -14,6 +14,7 @@ import "./apps.css";
 
 const JUMPS = [
   { id: "contact",  label: "Contact"  },
+  { id: "fixes",    label: "First checks" },
   { id: "faq",      label: "FAQ"      },
   { id: "features", label: "Features" },
 ];
@@ -26,9 +27,12 @@ const AppSupport = () => {
   const [copied, setCopied] = useState(false);
 
   useSeo({
-    title: app ? `${app.name} support — help, FAQ and contact` : "App not found",
+    title: app
+      ? app.seo?.support?.title ?? `${app.name} support — help, FAQ and contact`
+      : "App not found",
     description: app
-      ? `Get help with ${app.name}: answers to common questions, the full feature list, and how to reach support directly.`
+      ? app.seo?.support?.description
+        ?? `Get help with ${app.name}: answers to common questions, the full feature list, and how to reach support directly.`
       : undefined,
     path: `/apps/${slug ?? ""}/support`,
   });
@@ -44,6 +48,17 @@ const AppSupport = () => {
   const { support } = app;
 
   const mailto = supportMailto(app);
+
+  /* Every desk the site runs, unless the app routes its mail
+     differently. Listing an address that does not apply to this app
+     only attracts mail nobody is reading for it. */
+  const desks = support.desks ?? [
+    { label: "Billing and refunds", address: CONTACT.billing },
+    { label: "Feature requests",    address: CONTACT.feedback },
+    { label: "Data and privacy",    address: CONTACT.privacy },
+    { label: "Security and abuse",  address: CONTACT.abuse },
+    { label: "Legal notices",       address: CONTACT.legal },
+  ];
 
   const copyEmail = async () => {
     try {
@@ -75,7 +90,7 @@ const AppSupport = () => {
         compact
       >
         <nav className="mono mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs uppercase tracking-[0.18em]" aria-label="Jump to section">
-          {JUMPS.map(j => (
+          {JUMPS.filter(j => j.id !== "fixes" || app.troubleshooting?.length).map(j => (
             <a key={j.id} href={`#${j.id}`} className="link nav-link pb-1" style={{ color: inkLow }}>
               {j.label}
             </a>
@@ -115,8 +130,13 @@ const AppSupport = () => {
 
             <dl className="app-reveal mono text-sm space-y-6">
               {([
-                ["Phone", <a key="p" href={`tel:${support.phone.replace(/\s/g, "")}`} className="link underline underline-offset-4 hover:opacity-70 transition-opacity">{support.phone}</a>],
-                ["Hours", support.hours],
+                /* An email-only desk lists neither a number nor opening
+                   hours — printing "Mon–Fri" beside an inbox nobody
+                   staffs on a clock is a promise the app cannot keep. */
+                ...(support.phone
+                  ? [["Phone", <a key="p" href={`tel:${support.phone.replace(/\s/g, "")}`} className="link underline underline-offset-4 hover:opacity-70 transition-opacity">{support.phone}</a>] as const]
+                  : []),
+                ...(support.hours ? [["Hours", support.hours] as const] : []),
                 ["Response time", support.responseTime],
                 ["Registered address", support.address],
               ] as const).map(([k, v]) => (
@@ -136,13 +156,7 @@ const AppSupport = () => {
               Other desks
             </p>
             <ul className="mono mt-5 grid gap-x-10 gap-y-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-              {([
-                ["Billing and refunds", CONTACT.billing],
-                ["Feature requests", CONTACT.feedback],
-                ["Data and privacy", CONTACT.privacy],
-                ["Security and abuse", CONTACT.abuse],
-                ["Legal notices", CONTACT.legal],
-              ] as const).map(([label, address]) => (
+              {desks.map(({ label, address }) => (
                 <li key={address}>
                   <p className="text-[0.65rem] uppercase tracking-[0.18em]" style={{ color: inkDim }}>{label}</p>
                   <a
@@ -166,6 +180,30 @@ const AppSupport = () => {
             </Link>
           </p>
         </AppSection>
+
+        {/* ── Before you write in ─────────────────────────────── */}
+        {!!app.troubleshooting?.length && (
+          <AppSection
+            id="fixes"
+            kicker="Before you write in"
+            title="Try these first."
+            intro="Most support mail is one of these, and each one is faster to fix than to describe."
+            inks={inks}
+          >
+            <div style={{ ["--dt-border"]: border, ["--dt-accent"]: inks.accent } as CSSProperties}>
+              {app.troubleshooting.map(t => (
+                <Accordion
+                  key={t.q}
+                  className="dt-reveal dt-faq"
+                  inkLow={inkLow}
+                  summary={<span className="dt-faq-q">{t.q}</span>}
+                >
+                  {t.a}
+                </Accordion>
+              ))}
+            </div>
+          </AppSection>
+        )}
 
         {/* ── FAQ ─────────────────────────────────────────────── */}
         <AppSection
