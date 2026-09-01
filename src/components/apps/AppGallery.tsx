@@ -2,7 +2,7 @@ import { CSSProperties, FC, memo, useEffect, useRef, useState } from "react";
 import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, useReducedMotion } from "motion/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { AppMeta } from "./apps.data";
+import { AppMeta, Screen, shotSrc } from "./apps.data";
 import { markLoaded, revealOnLoad } from "./AppChrome";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -31,17 +31,19 @@ function useIsMobile(bp = 768): boolean {
     than over it, so it never covers a real screenshot's primary action. */
 const Shot: FC<{
   app: AppMeta;
+  screen: Screen;
+  /** 1-based position, for the caption's number and the eager cutoff. */
   n: number;
   variant: "rail" | "stacked";
   inkLow: string;
   inkDim: string;
   border: string;
-}> = memo(({ app, n, variant, inkLow, inkDim, border }) => (
+}> = memo(({ app, screen, n, variant, inkLow, inkDim, border }) => (
   <figure className={`app-shot-item app-shot-item--${variant}`}>
     <div className={`proj-shot app-shot app-shot--${variant}`} style={{ border: `1px solid ${border}` }}>
       <img
-        src={`/apps/${app.slug}/shot-${n}.webp`}
-        alt={`${app.name} screenshot ${n} — ${app.screenCaptions[n - 1] ?? ""}`}
+        src={shotSrc(app.slug, screen.file)}
+        alt={`${app.name} — ${screen.caption}`}
         loading={n <= 3 ? "eager" : "lazy"}
         decoding="async"
         ref={markLoaded}
@@ -50,7 +52,7 @@ const Shot: FC<{
     </div>
     <figcaption className="app-shot-caption mono" style={{ color: inkLow }}>
       <span style={{ color: inkDim }}>{String(n).padStart(2, "0")}</span>
-      {" "}{app.screenCaptions[n - 1] ?? ""}
+      {" "}{screen.caption}
     </figcaption>
   </figure>
 ));
@@ -63,7 +65,7 @@ type Props = { app: AppMeta; ink: string; inkLow: string; inkDim: string; border
     On mobile it degrades to the same vertical stack the project pages
     use, with each shot held to a share of the viewport height. */
 const AppGallery: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
-  const total = app.screens || 0;
+  const total = app.screens.length;
   const reduced = useReducedMotion();
   const isMobile = useIsMobile();
 
@@ -108,8 +110,6 @@ const AppGallery: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
 
   if (!total) return null;
 
-  const shots = Array.from({ length: total }, (_, i) => i + 1);
-
   const Label = (
     <div className="px-6 md:px-14 xl:px-20 py-5 flex items-center gap-5" style={{ borderTop: `1px solid ${border}` }}>
       <span className="mono text-xs tracking-[0.22em] uppercase font-medium" style={{ color: inkDim }}>
@@ -134,15 +134,15 @@ const AppGallery: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
       <div id="screens">
         {Label}
         <div className="app-shot-stack">
-          {shots.map(n => (
+          {app.screens.map((screen, i) => (
             <motion.div
-              key={n}
+              key={screen.file}
               initial={reduced ? false : { opacity: 0, y: 36 }}
               whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Shot app={app} n={n} variant="stacked" inkLow={inkLow} inkDim={inkDim} border={border} />
+              <Shot app={app} screen={screen} n={i + 1} variant="stacked" inkLow={inkLow} inkDim={inkDim} border={border} />
             </motion.div>
           ))}
         </div>
@@ -174,8 +174,8 @@ const AppGallery: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
               <p className="app-rail-lead-num mono">{String(total).padStart(2, "0")}</p>
               <p className="app-rail-lead-label mono">Screens</p>
             </div>
-            {shots.map(n => (
-              <Shot key={n} app={app} n={n} variant="rail" inkLow={inkLow} inkDim={inkDim} border={border} />
+            {app.screens.map((screen, i) => (
+              <Shot key={screen.file} app={app} screen={screen} n={i + 1} variant="rail" inkLow={inkLow} inkDim={inkDim} border={border} />
             ))}
             <div className="app-rail-tail" aria-hidden />
           </motion.div>

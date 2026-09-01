@@ -348,7 +348,16 @@
     clip-path: inset(0 0 calc((1 - var(--dt-fill, 0)) * 100%) 0);
   }
 }
-/* ── Stacked flow (more than four steps) ───────────────────────
+/* Five or six across: the columns are narrower than the four this was
+   drawn for, so the type steps down to keep the measure readable
+   rather than the grid wrapping and breaking the rail. */
+@media (min-width: 900px) {
+  .dt-flow--tight { gap: clamp(1.1rem, 2vw, 1.75rem); }
+  .dt-flow--tight .dt-step-title { font-size: clamp(0.94rem, 1.25vw, 1.05rem); }
+  .dt-flow--tight .dt-step > p { font-size: 0.875rem; line-height: 1.6; }
+}
+
+/* ── Stacked flow (seven or more steps) ───────────────────────
    Everything the 900px block switched to horizontal, switched back:
    the rail runs down the left at every width, and the content column
    is capped so a nine-step sequence does not run 200 characters wide

@@ -283,12 +283,17 @@ export const FlowSteps: FC<{
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
-  /* The horizontal rail gives each step a column, which works at the
-     four a project page walks through. A nine-step sequence would get
-     a ninth of the width each — a column too narrow for a sentence. So
-     past four, it stays the vertical timeline at every width, which is
-     the right shape for a long sequence anyway. */
-  const stack = steps.length > 4;
+  /* The horizontal rail gives each step a column. Up to six that still
+     leaves a column wide enough to read; a nine-step sequence would get
+     a ninth of the width each, narrower than a sentence. So seven or
+     more stays the vertical timeline at every width, with the number
+     and title beside the body — the right shape for a long sequence
+     anyway. Below seven, desktop gets the rail and mobile keeps the
+     stack, as before. */
+  const stack = steps.length >= 7;
+  /* Five and six columns are tighter than the four this was drawn for,
+     so the type steps down rather than the grid wrapping. */
+  const tight = !stack && steps.length > 4;
 
   useGSAP(() => {
     const el = ref.current;
@@ -363,7 +368,7 @@ export const FlowSteps: FC<{
   return (
     <div
       ref={ref}
-      className={`dt-flow${stack ? " dt-flow--stack" : ""}`}
+      className={`dt-flow${stack ? " dt-flow--stack" : ""}${tight ? " dt-flow--tight" : ""}`}
       style={{
         ["--dt-border"]: border,
         ["--dt-accent"]: accent,

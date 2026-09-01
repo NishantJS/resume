@@ -3,10 +3,17 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useReducedMotion } from "motion/react";
-import { AppMeta } from "./apps.data";
+import { AppMeta, shotSrc } from "./apps.data";
 import { markLoaded, revealOnLoad } from "./AppChrome";
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* The eyebrow names the screen the row is showing. A featured row may
+   point at a screenshot that is not in the gallery — one worth showing
+   once, beside its claim — so fall back to the feature's own title
+   rather than printing nothing. */
+const captionFor = (app: AppMeta, file: string) =>
+  app.screens.find(s => s.file === file)?.caption ?? "";
 
 type Props = { app: AppMeta; ink: string; inkLow: string; inkDim: string; border: string };
 
@@ -56,7 +63,7 @@ const AppShowcase: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
         >
           <div className="app-case-copy">
             <p className="mono text-xs uppercase tracking-[0.22em] font-medium" style={{ color: inkDim }}>
-              {String(i + 1).padStart(2, "0")} · {app.screenCaptions[f.shot - 1]}
+              {String(i + 1).padStart(2, "0")}{captionFor(app, f.shot) && ` · ${captionFor(app, f.shot)}`}
             </p>
             <h3 className="mt-4 text-3xl sm:text-4xl xl:text-5xl font-semibold tracking-tight leading-[1.05]">
               {f.title}
@@ -70,7 +77,7 @@ const AppShowcase: FC<Props> = ({ app, ink, inkLow, inkDim, border }) => {
             <span className="app-case-glow" style={{ background: app.glow }} aria-hidden />
             <div className="app-case-phone" style={{ borderColor: border, ["--ink"]: ink } as CSSProperties}>
               <img
-                src={`/apps/${app.slug}/shot-${f.shot}.webp`}
+                src={shotSrc(app.slug, f.shot)}
                 alt={`${app.name} — ${f.title}`}
                 loading="lazy"
                 decoding="async"

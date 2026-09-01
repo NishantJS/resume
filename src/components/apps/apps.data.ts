@@ -8,11 +8,20 @@ import { CONTACT } from "../../contact.data";
    NOTE: copy is placeholder / generic for now. Swap the strings,
    not the shape.                                                  */
 
+/** One phone screenshot. */
+export interface Screen {
+  /** Filename inside /apps/<slug>/, extension included. */
+  file: string;
+  caption: string;
+}
+
 export interface Feature {
   title: string;
   body: string;
-  /** 1-based screenshot that illustrates this feature. */
-  shot: number;
+  /** Screenshot that illustrates this feature — a file in
+      /apps/<slug>/. It does not have to be one of the gallery
+      `screens`; a feature may point at a screen worth showing once. */
+  shot: string;
   /** Promotes the feature into the full-width alternating showcase.
       Everything else renders as a card with a cropped thumbnail. */
   featured?: boolean;
@@ -134,12 +143,13 @@ export interface AppMeta {
   /** One line above the closing install button. */
   closer: string;
 
-  /** Phone screenshots, resolved as /apps/<slug>/shot-<n>.webp for
-      n = 1..screens. These are generated placeholders for now —
-      drop real 9:19.5 exports over them, keeping the same names. */
-  screens: number;
-  /** One caption per screenshot, shown under the shot in the rail. */
-  screenCaptions: string[];
+  /** The gallery, in order. Files live in /apps/<slug>/ and are named
+      for what they show, not numbered by position — a numbered
+      sequence breaks the moment a screenshot is added or dropped.
+
+      The first three also form the hero cluster: [1] left, [0] front,
+      [2] right, so put the strongest screen first. */
+  screens: Screen[];
 
   features: Feature[];
   /** What it's built on, grouped by what each piece is for — the
@@ -201,6 +211,9 @@ export interface AppMeta {
   changelog: ChangelogEntry[];
 }
 
+/** Where an app's screenshot lives. */
+export const shotSrc = (slug: string, file: string) => `/apps/${slug}/${file}`;
+
 /* ─────────────────────────────────────────────────────────────── */
 
 /** Support desk. `email` is the address people write to; `cc` is the
@@ -252,78 +265,90 @@ export const apps: AppMeta[] = [
       { value: "8", label: "Zones, one lap" },
     ],
     closer: "The half hour that decides the next ten years.",
-    screens: 5,
-    screenCaptions: ["Pick your variant", "Prep brief", "Walk the car", "Instrument readings", "Score and verdict"],
+    screens: [
+      { file: "home.webp",                    caption: "Home" },
+      { file: "walk-the-car.webp",            caption: "Walk the car" },
+      { file: "instrument-readings.webp",     caption: "Instrument readings" },
+      { file: "identity-checks.webp",         caption: "Identity and papers" },
+      { file: "high-issues.webp",             caption: "What to do about it" },
+      { file: "where-problems-are.webp",      caption: "Where the problems are" },
+      { file: "analysis-recommendation.webp", caption: "Score and verdict" },
+      { file: "verdict-do-not-accept.webp",   caption: "When to refuse the car" },
+      { file: "report.webp",                  caption: "The report" },
+      { file: "report-evidence.webp",         caption: "Before and after" },
+      { file: "report-preview.webp",          caption: "The PDF" },
+      { file: "follow-ups.webp",              caption: "Follow-ups" },
+    ],
     features: [
       {
         title: "Knows your exact variant",
         body: "32 model families and 377 variants across seven manufacturers — Maruti Suzuki, Tata, Hyundai, Mahindra, Kia, Toyota and MG — the best-selling cars in India plus every mainstream EV. Checks are generated from that variant's own specification, down to the trim ladder. The free generic inspection works on any car at all.",
-        shot: 1, featured: true,
+        shot: "home.webp", featured: true,
       },
       {
         title: "Walks the car once",
         body: "Checks are grouped by where you physically stand, not by engineering system: at the desk, around the car, at the charger, under the bonnet, inside, in the boot, on the drive, and back at the desk. Eight zones, one lap, instead of six trips round the car.",
-        shot: 3, featured: true,
+        shot: "walk-the-car.webp", featured: true,
       },
       {
         title: "Scores honestly",
         body: "Findings come off the score as an absolute penalty, so a car with a dozen defects lands in the sixties rather than the high nineties. High findings count fully, medium at 40%, low at 15%. Critical safety and identity problems are kept out of the score entirely and reported as blockers, so a high number can never paper over a VIN mismatch.",
-        shot: 5, featured: true,
+        shot: "analysis-recommendation.webp", featured: true,
       },
       {
         title: "Proves you got the right car",
         body: "Being handed the trim below the one you paid for is the most expensive mistake at delivery. Generated from the trim ladder: exactly what your variant has that the one below it does not, item by item, on the car in front of you.",
-        shot: 1,
+        shot: "variant-proof.webp",
       },
       {
         title: "Records what the instruments say",
         body: "Paint thickness, tread depth, pressures against the placard, battery voltage, moisture — on a keypad built for standing in a yard with a gauge in your other hand. The app compares every reading against every other, which is where a refinished panel or a swapped tyre gives itself away.",
-        shot: 4,
+        shot: "instrument-readings.webp",
       },
       {
         title: "Reads plates and odometers",
         body: "Photograph a VIN, an odometer or a tyre date code and the number is extracted for you. Recognition runs on-device with a bundled model; the image never leaves the phone, and it works in aeroplane mode.",
-        shot: 2,
+        shot: "identity-checks.webp",
       },
       {
         title: "Cross-checks facts from two places",
         body: "Glass date codes across every pane, seatbelt webbing dates against the build, and with a scanner: module distance against the dashboard, ignition cycle count, battery state of health. These do not find a scratch — they find history somebody would rather you did not have.",
-        shot: 4,
+        shot: "by-system.webp",
       },
       {
         title: "Keeps evidence",
         body: "Photographs filed against their check, with the reason they were taken — and before/after pairs when something is put right on a return visit.",
-        shot: 2,
+        shot: "report-evidence.webp",
       },
       {
         title: "Produces a report",
         body: "A clean PDF with your details, the score, every finding, what you asked for, and the photographs. Every report carries a reference like PDI-0824-K7RM, so a dealer conversation has something to quote.",
-        shot: 5,
+        shot: "report.webp",
       },
       {
         title: "Chases what the dealer promised",
         body: "\"We'll fix that at first service\" is worth nothing unless it is written down with a name and a date against it. Every undertaking is recorded with who gave it and by when; one tap composes the message, and closing one asks for a photograph of the work.",
-        shot: 3,
+        shot: "follow-ups.webp",
       },
       {
         title: "Tracks what delivery started",
         body: "The temporary registration expires in a month, and driving past it is a ₹5,000–10,000 offence nobody warns you about. The RC, the first service, the battery warranty and the own-damage cover are all counted down.",
-        shot: 5,
+        shot: "after-delivery.webp",
       },
       {
         title: "Works for buyers and inspectors",
         body: "Guided mode explains every check for someone who has never done this. Professional mode drops the coaching and turns the report into your document — your firm, your logo, your contact details, your kit assumed every morning.",
-        shot: 3,
+        shot: "score-good.webp",
       },
       {
         title: "Tells you how to get access",
         body: "Every other checklist assumes you are already standing next to the car — the hardest step is often being allowed to. The prep brief covers what to bring, when to arrive, what light you need, and what to say when you are told the car is sealed or the yard is off limits.",
-        shot: 2,
+        shot: "find-a-check.webp",
       },
       {
         title: "Backs everything up",
         body: "Every inspection into one file, photographs included, restorable on another device. Your evidence should not die with your phone.",
-        shot: 4,
+        shot: "report-preview.webp",
       },
     ],
     stack: [
@@ -608,53 +633,84 @@ export const apps: AppMeta[] = [
       { value: "9", label: "Document types" },
     ],
     closer: "Billing that is just as fast in a basement shop, on a train, or on a phone with no data left.",
-    screens: 5,
-    screenCaptions: ["Dashboard", "Quick bill", "Invoice", "Money owed", "Reports"],
+    screens: [
+      { file: "home.webp",                              caption: "Home" },
+      { file: "quick-bill-6a95ebe8cf087.webp",          caption: "Quick bill" },
+      { file: "new-invoice-6a95ebe751985.webp",         caption: "New invoice" },
+      { file: "sku-search-6a95ebfd83ed5.webp",          caption: "Pick what you sold" },
+      { file: "invoice-preview-6a95ebe19e63f.webp",     caption: "Invoice and share" },
+      { file: "invoices.webp",                          caption: "Every invoice, by status" },
+      { file: "money-owned-6a95ebe60b83c.webp",         caption: "Money owed" },
+      { file: "reminder-6a95ebed183d8.webp",            caption: "Payment reminders" },
+      { file: "items-6a95ebe48c9b0.webp",               caption: "Your catalogue" },
+      { file: "day-book-6a95ebde3f1fd.webp",            caption: "Day book" },
+      { file: "reports-numerals-6a95ebf96ad7e.webp",    caption: "Reports" },
+    ],
     features: [
       {
         title: "Quick bill",
         body: "A counter-shop grid for billing at speed when someone is standing in front of you. The second invoice to the same customer takes seconds — everything is remembered.",
-        shot: 2, featured: true,
+        shot: "quick-bill-6a95ebe8cf087.webp", featured: true,
       },
       {
         title: "GST, done properly",
         body: "CGST, SGST, IGST and UTGST worked out from the place of supply, using the GST state code on the GSTIN. HSN and SAC codes, rate-wise tax break-up, amount in words and reverse charge. GSTIN validation catches a typo before the invoice goes out.",
-        shot: 3, featured: true,
+        shot: "add-item-6a95ebda27411.webp", featured: true,
       },
       {
         title: "Money owed",
         body: "Who is late, and by how many days. Record part payments and see the balance on every invoice, then send a WhatsApp reminder in your own wording — from your number, edited by you before it goes.",
-        shot: 4, featured: true,
+        shot: "money-owned-6a95ebe60b83c.webp", featured: true,
       },
       {
         title: "Nine document types",
         body: "GST invoices, proforma invoices, quotes, estimates, credit and debit notes, delivery challans, payment receipts and purchase bills. Quotes convert to invoices without retyping anything.",
-        shot: 3,
+        shot: "settings-6a95ebfb86211.webp",
       },
       {
         title: "A UPI QR on the invoice",
         body: "Drawn on your phone from your own UPI id, with your bank details beside it for customers who would rather transfer. InvoiceKaro is not part of the payment and never sees it.",
-        shot: 1,
+        shot: "invoice-preview-6a95ebe19e63f.webp",
       },
       {
         title: "Barcode scanning, offline",
         body: "Uses a recogniser bundled inside the app rather than one downloaded on demand, so scanning a packet works with no network at all.",
-        shot: 2,
+        shot: "stock-management-6a95ebff243e9.webp",
       },
       {
-        title: "Stock, expenses and purchases",
-        body: "Stock levels, batches, storage locations and low-stock warnings — off by default, because plenty of businesses do not sell goods. Expenses with input tax credit tracked, and purchase bills sitting beside what customers owe you.",
-        shot: 5,
+        title: "Stock, only if you sell goods",
+        body: "Stock levels, batches, storage locations and low-stock warnings — off by default, because plenty of businesses do not sell goods. Turn it on per item and every sale and purchase adjusts the count.",
+        shot: "items-6a95ebe48c9b0.webp",
+      },
+      {
+        title: "Expenses and purchases",
+        body: "Expenses with input tax credit tracked, and purchase bills sitting beside what customers owe you — so what you are owed and what you owe are one screen apart.",
+        shot: "expense-tracker-6a95ebdf070d7.webp",
+      },
+      {
+        title: "Customers, remembered",
+        body: "Customers and suppliers with GSTIN, billing and shipping addresses, credit terms and per-customer prices. Import one from your phone's contacts in a tap; the GSTIN decides the tax treatment from then on.",
+        shot: "add-customer-6a95ebd9ea208.webp",
+      },
+      {
+        title: "Repeating invoices",
+        body: "The customers you bill every month raise themselves. The same invoice goes out on schedule, with the next number in your series.",
+        shot: "repeat-invoice-6a95ebf03624e.webp",
+      },
+      {
+        title: "Reminders in your words",
+        body: "Reminder wording is yours to write, with the customer, invoice number, amount and due date filled in for you. WhatsApp opens with it ready — you read it, then send it.",
+        shot: "customize-reminder-wording-6a95ebdb9da7a.webp",
       },
       {
         title: "Reports your accountant will take",
         body: "Day book, receivables ageing, profit, best customers and best-selling items, month by month. GSTR-1 and GSTR-3B summaries, plus CSV exports.",
-        shot: 5,
+        shot: "reports-by-hsn-6a95ebf2e8dfd.webp",
       },
       {
         title: "English, हिंदी and मराठी",
         body: "The whole app, including the printed invoice. Devanagari fonts are bundled, so a name in Hindi prints correctly even offline. Light and dark themes, and adjustable text size for reading a phone at arm's length in a shop.",
-        shot: 1,
+        shot: "invoice-preview-6a95ebe19e63f.webp",
       },
     ],
     stack: [

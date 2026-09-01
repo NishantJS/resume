@@ -6,7 +6,7 @@ import { appSeo } from "./apps.seo";
 import {
   AppCloser, AppNav, CountUp, AppNotFound, AppSection, AppStatement, AppTabs,
   FactsBand, FlowSteps, OverviewBand, RailSection, SectionRail, StackGroups,
-  inksFor, markLoaded, revealOnLoad, useSectionReveal,
+  inksFor, useSectionReveal,
 } from "./AppChrome";
 import AppProductHero from "./AppProductHero";
 import AppShowcase from "./AppShowcase";
@@ -125,26 +125,23 @@ const AppPage = () => {
           intro={`Every screen in ${app.name} earns its place. No dashboards nobody opens.`}
           inks={inks}
         >
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {app.features.filter(f => !f.featured).map(f => (
-              <li key={f.title} className="app-reveal app-fcard" style={{ borderColor: border }}>
-                {/* The crop shows the top of the screen, where the app's
-                    own chrome and content are — a whole 9:19.5 phone in
-                    a card would be mostly empty. */}
-                <div className="app-fcard-shot" style={{ borderColor: border }}>
-                  <img
-                    src={`/apps/${app.slug}/shot-${f.shot}.webp`}
-                    alt={`${app.name} — ${f.title}`}
-                    loading="lazy"
-                    decoding="async"
-                    ref={markLoaded}
-                    onLoad={revealOnLoad}
-                  />
-                </div>
-                <div className="app-fcard-body">
-                  <h3 className="text-lg font-semibold tracking-tight">{f.title}</h3>
-                  <p className="mt-2 text-[0.95rem] leading-relaxed" style={{ color: inkLow }}>{f.body}</p>
-                </div>
+          {/* No thumbnail. A 4:3 crop of a 9:19.5 screen can only show
+              the app bar — the same chrome on every card, never the
+              thing the card is about. The three claims worth proving
+              with a screenshot are the featured rows above, at a size
+              where the screen can actually be read. */}
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {app.features.filter(f => !f.featured).map((f, i) => (
+              <li
+                key={f.title}
+                className="app-reveal app-fcard"
+                style={{ borderColor: border, background: inks.panel, ["--fcard-accent"]: inks.accent } as CSSProperties}
+              >
+                <span className="app-fcard-num mono" style={{ color: inkDim }}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="app-fcard-title">{f.title}</h3>
+                <p className="app-fcard-text" style={{ color: inkLow }}>{f.body}</p>
               </li>
             ))}
           </ul>

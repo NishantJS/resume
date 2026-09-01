@@ -2,16 +2,19 @@ import { CSSProperties, FC, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { AppMeta } from "./apps.data";
+import { AppMeta, shotSrc } from "./apps.data";
 import { MaskedTitle, PlayIcon, comingSoonLabel, inkFor, markLoaded, onlyPlay, revealOnLoad } from "./AppChrome";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* Which three shots make up the hero cluster, and how each is posed. */
+/* Which of the app's screens make up the hero cluster, and how each is
+   posed. Indices into `screens`, so the second one entered is the
+   centrepiece. An app with fewer than three screens shows fewer phones
+   rather than requesting one that does not exist. */
 const CLUSTER = [
-  { n: 2, cls: "app-hero-phone--left" },
-  { n: 1, cls: "app-hero-phone--front" },
-  { n: 3, cls: "app-hero-phone--right" },
+  { i: 1, cls: "app-hero-phone--left" },
+  { i: 0, cls: "app-hero-phone--front" },
+  { i: 2, cls: "app-hero-phone--right" },
 ];
 
 /** The landing hero. Unlike a project page — which leads with the
@@ -145,10 +148,10 @@ const AppProductHero: FC<{ app: AppMeta }> = ({ app }) => {
         {/* ── Product cluster ──────────────────────────────── */}
         <div className="app-hero-art" aria-hidden>
           <span className="app-hero-glow" style={{ background: app.glow }} />
-          {CLUSTER.map(({ n, cls }) => (
-            <div key={n} className={`app-hero-phone ${cls}`} style={{ borderColor: border }}>
+          {CLUSTER.filter(({ i }) => app.screens[i]).map(({ i, cls }) => (
+            <div key={i} className={`app-hero-phone ${cls}`} style={{ borderColor: border }}>
               <img
-                src={`/apps/${app.slug}/shot-${n}.webp`}
+                src={shotSrc(app.slug, app.screens[i].file)}
                 alt=""
                 loading="eager"
                 decoding="async"
