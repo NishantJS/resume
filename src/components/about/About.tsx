@@ -355,9 +355,9 @@ const TimelineSection: FC<{ children: React.ReactNode }> = ({ children }) => {
   }, { scope: ref, dependencies: [reduced] });
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="tl relative">
       <div className="tl-track" aria-hidden><div className="tl-progress" /></div>
-      <div className="space-y-5 md:space-y-6">{children}</div>
+      <div className="tl-entries">{children}</div>
     </div>
   );
 };
@@ -410,22 +410,20 @@ const TimelineCard: FC<{
   }, { scope: cardRef, dependencies: [reduced] });
 
   return (
-    <div ref={cardRef} className="tl-entry relative pl-9 md:pl-12">
+    <div ref={cardRef} className="tl-entry relative">
       <span
         className="tl-dot"
         style={{ backgroundColor: color, boxShadow: `0 0 14px 1px ${color}66` }}
         aria-hidden
       />
+      {/* When and where, in the rail's own column. Inside the card these
+          competed with the role for the first line; out here they are a
+          column you can read down on their own. */}
+      <div className="tl-when tl-text">
+        <span className="tl-period mono tabular-nums" style={{ color }}>{period}</span>
+        {meta && <span className="tl-where mono">{meta}</span>}
+      </div>
       <div className="tl-card group" style={{ ["--tl" as string]: color } as React.CSSProperties}>
-        <div className="tl-text flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-3">
-          <span
-            className="mono text-[0.7rem] tabular-nums px-2.5 py-1 rounded-full border"
-            style={{ color, borderColor: `${color}55`, background: `${color}14` }}
-          >
-            {period}
-          </span>
-          {meta && <span className="mono text-xs text-gray-500">{meta}</span>}
-        </div>
         <p className="tl-text text-xl md:text-2xl font-semibold leading-snug">
           {href ? (
             <a

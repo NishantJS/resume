@@ -4,6 +4,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ProjectData } from "./projects.data";
 import { ArrowUpRight, inkFor } from "../shared/reveal";
+import { useMagnetic } from "../../hooks/useMagnetic";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +13,8 @@ type Props = { project: ProjectData; index: number; total: number };
 
 const AboutSection: FC<Props> = ({ project, index, total }) => {
   const ref = useRef<HTMLElement>(null);
+  const visitRef = useRef<HTMLAnchorElement>(null);
+  useMagnetic(visitRef, { reduced: useReducedMotion() });
   // Same ink ladder as the bands below, so the hero copy and the page
   // body don't sit at two different weights of the project's colour.
   const { ink, inkLow, border } = inkFor(project.color);
@@ -136,6 +140,7 @@ const AboutSection: FC<Props> = ({ project, index, total }) => {
           <div className="flex flex-col items-start gap-5 shrink-0">
             {project.href ? (
               <a
+                ref={visitRef}
                 href={project.href}
                 target="_blank"
                 rel="noopener noreferrer"

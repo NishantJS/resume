@@ -10,6 +10,8 @@ import {
   ArrowUpRight, CountUp, RevealWords, inkFor, isLight, markLoaded, revealOnLoad, useRevealBatch,
 } from "../shared/reveal";
 import { Closer, DetailSection, Inks, Statement } from "../shared/DetailChrome";
+import { useMagnetic } from "../../hooks/useMagnetic";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 import "./apps.css";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -274,7 +276,10 @@ export const comingSoonLabel = (app: AppMeta) => {
     footnote; this is the second, larger ask. The reveal itself is the
     shared one — the same characters-ignite-and-cool treatment the
     project pages close on. */
-export const AppCloser: FC<{ app: AppMeta; inks: Inks }> = ({ app, inks }) => (
+export const AppCloser: FC<{ app: AppMeta; inks: Inks }> = ({ app, inks }) => {
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  useMagnetic(ctaRef, { reduced: useReducedMotion() });
+  return (
   <Closer
     kicker={app.release.playUrl ? `Get ${app.name}` : app.name}
     text={app.closer}
@@ -292,6 +297,7 @@ export const AppCloser: FC<{ app: AppMeta; inks: Inks }> = ({ app, inks }) => (
   >
     {app.release.playUrl ? (
       <a
+        ref={ctaRef}
         href={app.release.playUrl}
         target="_blank"
         rel="noopener noreferrer"
@@ -312,7 +318,8 @@ export const AppCloser: FC<{ app: AppMeta; inks: Inks }> = ({ app, inks }) => (
       </span>
     )}
   </Closer>
-);
+  );
+};
 
 /** Unknown slug under /apps — styled like the site's own 404. */
 export const AppNotFound: FC = () => {

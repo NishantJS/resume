@@ -69,10 +69,10 @@ const SkillRow = ({ group }: { group: typeof skillGroups[0] }) => {
   return (
     <li
       ref={rowRef}
-      className="flex flex-col md:flex-row md:items-start md:gap-6 mono"
+      className="skill-row mono"
       style={{ ["--chip" as string]: group.color, perspective: "600px" } as React.CSSProperties}
     >
-      <span className="skill-label flex items-center gap-2 font-semibold tracking-wide uppercase text-sm md:text-base xl:text-lg text-gray-300 md:w-36 xl:w-44 shrink-0 mb-2.5 md:mb-0 md:pt-1.5">
+      <span className="skill-label font-semibold tracking-wide uppercase text-sm md:text-base text-gray-300">
         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: group.color }} aria-hidden />
         {group.label}
       </span>

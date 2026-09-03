@@ -1,8 +1,10 @@
-import { FC } from "react";
+import { FC, useRef } from "react";
 import { CSSProperties } from "react";
 import { ProjectData } from "./projects.data";
 import { Closer, FactsBand, Inks } from "../shared/DetailChrome";
 import { ArrowUpRight } from "../shared/reveal";
+import { useMagnetic } from "../../hooks/useMagnetic";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 /* ── Project-flavoured wrappers ────────────────────────────────────
    The bands themselves are shared with /apps; these two just know how
@@ -26,11 +28,14 @@ export const ProjFacts: FC<{ project: ProjectData; inks: Inks }> = ({ project, i
 export const ProjCloser: FC<{ project: ProjectData; inks: Inks }> = ({ project, inks }) => {
   const { ink, inkLow, border } = inks;
   const line = project.closer ?? (project.href ? "See it in production." : "");
+  const visitRef = useRef<HTMLAnchorElement>(null);
+  useMagnetic(visitRef, { reduced: useReducedMotion() });
 
   return (
     <Closer kicker={project.displayTitle ?? project.title} text={line} inks={inks}>
       {project.href ? (
         <a
+          ref={visitRef}
           href={project.href}
           target="_blank"
           rel="noopener noreferrer"

@@ -1,6 +1,8 @@
 import { CSSProperties, FC, useRef } from "react";
 import { AppMeta } from "./apps.data";
 import { ArrowUpRight, MaskedTitle, inkFor, useHeroEntrance } from "./AppChrome";
+import { useMagnetic } from "../../hooks/useMagnetic";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 
 type Props = {
   app: AppMeta;
@@ -23,6 +25,8 @@ type Props = {
     panel below, all tinted by the app's pastel. */
 const AppHero: FC<Props> = ({ app, index, total, title, meta, lead, compact, cta, children }) => {
   const ref = useRef<HTMLElement>(null);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  useMagnetic(ctaRef, { reduced: useReducedMotion() });
   const { ink, inkLow, border } = inkFor(app.color);
   const indexLabel = String(index + 1).padStart(2, "0");
 
@@ -78,6 +82,7 @@ const AppHero: FC<Props> = ({ app, index, total, title, meta, lead, compact, cta
           {cta && app.release.playUrl && (
             <div className="flex flex-col items-start gap-4 shrink-0">
               <a
+                ref={ctaRef}
                 href={app.release.playUrl}
                 target="_blank"
                 rel="noopener noreferrer"

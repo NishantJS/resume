@@ -3,6 +3,8 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AppMeta, shotSrc } from "./apps.data";
+import { useMagnetic } from "../../hooks/useMagnetic";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { MaskedTitle, PlayIcon, comingSoonLabel, inkFor, markLoaded, onlyPlay, revealOnLoad } from "./AppChrome";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -60,6 +62,11 @@ const AppProductHero: FC<{ app: AppMeta }> = ({ app }) => {
   const btnVars = { ["--btn-ink"]: ink, ["--btn-fill"]: app.color, ["--btn-border"]: border } as CSSProperties;
   const live = Boolean(app.release.playUrl);
 
+  /* The site's primary action drifts toward the cursor, wherever it
+     appears — the contact CTA, a project's live link, and this. */
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  useMagnetic(ctaRef, { reduced: useReducedMotion() });
+
   return (
     <section
       ref={ref}
@@ -110,6 +117,7 @@ const AppProductHero: FC<{ app: AppMeta }> = ({ app }) => {
           <div className="app-hero-line opacity-0 mt-8 flex flex-wrap items-center gap-3">
             {live ? (
               <a
+                ref={ctaRef}
                 href={app.release.playUrl}
                 target="_blank"
                 rel="noopener noreferrer"

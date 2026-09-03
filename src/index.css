@@ -378,9 +378,112 @@ html {
 }
 
 /* ── About: experience / education timeline ─────────────────── */
+/* ── Landing-page column geometry ──────────────────────────────
+   Two sections put a label column beside a content column: the
+   timeline (dates beside cards) and Skills (group beside chips). They
+   share these so the page reads as one grid rather than two that
+   nearly agree. Wide enough for "Navi Mumbai, Maharashtra, India" on
+   two lines — at 8.5rem it broke to three and looked ragged. */
+:root {
+  --about-gutter: 0rem;
+  --about-gap: 2.25rem;
+}
+@media (min-width: 900px) { :root { --about-gutter: 10.5rem; } }
+@media (min-width: 1280px) { :root { --about-gutter: 11.5rem; } }
+
+/* ── Timeline geometry ─────────────────────────────────────────
+   One place decides where the rail runs: the date column's width plus
+   half the gap. The track, the dots and the entry grid all derive from
+   it, so the rail cannot drift out of the channel between the two
+   columns. Below the breakpoint the gutter collapses to zero and the
+   rail returns to the left edge with the dates above each card. */
+.tl {
+  --tl-gutter: var(--about-gutter);
+  --tl-gap: var(--about-gap);
+  --tl-rail: calc(var(--tl-gutter) + 7px);
+}
+@media (min-width: 900px) {
+  .tl { --tl-rail: calc(var(--tl-gutter) + var(--tl-gap) / 2); }
+}
+
+/* ── Skills: the same two columns as the timeline ──────────────── */
+.skill-row { display: flex; flex-direction: column; }
+.skill-label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.7rem;
+}
+@media (min-width: 900px) {
+  .skill-row {
+    display: grid;
+    grid-template-columns: var(--about-gutter) minmax(0, 1fr);
+    column-gap: var(--about-gap);
+    align-items: start;
+  }
+  .skill-label {
+    /* Right-aligned against the chips, on the same axis the timeline's
+       dates sit on. The dot trails the word so the colour lands next
+       to the content it keys. */
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    margin-bottom: 0;
+    padding-top: 0.4rem;
+  }
+}
+.tl-entries { display: flex; flex-direction: column; gap: 1.25rem; }
+@media (min-width: 768px) { .tl-entries { gap: 1.5rem; } }
+
+.tl-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding-left: 2.25rem;
+}
+@media (min-width: 900px) {
+  .tl-entry {
+    grid-template-columns: var(--tl-gutter) minmax(0, 1fr);
+    column-gap: var(--tl-gap);
+    padding-left: 0;
+    align-items: start;
+  }
+}
+
+/* When and where. Right-aligned on desktop so the dates sit against
+   the rail and read as one column. */
+.tl-when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.7rem;
+}
+@media (min-width: 900px) {
+  .tl-when {
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 0.4rem;
+    margin-bottom: 0;
+    padding-top: 1.35rem;
+  }
+}
+.tl-period {
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.tl-where {
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.38);
+  text-wrap: balance;
+}
+
 .tl-track {
   position: absolute;
-  left: 7px;
+  left: var(--tl-rail, 7px);
   top: 10px;
   bottom: 10px;
   width: 2px;
@@ -402,7 +505,7 @@ html {
 }
 .tl-dot {
   position: absolute;
-  left: 0;
+  left: calc(var(--tl-rail, 7px) - 7px);
   top: 1.55rem;
   width: 16px;
   height: 16px;
@@ -434,64 +537,217 @@ html {
    reader back up to the nav. Everything that moves on hover is a
    transform or a colour — no padding, no width — so a latched hover on
    a touch screen can't reflow the row. */
+/* Width and gutters come from the page's own container classes on the
+   element — see Explore.tsx. Only the rhythm inside it lives here. */
+.xp-section { padding-top: 0.25rem; }
 .xp-list {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-.xp-row {
-  display: grid;
-  grid-template-columns: 2.5rem minmax(0, 1fr) 1.75rem;
-  align-items: baseline;
-  gap: 0 1rem;
-  padding: 1.6rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: inherit;
-}
-.xp-num {
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.4);
-  font-variant-numeric: tabular-nums;
-  transition: color 300ms ease;
-}
-.xp-body {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  transition: translate 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* ── One destination ───────────────────────────────────────────
+   A full-width band rather than a list item: the whole thing is the
+   target, the accent belongs to the row, and there is room on the
+   right for the count that was dead space before. */
+.xp-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  /* Flush with the rule above it and with the text of every section
+     above that; the hover indent is what moves it off the margin. */
+  padding: clamp(1.7rem, 3.4vw, 2.5rem) 0;
+  color: inherit;
+  isolation: isolate;
+}
+/* The slide is a transform on the contents, not padding on the row.
+   Animating padding relays out the row on every frame — which is what
+   made the movement look stepped — and it cannot be handed to the
+   compositor. Translating the two columns is free and reads as one
+   piece sliding. */
+.xp-body,
+.xp-meta {
+  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* The rule belongs to the row and draws itself on entry, so it reads
+   as the row arriving rather than a border that was always there. */
+.xp-rule {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.xp-list li:first-child .xp-row { border-top: 1px solid rgba(255, 255, 255, 0.12); }
+
+/* Accent bloom, parked at the pointer. Painted behind everything and
+   composited only — no filter, no blur on a moving element. */
+.xp-bloom {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  background: radial-gradient(
+    22rem 22rem at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--xp, #fff) 16%, transparent) 0%,
+    transparent 68%
+  );
+  transition: opacity 520ms ease;
+}
+
+.xp-body { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
+
+/* The label rises out of this on entry. The mask clips, so it needs
+   room for the deepest descender the labels contain — the y in "My
+   Work" was losing its tail at 0.08em. The padding is pulled back off
+   the bottom margin so the extra room costs no layout. */
+.xp-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.22em;
+  margin-bottom: -0.14em;
+}
+
+/* Two layers of the same word: the ink underneath, the accent on top
+   clipped to nothing. Hover wipes the clip open left to right, which
+   fills the letterforms rather than tinting a box behind them. */
 .xp-label {
+  position: relative;
+  display: block;
   font-family: "Geologica", ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  font-size: clamp(1.9rem, 5.5vw, 3.1rem);
-  transition: color 300ms ease;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  font-size: clamp(2.1rem, 6vw, 4rem);
+  will-change: transform;
+}
+.xp-label::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: var(--xp, #fff);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 680ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
 }
 .xp-blurb {
-  font-size: clamp(0.85rem, 1.6vw, 0.98rem);
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: clamp(0.88rem, 1.4vw, 1rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.5);
   max-width: 46ch;
+  transition: color 420ms ease;
+}
+
+/* ── Count, unit, arrow ───────────────────────────────────────── */
+.xp-meta {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.1rem, 2.8vw, 2.4rem);
+}
+/* Count and unit are one object — the number means nothing without the
+   noun, and they were reading as two loose items before. */
+.xp-nums {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+.xp-count {
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-weight: 300;
+  line-height: 0.85;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.24);
+  transition: color 420ms ease;
+}
+.xp-unit {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+  transition: color 420ms ease;
 }
 .xp-arrow {
-  justify-self: end;
-  font-size: 1.15rem;
-  color: rgba(255, 255, 255, 0.3);
-  transition: translate 380ms cubic-bezier(0.22, 1, 0.36, 1), color 300ms ease;
+  flex: 0 0 auto;
+  width: clamp(2.4rem, 4vw, 3.1rem);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.55);
+  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 420ms ease, color 420ms ease, background-color 420ms ease;
 }
+.xp-arrow svg { width: 44%; height: 44%; }
+
+/* Narrow: one column. Side by side, the blurb was squeezed into a
+   third of the width and ran to five lines while the count sat in
+   space beside it. Stacked, the text gets the full measure and the
+   count and arrow become the row's own footer. */
+@media (max-width: 780px) {
+  .xp-row {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 1.15rem;
+  }
+  .xp-blurb { max-width: none; }
+  .xp-meta {
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .xp-nums {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+  .xp-count { font-size: 1.9rem; }
+}
+
+/* ── Hover ─────────────────────────────────────────────────────
+   Pointer only. On touch there is no hover state to reward, and a
+   sticky one left behind after a tap reads as a stuck row. */
 @media (hover: hover) and (pointer: fine) {
-  .xp-row:hover .xp-body { translate: 0.7rem 0; }
-  .xp-row:hover .xp-label,
-  .xp-row:hover .xp-num { color: var(--xp, #fff); }
-  .xp-row:hover .xp-arrow { translate: 0.4rem 0; color: var(--xp, #fff); }
+  .xp-row:hover .xp-body { transform: translate3d(clamp(1rem, 2.2vw, 1.75rem), 0, 0); }
+  .xp-row:hover .xp-meta { transform: translate3d(0.4rem, 0, 0); }
+  .xp-row:hover .xp-bloom { opacity: 1; }
+  .xp-row:hover .xp-label::after { clip-path: inset(0 0 0 0); }
+  .xp-row:hover .xp-blurb { color: rgba(255, 255, 255, 0.72); }
+  .xp-row:hover .xp-count { color: color-mix(in srgb, var(--xp, #fff) 70%, transparent); }
+  .xp-row:hover .xp-unit { color: rgba(255, 255, 255, 0.6); }
+  .xp-row:hover .xp-arrow {
+    transform: rotate(45deg) scale(1.06);
+    border-color: var(--xp, #fff);
+    color: #0a0a0a;
+    background-color: var(--xp, #fff);
+  }
 }
-/* Keyboard users get the same colour cue; the slide is pointer-only. */
-.xp-row:focus-visible .xp-label,
-.xp-row:focus-visible .xp-arrow { color: var(--xp, #fff); }
+
+/* Keyboard users get the same state, without the pointer-tracked bloom
+   which has nowhere to sit. */
+.xp-row:focus-visible .xp-label::after { clip-path: inset(0 0 0 0); }
+.xp-row:focus-visible .xp-arrow {
+  transform: rotate(45deg);
+  border-color: var(--xp, #fff);
+  color: #0a0a0a;
+  background-color: var(--xp, #fff);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .xp-body,
-  .xp-arrow { transition: none; }
+  .xp-meta,
+  .xp-label::after,
+  .xp-arrow,
+  .xp-bloom { transition: none; }
+  .xp-row:hover .xp-body,
+  .xp-row:hover .xp-meta { transform: none; }
 }
 
 /* ── About: skill chips ─────────────────────────────────────── */
@@ -595,10 +851,13 @@ html {
   border: 1px solid var(--btn-border, rgba(0, 0, 0, 0.14));
   border-radius: 999px;
   color: var(--btn-ink, #111);
-  transition: background 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+  /* `translate` rather than `transform` — the magnetic drift owns
+     `transform` on this button, and a transition on it would ease
+     every per-frame write into a lag. See .app-cta. */
+  transition: background 220ms ease, translate 220ms ease, box-shadow 220ms ease;
 }
 .proj-visit-btn:hover {
-  transform: translateY(-2px);
+  translate: 0 -2px;
   background: color-mix(in srgb, var(--btn-ink, #111) 7%, transparent);
   box-shadow: 0 14px 28px -18px rgba(0, 0, 0, 0.5);
 }
@@ -803,12 +1062,17 @@ html {
 /* The curve is front-loaded on purpose: opacity is most of the way up
    within the first few frames, so the canvas behind is never really
    seen, while the rise keeps going long enough to read as movement. */
+/* The incoming page settles rather than snapping on. An expo-out curve
+   spends most of its time near the end, so the last of the movement is
+   almost imperceptible — which is what reads as "smooth" rather than
+   "animated". translate3d keeps it on the compositor, so it never
+   competes with the scroll-driven work starting on the same frame. */
 .page-enter {
-  animation: page-enter 240ms cubic-bezier(0.16, 0.84, 0.28, 1) both;
+  animation: page-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .page-enter { animation: none; }
